@@ -50,4 +50,3 @@ Welcome to the **ICC Backend** repository! This project powers the backend for t
 ## 🎉 Acknowledgments
 
 - Special thanks to the contributors of this project.
-- 
