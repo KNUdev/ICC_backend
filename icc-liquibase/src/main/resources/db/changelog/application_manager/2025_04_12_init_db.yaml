@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - changeSet:
+      id: init_empty_db
+      author: DenysLeonenko
+      comment: "Empty base initialization"
+      changes: []

@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - includeAll:
+      path: changelog/application_manager/
+      relativeToChangelogFile: true
+  - includeAll:
+      path: changelog/employee_manager/
+      relativeToChangelogFile: true

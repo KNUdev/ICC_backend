@@ -1,0 +1,76 @@
+server:
+  port: ${APPLICATION_PORT:5001}
+  tomcat:
+    max-swallow-size: -1
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      force-response: true
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  profiles:
+    active: dev
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URI:jdbc:postgresql://localhost:5433/icc_db}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:knudevpass}
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    default-schema: liquibase
+    change-log: classpath:db/master.yaml
+  jackson:
+    time-zone: Europe/Kiev
+#  messages:
+#    basename: i18n/messages
+#    encoding: UTF-8
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_updates: true
+        order_inserts: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: debug
+        transaction:
+          support:
+            TransactionSynchronizationUtils: info
+
+application:
+  base-url: ${BASE_URL:http://localhost:5001}
+  minio:
+    internal-url: ${MINIO_INTERNAL_URL:http://minio:9000}
+    external-url: ${MINIO_EXTERNAL_URL:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    use-proxy: ${MINIO_USE_PROXY:false}
+  files:
+    images:
+      allowed-extensions:
+        - jpg
+        - jpeg
+        - png
+        - webp
+      maximum-size-in-kilobytes: 2048
+    pdfs:
+      tasks:
+        allowed-extensions:
+          - pdf
+        maximum-size-in-kilobytes: 5120
+springdoc:
+  swagger-ui:
+    path: /api/documentation
+
