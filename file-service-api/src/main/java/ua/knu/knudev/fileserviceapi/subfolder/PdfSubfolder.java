@@ -28,6 +28,7 @@ public enum PdfSubfolder implements PdfSubfolderI {
     /**
      * Only valid if this == ROLE_TASKS; otherwise throws
 //     */
+    // todo maybe delete
 //    public PdfSubfolderI forRole(AccountTechnicalRole technicalRole) {
 //        if (this != ROLE_ASSIGNMENTS_TASK) {
 //            throw new UnsupportedOperationException(
