@@ -1,4 +1,6 @@
-FROM openjdk:17-alpine AS builder
+#todo improve this dockerfile
+
+FROM openjdk:21-bookworm AS builder
 
 WORKDIR application
 
@@ -15,7 +17,7 @@ COPY ${JAR_FILE} application.jar
 
 RUN java -Djarmode=layertools -jar application.jar extract && ls -R application/
 
-FROM openjdk:17-alpine AS runtime
+FROM openjdk:21-bookworm AS runtime
 
 WORKDIR application
 
