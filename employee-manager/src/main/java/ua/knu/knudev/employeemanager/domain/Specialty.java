@@ -36,7 +36,7 @@ public class Specialty {
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private SpecialtyCategory category;
 
     @ManyToMany(mappedBy = "specialties")
     private Set<Sector> sectors = new HashSet<>();

@@ -51,8 +51,9 @@ public class Employee {
     @Embedded
     private WorkHours workHours;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private EmployeeAdministrativeRole role;
 
     @ManyToOne
     @JoinColumn(name = "specialty_id", referencedColumnName = "id", nullable = false)

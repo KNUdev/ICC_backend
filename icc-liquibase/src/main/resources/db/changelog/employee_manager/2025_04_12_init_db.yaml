@@ -34,7 +34,7 @@ databaseChangeLog:
                   type: datetime
               - column:
                   name: category
-                  type: varchar(255)
+                  type: varchar(10)
 
   - changeSet:
       id: create_sector_table
@@ -127,22 +127,22 @@ databaseChangeLog:
                     primaryKey: true
               - column:
                   name: first_name
-                  type: varchar(75)
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: middle_name
-                  type: varchar(75)
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: last_name
-                  type: varchar(75)
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: email
-                  type: varchar(75)
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
