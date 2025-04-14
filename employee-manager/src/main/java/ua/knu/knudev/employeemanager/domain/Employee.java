@@ -2,9 +2,11 @@ package ua.knu.knudev.employeemanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,8 +19,8 @@ import java.util.UUID;
 @Builder
 public class Employee {
     @Id
-    @GeneratedValue
-    @Column(nullable = false)
+    @UuidGenerator
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @Embedded
@@ -30,23 +32,27 @@ public class Employee {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column
     private LocalDateTime updatedAt;
 
-    @Column
+    @Column(nullable = false)
     private Double salaryInUAH;
 
     @Column(nullable = false)
     private Boolean isStudent;
 
-    @Column
     private String avatar;
+
+    @Column(nullable = false)
+    private LocalDate contractEndDate;
 
     @Embedded
     private WorkHours workHours;
+
+    @Column(nullable = false)
+    private Role role;
 
     @ManyToOne
     @JoinColumn(name = "specialty_id", referencedColumnName = "id", nullable = false)

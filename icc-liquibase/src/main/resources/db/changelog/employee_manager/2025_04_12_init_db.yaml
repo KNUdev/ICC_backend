@@ -19,13 +19,11 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: uk_name
                   type: varchar(255)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: created_at
                   type: datetime
@@ -34,8 +32,6 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: datetime
-                  constraints:
-                    nullable: false
               - column:
                   name: category
                   type: varchar(255)
@@ -60,13 +56,11 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: uk_name
                   type: varchar(255)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: created_at
                   type: datetime
@@ -75,8 +69,6 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: datetime
-                  constraints:
-                    nullable: false
 
   - changeSet:
       id: create_sectors_specialties_table
@@ -169,6 +161,8 @@ databaseChangeLog:
               - column:
                   name: salary_inuah
                   type: double
+                  constraints:
+                    nullable: false
               - column:
                   name: is_student
                   type: boolean
@@ -177,6 +171,16 @@ databaseChangeLog:
               - column:
                   name: avatar
                   type: varchar(255)
+              - column:
+                  name: contract_end_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
               - column:
                   name: specialty_id
                   type: uuid
@@ -190,9 +194,13 @@ databaseChangeLog:
               - column:
                   name: start_time
                   type: time
+                  constraints:
+                    nullable: false
               - column:
                   name: end_time
                   type: time
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             baseTableSchemaName: employee_manager
             baseTableName: employee

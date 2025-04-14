@@ -14,9 +14,9 @@ import java.sql.Time;
 @EqualsAndHashCode
 @ToString
 public class WorkHours {
-    @Column
+    @Column(nullable = false)
     private Time startTime;
 
-    @Column
+    @Column(nullable = false)
     private Time endTime;
 }

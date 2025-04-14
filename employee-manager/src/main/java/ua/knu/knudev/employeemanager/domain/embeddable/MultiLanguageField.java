@@ -12,9 +12,9 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class MultiLanguageField {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String en;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String uk;
 }

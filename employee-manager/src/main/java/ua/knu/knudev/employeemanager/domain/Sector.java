@@ -2,9 +2,11 @@ package ua.knu.knudev.employeemanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,8 +19,8 @@ import java.util.UUID;
 @Builder
 public class Sector {
     @Id
-    @GeneratedValue
-    @Column(nullable = false)
+    @UuidGenerator
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @Embedded
@@ -31,14 +33,14 @@ public class Sector {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column
     private LocalDateTime updatedAt;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
-            name = "sector_specialty",
-            joinColumns = @JoinColumn(name="sector_id"),
-            inverseJoinColumns = @JoinColumn(name="specialty_id")
+            name = "sectors_specialties",
+            schema = "employee_manager",
+            joinColumns = @JoinColumn(name= "sector_id"),
+            inverseJoinColumns = @JoinColumn(name= "specialty_id")
     )
-    private Set<Specialty> specialties;
+    private Set<Specialty> specialties = new HashSet<>();
 }
