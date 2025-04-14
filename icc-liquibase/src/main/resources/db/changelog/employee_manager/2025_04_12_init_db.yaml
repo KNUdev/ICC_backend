@@ -1,6 +1,219 @@
 databaseChangeLog:
   - changeSet:
-      id: init_empty_db
-      author: DenysLeonenko
-      comment: "Empty base initialization"
-      changes: []
+      id: create_specialty_table
+      author: SviatoslavChervoniuk
+      changes:
+        - createTable:
+            schemaName: employee_manager
+            tableName: specialty
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: category
+                  type: varchar(10)
+
+  - changeSet:
+      id: create_sector_table
+      author: SviatoslavChervoniuk
+      changes:
+        - createTable:
+            schemaName: employee_manager
+            tableName: sector
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+
+  - changeSet:
+      id: create_sectors_specialties_table
+      author: SviatoslavChervoniuk
+      changes:
+        - createTable:
+            schemaName: employee_manager
+            tableName: sectors_specialties
+            columns:
+              - column:
+                  name: sector_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: employee_manager
+            tableName: sectors_specialties
+            columnNames: sector_id, specialty_id
+            constraintName: pk_sectors_specialties
+        - addForeignKeyConstraint:
+            baseTableSchemaName: employee_manager
+            baseTableName: sectors_specialties
+            baseColumnNames: sector_id
+            referencedTableSchemaName: employee_manager
+            referencedTableName: sector
+            referencedColumnNames: id
+            constraintName: fk_sectors_specialties_sector
+        - addForeignKeyConstraint:
+            baseTableSchemaName: employee_manager
+            baseTableName: sectors_specialties
+            baseColumnNames: specialty_id
+            referencedTableSchemaName: employee_manager
+            referencedTableName: specialty
+            referencedColumnNames: id
+            constraintName: fk_sectors_specialties_specialty
+
+  - changeSet:
+      id: create_employee_table
+      author: SviatoslavChervoniuk
+      changes:
+        - createTable:
+            schemaName: employee_manager
+            tableName: employee
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: first_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: middle_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_number
+                  type: varchar(12)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: salary_inuah
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_student
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: varchar(255)
+              - column:
+                  name: contract_end_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sector_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: time
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: employee_manager
+            baseTableName: employee
+            baseColumnNames: specialty_id
+            referencedTableSchemaName: employee_manager
+            referencedTableName: specialty
+            referencedColumnNames: id
+            constraintName: fk_employee_specialty
+        - addForeignKeyConstraint:
+            baseTableSchemaName: employee_manager
+            baseTableName: employee
+            baseColumnNames: sector_id
+            referencedTableSchemaName: employee_manager
+            referencedTableName: sector
+            referencedColumnNames: id
+            constraintName: fk_employee_sector
