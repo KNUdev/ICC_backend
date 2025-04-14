@@ -42,7 +42,8 @@
 		<module>report-manager-api</module>
 		<module>file-service</module>
 		<module>file-service-api</module>
-	</modules>
+        <module>icc-integration-tests</module>
+    </modules>
 	<properties>
 		<java.version>21</java.version>
 		<maven.compiler.source>21</maven.compiler.source>
