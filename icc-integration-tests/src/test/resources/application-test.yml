@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    url: '
+      jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=
+      CREATE SCHEMA IF NOT EXISTS APPLICATION_MANAGER\; 
+      CREATE SCHEMA IF NOT EXISTS EMPLOYEE_MANAGER
+    '
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: pa
+  liquibase:
+    change-log: classpath:db/master.yaml
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+application:
+  minio:
+    internal-url: ${MINIO_INTERNAL_URL:http://minio:9000}
+    external-url: ${MINIO_EXTERNAL_URL:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    use-proxy: ${MINIO_USE_PROXY:false}
+  files:
+    images:
+      allowed-extensions:
+        - jpg
+        - jpeg
+        - png
+        - webp
+      maximum-size-in-kilobytes: 2048
+    pdfs:
+      tasks:
+        allowed-extensions:
+          - pdf
+        maximum-size-in-kilobytes: 2048
