@@ -1,11 +1,12 @@
-package ua.knu.knudev.employeemanagerapi.config.request;
+package ua.knu.knudev.employeemanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import ua.knu.knudev.employeemanagerapi.config.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
@@ -16,19 +17,26 @@ import java.util.Set;
 public record SpecialtyCreationRequest(
         @NotEmpty(message = "Field 'Specialty' cannot be empty")
         @Valid
+        @Schema(
+                description = "Specialty ID",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                implementation = SpecialtyDto.class
+        )
         MultiLanguageFieldDto name,
 
         @NotNull(message = "Field 'specialtyCategory' cannot be empty")
         @Schema(
                 description = "Specialty category",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                implementation = SpecialtyDto.class
         )
         SpecialtyCategory category,
 
         @NotNull(message = "Sectors set cannot be empty")
         @Schema(
                 description = "A set of specialty sectors",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                implementation = SpecialtyDto.class
         )
         Set<@Valid SectorDto> sectors
 ) {
