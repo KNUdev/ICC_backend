@@ -1,4 +1,4 @@
-package common;
+package ua.knu.knudev.applicationmanager.common;
 
 public enum ApplicationStatus {
     IN_QUEUE("В черзі"),

@@ -1,4 +1,4 @@
-package common;
+package ua.knu.knudev.applicationmanager.common;
 
 import jakarta.persistence.Embeddable;
 

@@ -1,6 +1,6 @@
-package domain;
+package ua.knu.knudev.applicationmanager.domain;
 
-import common.MultiLanguageField;
+import ua.knu.knudev.applicationmanager.common.MultiLanguageField;
 import jakarta.persistence.*;
 import lombok.*;
 

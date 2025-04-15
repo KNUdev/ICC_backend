@@ -1,7 +1,7 @@
-package domain;
+package ua.knu.knudev.applicationmanager.domain;
 
-import common.ApplicationStatus;
-import common.FullName;
+import ua.knu.knudev.applicationmanager.common.ApplicationStatus;
+import ua.knu.knudev.applicationmanager.common.FullName;
 import jakarta.persistence.*;
 import lombok.*;
 
