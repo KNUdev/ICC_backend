@@ -1,5 +1,7 @@
 package ua.knu.knudev.applicationmanager.domain;
 
+import ua.knu.knudev.applicationmanager.common.ApplicationStatus;
+import ua.knu.knudev.applicationmanager.common.FullName;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.applicationmanager.domain.embedded.ApplicationStatus;
 import jakarta.persistence.*;
@@ -8,6 +10,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+
+import ua.knu.knudev.employeemanager.domain.Employee;
 
 @Getter
 @Setter
@@ -23,21 +27,19 @@ public class Application {
     @Column (nullable = false, updatable = false)
     private UUID id;
 
-    @Column (nullable = false)
-    private String applicantName;
+    @Embedded
+    private FullName applicantName;
 
-    @Column (nullable = false, updatable = false)
+    @Column(nullable = false)
     private String email;
 
     @Column (nullable = false)
     private LocalDateTime receivedAt;
-    @Column (nullable = false)
     private LocalDateTime completedAt;
 
     @Column(nullable = false)
     private String problemDescription;
 
-    @Column(nullable = false)
     private String problemPhoto;
 
     @Column(nullable = false)
