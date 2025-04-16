@@ -2,7 +2,6 @@ package ua.knu.knudev.employeemanager.service;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +32,7 @@ import java.util.function.Function;
 @Validated
 @Slf4j
 public class SpecialtyService implements SpecialtyApi {
+
     private final SpecialtyRepository specialtyRepository;
     private final SpecialtyMapper specialtyMapper;
     private final SectorMapper sectorMapper;
@@ -40,11 +40,13 @@ public class SpecialtyService implements SpecialtyApi {
 
     @Override
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
-        Set<Sector> sectors = sectorMapper.toDomains(specialtyCreationRequest.sectors());
+        Set<Sector> sectors = sectorMapper.toDomains
+                (specialtyCreationRequest.sectors());
 
         Specialty specialty = Specialty.builder()
                 .createdAt(LocalDateTime.now())
-                .name(multiLanguageFieldMapper.toDomain(specialtyCreationRequest.name()))
+                .name(multiLanguageFieldMapper.toDomain
+                        (specialtyCreationRequest.name()))
                 .category(specialtyCreationRequest.category())
                 .sectors(sectors)
                 .build();
@@ -76,7 +78,6 @@ public class SpecialtyService implements SpecialtyApi {
 
     @Override
     public void delete(UUID specialtyId) {
-        log.info("Deleting Specialty: {}", specialtyId);
         specialtyRepository.deleteById(specialtyId);
     }
 
@@ -85,22 +86,15 @@ public class SpecialtyService implements SpecialtyApi {
     public SpecialtyDto update(@Valid SpecialtyUpdateRequest specialtyUpdateRequest) {
         Specialty specialty = getSpecialtyById(specialtyUpdateRequest.id());
 
-        log.info("Updating Specialty: {}", specialty);
-
         specialty.setUpdatedAt(LocalDateTime.now());
 
-        specialty.setName(getOrDefault(
-                specialtyUpdateRequest.name(),
-                specialty.getName(),
+        specialty.setName(getOrDefault(specialtyUpdateRequest.name(), specialty.getName(),
                 multiLanguageFieldMapper::toDomain));
 
-        specialty.setCategory(getOrDefault(
-                specialtyUpdateRequest.category(),
+        specialty.setCategory(getOrDefault(specialtyUpdateRequest.category(),
                 specialty.getCategory()));
 
-        specialty.setSectors(getOrDefault(
-                specialtyUpdateRequest.sectors(),
-                specialty.getSectors(),
+        specialty.setSectors(getOrDefault(specialtyUpdateRequest.sectors(), specialty.getSectors(),
                 sectorMapper::toDomains));
 
         Specialty savedSpecialty = specialtyRepository.save(specialty);
@@ -108,7 +102,8 @@ public class SpecialtyService implements SpecialtyApi {
     }
 
     public Specialty getSpecialtyById(UUID id) {
-        return specialtyRepository.findById(id).orElseThrow(() -> new SpecialtyException("Specialty with id " + id + " not found"));
+        return specialtyRepository.findById(id).orElseThrow(
+                () -> new SpecialtyException("Specialty with id " + id + " not found"));
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {

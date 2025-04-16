@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
-import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
@@ -20,7 +19,7 @@ public record SpecialtyCreationRequest(
         @Schema(
                 description = "Specialty ID",
                 requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SpecialtyDto.class
+                implementation = MultiLanguageFieldDto.class
         )
         MultiLanguageFieldDto name,
 
@@ -28,7 +27,7 @@ public record SpecialtyCreationRequest(
         @Schema(
                 description = "Specialty category",
                 requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SpecialtyDto.class
+                implementation = SpecialtyCategory.class
         )
         SpecialtyCategory category,
 
@@ -36,7 +35,7 @@ public record SpecialtyCreationRequest(
         @Schema(
                 description = "A set of specialty sectors",
                 requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SpecialtyDto.class
+                implementation = SectorDto.class
         )
         Set<@Valid SectorDto> sectors
 ) {
