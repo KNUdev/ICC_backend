@@ -1,6 +1,7 @@
 package ua.knu.knudev.applicationmanager.domain;
 
-import ua.knu.knudev.applicationmanager.common.MultiLanguageField;
+import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.applicationmanager.domain.embedded.MultiLanguageField;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,21 +13,31 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "department", schema = "public")
+@Table(name = "department", schema = "application_manager")
 @Builder
 @Entity
 public class Department {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     private UUID id;
 
+    @AttributeOverrides({
+            @AttributeOverride(name = "en", column = @Column(name = "en_name")),
+            @AttributeOverride(name = "uk", column = @Column(name = "uk_name"))
+    })
     @Embedded
+    @Column (nullable = false)
     private MultiLanguageField departmentName;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "applicantDepartment")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "department_applications",
+            joinColumns = @JoinColumn(name = "department_id"),
+            inverseJoinColumns = @JoinColumn(name = "application_id")
+    )
     private Set<Application> applications;
 }

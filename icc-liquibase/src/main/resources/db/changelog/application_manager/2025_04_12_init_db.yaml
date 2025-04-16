@@ -1,6 +1,168 @@
 databaseChangeLog:
   - changeSet:
-      id: init_empty_db
-      author: DenysLeonenko
-      comment: "Empty base initialization"
-      changes: []
+      id: create_department_table
+      author: MariaDemydovych
+      changes:
+        - createTable:
+            schemaName: application_manager
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+
+  - changeSet:
+      id: create_application_table
+      author: MariaDemydovych
+      changes:
+        - createTable:
+            schemaName: application_manager
+            tableName: application
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: applicant_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: received_at
+                  type: datetime
+              - column:
+                  name: completed_at
+                  type: datetime
+              - column:
+                  name: problem_description
+                  type: varchar
+                  constraints:
+                    nullable: false
+              - column:
+                  name: problem_photo
+                  type: varchar
+              - column:
+                  name: status
+                  type: varchar(50)
+              - column:
+                  name: applicant_department_id
+                  type: uuid
+        - addForeignKeyConstraint:
+            baseTableSchemaName: application_manager
+            baseTableName: application
+            baseColumnNames: applicant_department_id
+            referencedTableSchemaName: application_manager
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_application_department
+
+  - changeSet:
+      id: create_application_employee_table
+      author: MariaDemydovych
+      changes:
+        - createTable:
+            schemaName: application_manager
+            tableName: application_employee
+            columns:
+              - column:
+                  name: application_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: employee_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: application_manager
+            tableName: application_employee
+            columnNames: application_id, employee_id
+            constraintName: pk_application_employee
+        - addForeignKeyConstraint:
+            baseTableSchemaName: application_manager
+            baseTableName: application_employee
+            baseColumnNames: application_id
+            referencedTableSchemaName: application_manager
+            referencedTableName: application
+            referencedColumnNames: id
+            constraintName: fk_application_employee_application
+        - addForeignKeyConstraint:
+            baseTableSchemaName: application_manager
+            baseTableName: application_employee
+            baseColumnNames: employee_id
+            referencedTableSchemaName: employee_manager
+            referencedTableName: employee
+            referencedColumnNames: id
+            constraintName: fk_application_employee_employee
+
+  - changeSet:
+      id: create_department_applications_table
+      author: MariaDemydovych
+      changes:
+        - createTable:
+            schemaName: application_manager
+            tableName: department_applications
+            columns:
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: application_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: application_manager
+            tableName: department_applications
+            columnNames: department_id, application_id
+            constraintName: pk_department_applications
+        - addForeignKeyConstraint:
+            baseTableSchemaName: application_manager
+            baseTableName: department_applications
+            baseColumnNames: department_id
+            referencedTableSchemaName: application_manager
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_department_applications_department
+        - addForeignKeyConstraint:
+            baseTableSchemaName: application_manager
+            baseTableName: department_applications
+            baseColumnNames: application_id
+            referencedTableSchemaName: application_manager
+            referencedTableName: application
+            referencedColumnNames: id
+            constraintName: fk_department_applications_application

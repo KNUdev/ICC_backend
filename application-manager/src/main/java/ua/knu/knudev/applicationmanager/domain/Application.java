@@ -1,7 +1,7 @@
 package ua.knu.knudev.applicationmanager.domain;
 
-import ua.knu.knudev.applicationmanager.common.ApplicationStatus;
-import ua.knu.knudev.applicationmanager.common.FullName;
+import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.applicationmanager.domain.embedded.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,25 +15,27 @@ import ua.knu.knudev.employeemanager.domain.Employee;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "application", schema = "public")
+@Table(name = "application", schema = "application_manager")
 @Builder
 @Entity
 public class Application {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
+    @Column (nullable = false, updatable = false)
     private UUID id;
 
     @Embedded
-    private FullName applicantName;
+    @Column (nullable = false)
+    private String applicantName;
 
-    @Column(nullable = false)
+    @Column (nullable = false, updatable = false)
     private String email;
 
     private LocalDateTime receivedAt;
     private LocalDateTime completedAt;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
     private String problemDescription;
 
     private String problemPhoto;
@@ -42,8 +44,15 @@ public class Application {
     private ApplicationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn (name = "applicant_department_id", referencedColumnName = "id")
     private Department applicantDepartment;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "application_employee",
+            joinColumns = @JoinColumn(name = "application_id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id")
+    )
     private Set<Employee> assignedEmployees;
+
 }
