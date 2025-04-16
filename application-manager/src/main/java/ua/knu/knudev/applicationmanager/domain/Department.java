@@ -3,7 +3,7 @@ package ua.knu.knudev.applicationmanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.applicationmanager.common.MultiLanguageField;
+import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -20,7 +20,6 @@ public class Department {
 
     @Id
     @UuidGenerator
-    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @AttributeOverrides({
@@ -29,10 +28,11 @@ public class Department {
     })
     @Embedded
     @Column(nullable = false)
-    private MultiLanguageField Name;
+    private MultiLanguageField name;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

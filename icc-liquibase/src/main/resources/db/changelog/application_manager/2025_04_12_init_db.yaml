@@ -33,7 +33,7 @@ databaseChangeLog:
                   name: updated_at
                   type: datetime
                   constraints:
-                    nullable: false
+                    nullable: true
 
   - changeSet:
       id: create_application_table
@@ -51,12 +51,22 @@ databaseChangeLog:
                     unique: true
                     primaryKey: true
               - column:
-                  name: applicant_name
+                  name: first_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: email
+                  name: middle_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applicant_email
                   type: varchar(255)
                   constraints:
                     nullable: false
@@ -69,7 +79,7 @@ databaseChangeLog:
                   name: completed_at
                   type: datetime
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: problem_description
                   type: varchar(255)
@@ -79,7 +89,7 @@ databaseChangeLog:
                   name: problem_photo
                   type: varchar(255)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: status
                   type: varchar(50)
@@ -96,6 +106,8 @@ databaseChangeLog:
             referencedTableName: department
             referencedColumnNames: id
             constraintName: fk_application_department
+
+
 
   - changeSet:
       id: create_application_assigned_employee_ids_table
