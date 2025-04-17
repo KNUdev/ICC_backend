@@ -107,8 +107,6 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_application_department
 
-
-
   - changeSet:
       id: create_application_assigned_employee_ids_table
       author: MariaDemydovych
