@@ -32,6 +32,8 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: datetime
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_application_table
@@ -61,9 +63,13 @@ databaseChangeLog:
               - column:
                   name: received_at
                   type: datetime
+                  constraints:
+                    nullable: false
               - column:
                   name: completed_at
                   type: datetime
+                  constraints:
+                    nullable: false
               - column:
                   name: problem_description
                   type: varchar
@@ -72,16 +78,20 @@ databaseChangeLog:
               - column:
                   name: problem_photo
                   type: varchar
+                  constraints:
+                    nullable: false
               - column:
                   name: status
                   type: varchar(50)
+                  constraints:
+                    nullable: false
               - column:
-                  name: applicant_department_id
+                  name: department_id
                   type: uuid
         - addForeignKeyConstraint:
             baseTableSchemaName: application_manager
             baseTableName: application
-            baseColumnNames: applicant_department_id
+            baseColumnNames: department_id
             referencedTableSchemaName: application_manager
             referencedTableName: department
             referencedColumnNames: id

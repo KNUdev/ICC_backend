@@ -7,6 +7,7 @@ import jakarta.persistence.Embeddable;
 public class MultiLanguageField {
     @Column(nullable=false)
     private String en;
+
     @Column(nullable=false)
     private String uk;
 }

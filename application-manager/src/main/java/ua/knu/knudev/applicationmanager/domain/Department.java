@@ -28,14 +28,17 @@ public class Department {
     })
     @Embedded
     @Column (nullable = false)
-    private MultiLanguageField departmentName;
+    private MultiLanguageField Name;
 
+    @Column (nullable = false)
     private LocalDateTime createdAt;
+    @Column (nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "department_applications",
+            schema = "application_manager",
             joinColumns = @JoinColumn(name = "department_id"),
             inverseJoinColumns = @JoinColumn(name = "application_id")
     )
