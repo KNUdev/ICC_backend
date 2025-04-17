@@ -19,6 +19,7 @@ import ua.knu.knudev.employeemanagerapi.api.SpecialtyApi;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
+import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyUpdateRequest;
 
 import java.time.LocalDateTime;
@@ -70,9 +71,11 @@ public class SpecialtyService implements SpecialtyApi {
 
     @Override
     //todo to rework
-    public Page<SpecialtyDto> getAll() {
+    public Page<SpecialtyDto> getAll(SpecialtyReceivingRequest receivingRequest) {
         Pageable paging = PageRequest.of(0, 10);
-        Page<Specialty> specialtyPage = specialtyRepository.findAll(paging);
+        Page<Specialty> specialtyPage = specialtyRepository.getSpecialtiesByFilter(paging, receivingRequest.name(), receivingRequest.sectorName(),
+                receivingRequest.createdAt(), receivingRequest.updatedAt(), receivingRequest.category());
+
         return specialtyPage.map(specialtyMapper::toDto);
     }
 
