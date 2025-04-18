@@ -21,13 +21,13 @@ public record SectorReceivingRequest(
         LocalDateTime updatedAt,
 
         @Schema(
-                description = "A set of sector specialties",
+                description = "Page number",
                 implementation = Integer.class
         )
         Integer pageNumber,
 
         @Schema(
-                description = "A set of sector specialties",
+                description = "Number of employees per page",
                 implementation = Integer.class
         )
         Integer pageSize
