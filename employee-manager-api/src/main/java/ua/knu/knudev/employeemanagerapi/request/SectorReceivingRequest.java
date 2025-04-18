@@ -14,10 +14,10 @@ public record SectorReceivingRequest(
         @Schema(description = "Name of the sector specialty")
         String specialtyName,
 
-        @Schema(description = "Time of Sector creation")
+        @Schema(description = "Timestamp when Sector was created")
         LocalDateTime createdAt,
 
-        @Schema(description = "Time of the last Sector update")
+        @Schema(description = "Timestamp of the last update to Sector")
         LocalDateTime updatedAt,
 
         @Schema(
@@ -27,7 +27,7 @@ public record SectorReceivingRequest(
         Integer pageNumber,
 
         @Schema(
-                description = "Number of employees per page",
+                description = "Number of sectors per page",
                 implementation = Integer.class
         )
         Integer pageSize
