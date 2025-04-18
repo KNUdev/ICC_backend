@@ -24,7 +24,7 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     QSpecialty qSpecialty = QSpecialty.specialty;
 
     default Page<Sector> findAllBySearchQuery(
-            Pageable pageable, String searchQuery, LocalDateTime createdAt, LocalDateTime updatedAt
+            Pageable pageable, String searchQuery, String specialtyName, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {
         BooleanBuilder predicate = new BooleanBuilder();
 
@@ -33,11 +33,13 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
                     .map(word ->
                             qSector.name.en.containsIgnoreCase(word)
                                     .or(qSector.name.uk.containsIgnoreCase(word))
-                                    .or(qSpecialty.name.en.containsIgnoreCase(word))
-                                    .or(qSpecialty.name.uk.containsIgnoreCase(word))
                     )
                     .reduce(BooleanExpression::and)
                     .ifPresent(predicate::and);
+        }
+        if (specialtyName != null) {
+            predicate.and(qSpecialty.name.en.containsIgnoreCase(specialtyName)
+                    .or(qSpecialty.name.uk.containsIgnoreCase(specialtyName)));
         }
         if (createdAt != null) {
             predicate.and(qSector.createdAt.eq(createdAt));

@@ -64,7 +64,7 @@ public class SectorService implements SectorApi {
     public Page<SectorDto> getAll(SectorReceivingRequest request) {
         Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
         Page<Sector> sectorsPage = sectorRepository.findAllBySearchQuery(
-                paging, request.searchQuery(), request.createdAt(), request.updatedAt()
+                paging, request.searchQuery(), request.specialtyName(), request.createdAt(), request.updatedAt()
         );
 
         return sectorsPage.map(sectorMapper::toDto);
@@ -90,7 +90,7 @@ public class SectorService implements SectorApi {
                 request.specialties(),
                 sector.getSpecialties(),
                 specialtyMapper::toDomains
-                ));
+        ));
 
         Sector savedSector = sectorRepository.save(sector);
         return sectorMapper.toDto(savedSector);
@@ -100,7 +100,6 @@ public class SectorService implements SectorApi {
     public void delete(UUID sectorId) {
         sectorRepository.deleteById(sectorId);
     }
-
 
     private Sector getSectorById(UUID id) {
         return sectorRepository.findById(id).orElseThrow(
