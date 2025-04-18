@@ -35,12 +35,9 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
                     .reduce(BooleanExpression::or)
                     .ifPresent(predicate::and);
         }
-        if (predicate.hasValue()) {
-            Arrays.stream(sectorName.split("\\s+"))
-                    .map(word -> qSector.name.en.containsIgnoreCase(word)
-                            .or(qSector.name.uk.containsIgnoreCase(word)))
-                    .reduce(BooleanExpression::and)
-                    .ifPresent(predicate::and);
+        if(sectorName != null) {
+            predicate.and(qSector.name.en.containsIgnoreCase(sectorName)
+                    .or(qSector.name.uk.containsIgnoreCase(sectorName)));
         }
         if (category != null) {
             predicate.and(qSpecialty.category.eq(category));

@@ -72,9 +72,9 @@ public class SpecialtyService implements SpecialtyApi {
     @Override
     //todo to rework
     public Page<SpecialtyDto> getAll(SpecialtyReceivingRequest receivingRequest) {
-        Pageable paging = PageRequest.of(0, 10);
-        Page<Specialty> specialtyPage = specialtyRepository.getSpecialtiesByFilter(paging, receivingRequest.name(), receivingRequest.sectorName(),
-                receivingRequest.createdAt(), receivingRequest.updatedAt(), receivingRequest.category());
+        Pageable paging = PageRequest.of(receivingRequest.pageNumber(), receivingRequest.pageSize());
+        Page<Specialty> specialtyPage = specialtyRepository.getSpecialtiesByFilter(paging, receivingRequest.searchQuery(),
+                receivingRequest.sectorName(), receivingRequest.createdAt(), receivingRequest.updatedAt(), receivingRequest.category());
 
         return specialtyPage.map(specialtyMapper::toDto);
     }

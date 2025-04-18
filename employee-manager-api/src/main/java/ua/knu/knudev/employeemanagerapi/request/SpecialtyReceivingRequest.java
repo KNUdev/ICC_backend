@@ -9,20 +9,28 @@ import java.time.LocalDateTime;
 @Builder
 @Schema(description = "Request DTO for receiving specialty details")
 public record SpecialtyReceivingRequest(
-        @Schema(description = "Name of the specialty")
-        String name,
+        @Schema(description = "Substring which can be part of any specialty property with String type")
+        String searchQuery,
 
         @Schema(description = "Name of the specialty sector")
         String sectorName,
 
         @Schema(description = "Category of the specialty",
-        implementation = SpecialtyCategory.class)
+                implementation = SpecialtyCategory.class)
         SpecialtyCategory category,
 
         @Schema(description = "Date when specialty created")
         LocalDateTime createdAt,
 
         @Schema(description = "Date when specialty updated")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Page number",
+                implementation = Integer.class)
+        Integer pageNumber,
+
+        @Schema(description = "Number of sectors per page",
+                implementation = Integer.class)
+        Integer pageSize
 ) {
 }
