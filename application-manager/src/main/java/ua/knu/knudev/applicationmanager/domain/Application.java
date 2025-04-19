@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-import ua.knu.knudev.employeemanager.domain.Employee;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -50,13 +48,12 @@ public class Application {
     @JoinColumn (name = "department_id", referencedColumnName = "id")
     private Department Department;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "application_employee",
+    @ElementCollection
+    @CollectionTable(
+            name = "application_assigned_employee_ids",
             schema = "application_manager",
-            joinColumns = @JoinColumn(name = "application_id"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id")
+            joinColumns = @JoinColumn(name = "application_id")
     )
-    private Set<Employee> assignedEmployees;
-
+    @Column(name = "assigned_employee_id")
+    private Set<UUID> assignedEmployeeIds;
 }

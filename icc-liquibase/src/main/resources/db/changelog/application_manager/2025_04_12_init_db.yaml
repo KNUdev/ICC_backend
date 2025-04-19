@@ -98,12 +98,12 @@ databaseChangeLog:
             constraintName: fk_application_department
 
   - changeSet:
-      id: create_application_employee_table
+      id: create_application_assigned_employee_ids_table
       author: MariaDemydovych
       changes:
         - createTable:
+            tableName: application_assigned_employee_ids
             schemaName: application_manager
-            tableName: application_employee
             columns:
               - column:
                   name: application_id
@@ -111,31 +111,24 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: employee_id
+                  name: assigned_employee_id
                   type: uuid
                   constraints:
                     nullable: false
         - addPrimaryKey:
+            tableName: application_assigned_employee_ids
             schemaName: application_manager
-            tableName: application_employee
-            columnNames: application_id, employee_id
-            constraintName: pk_application_employee
+            columnNames: application_id, assigned_employee_id
+            constraintName: pk_application_assigned_employee_id
         - addForeignKeyConstraint:
             baseTableSchemaName: application_manager
-            baseTableName: application_employee
+            baseTableName: application_assigned_employee_ids
             baseColumnNames: application_id
-            referencedTableSchemaName: application_manager
+            constraintName: fk_application_assigned_employee_ids
             referencedTableName: application
+            referencedTableSchemaName: application_manager
             referencedColumnNames: id
-            constraintName: fk_application_employee_application
-        - addForeignKeyConstraint:
-            baseTableSchemaName: application_manager
-            baseTableName: application_employee
-            baseColumnNames: employee_id
-            referencedTableSchemaName: employee_manager
-            referencedTableName: employee
-            referencedColumnNames: id
-            constraintName: fk_application_employee_employee
+            onDelete: CASCADE
 
   - changeSet:
       id: create_department_applications_table
