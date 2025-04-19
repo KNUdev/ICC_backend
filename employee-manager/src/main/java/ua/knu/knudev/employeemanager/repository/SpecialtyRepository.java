@@ -11,6 +11,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.employeemanager.domain.QSector;
 import ua.knu.knudev.employeemanager.domain.QSpecialty;
 import ua.knu.knudev.employeemanager.domain.Specialty;
+import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 
 import java.time.LocalDateTime;
@@ -24,27 +25,26 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
     QSpecialty qSpecialty = QSpecialty.specialty;
     QSector qSector = QSector.sector;
 
-    default Page<Specialty> getSpecialtiesByFilter(Pageable pageable, String searchQuery, String sectorName,
-                                                   LocalDateTime createdAt, LocalDateTime updatedAt, SpecialtyCategory category) {
+    default Page<Specialty> getSpecialtiesByFilter(Pageable pageable, SpecialtyReceivingRequest specialtyReceivingRequest) {
         BooleanBuilder predicate = new BooleanBuilder();
 
-        if (StringUtils.isNotBlank(searchQuery)) {
-            Arrays.stream(searchQuery.split("\\s+"))
+        if (StringUtils.isNotBlank(specialtyReceivingRequest.searchQuery())) {
+            Arrays.stream(specialtyReceivingRequest.searchQuery().split("\\s+"))
                     .map(word -> qSpecialty.name.en.containsIgnoreCase(word)
                             .or(qSpecialty.name.uk.containsIgnoreCase(word)))
-                    .reduce(BooleanExpression::or)
+                    .reduce(BooleanExpression::and)
                     .ifPresent(predicate::and);
         }
-        if(sectorName != null) {
-            predicate.and(qSector.name.en.containsIgnoreCase(sectorName)
-                    .or(qSector.name.uk.containsIgnoreCase(sectorName)));
+        if(specialtyReceivingRequest.sectorName() != null) {
+            predicate.and(qSector.name.en.containsIgnoreCase(specialtyReceivingRequest.sectorName())
+                    .or(qSector.name.uk.containsIgnoreCase(specialtyReceivingRequest.sectorName())));
         }
-        if (category != null) {
-            predicate.and(qSpecialty.category.eq(category));
-        } else if (createdAt != null) {
-            predicate.and(qSpecialty.createdAt.eq(createdAt));
-        } else if (updatedAt != null) {
-            predicate.and(qSpecialty.updatedAt.eq(updatedAt));
+        if (specialtyReceivingRequest.category() != null) {
+            predicate.and(qSpecialty.category.eq(specialtyReceivingRequest.category()));
+        } else if (specialtyReceivingRequest.createdAt() != null) {
+            predicate.and(qSpecialty.createdAt.eq(specialtyReceivingRequest.createdAt()));
+        } else if (specialtyReceivingRequest.updatedAt() != null) {
+            predicate.and(qSpecialty.updatedAt.eq(specialtyReceivingRequest.updatedAt()));
         }
 
         JPAQuery<Specialty> query = getQueryFactory().selectFrom(qSpecialty)
