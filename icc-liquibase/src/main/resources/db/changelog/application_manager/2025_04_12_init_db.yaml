@@ -72,12 +72,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: problem_description
-                  type: varchar
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: problem_photo
-                  type: varchar
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
