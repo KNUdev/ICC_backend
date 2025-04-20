@@ -11,8 +11,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.employeemanager.domain.QSector;
 import ua.knu.knudev.employeemanager.domain.QSpecialty;
 import ua.knu.knudev.employeemanager.domain.Sector;
+import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -23,29 +23,19 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     QSector qSector = QSector.sector;
     QSpecialty qSpecialty = QSpecialty.specialty;
 
-    default Page<Sector> findAllBySearchQuery(
-            Pageable pageable, String searchQuery, String specialtyName, LocalDateTime createdAt, LocalDateTime updatedAt
-    ) {
+    default Page<Sector> findAllBySearchQuery(Pageable pageable, SectorReceivingRequest request) {
         BooleanBuilder predicate = new BooleanBuilder();
 
-        if (StringUtils.isNotBlank(searchQuery)) {
-            Arrays.stream(searchQuery.split("\\s+"))
-                    .map(word ->
-                            qSector.name.en.containsIgnoreCase(word)
-                                    .or(qSector.name.uk.containsIgnoreCase(word))
-                    )
-                    .reduce(BooleanExpression::and)
-                    .ifPresent(predicate::and);
+        addBySearchQuery(predicate, request.searchQuery());
+        if (request.specialtyName() != null) {
+            predicate.and(qSpecialty.name.en.containsIgnoreCase(request.specialtyName())
+                    .or(qSpecialty.name.uk.containsIgnoreCase(request.specialtyName())));
         }
-        if (specialtyName != null) {
-            predicate.and(qSpecialty.name.en.containsIgnoreCase(specialtyName)
-                    .or(qSpecialty.name.uk.containsIgnoreCase(specialtyName)));
+        if (request.createdAt() != null) {
+            predicate.and(qSector.createdAt.eq(request.createdAt()));
         }
-        if (createdAt != null) {
-            predicate.and(qSector.createdAt.eq(createdAt));
-        }
-        if (updatedAt != null) {
-            predicate.and(qSector.updatedAt.eq(updatedAt));
+        if (request.updatedAt() != null) {
+            predicate.and(qSector.updatedAt.eq(request.updatedAt()));
         }
 
         JPAQuery<Sector> query = getQueryFactory().selectFrom(qSector)
@@ -55,5 +45,18 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
                 .limit(pageable.isUnpaged() ? Integer.MAX_VALUE : pageable.getPageSize());
 
         return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
+    }
+
+
+    private void addBySearchQuery(BooleanBuilder predicate, String searchQuery) {
+        if (StringUtils.isNotBlank(searchQuery)) {
+            Arrays.stream(searchQuery.split("\\s+"))
+                    .map(word ->
+                            qSector.name.en.containsIgnoreCase(word)
+                                    .or(qSector.name.uk.containsIgnoreCase(word))
+                    )
+                    .reduce(BooleanExpression::and)
+                    .ifPresent(predicate::and);
+        }
     }
 }

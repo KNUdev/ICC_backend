@@ -62,10 +62,8 @@ public class SectorService implements SectorApi {
 
     @Override
     public Page<SectorDto> getAll(SectorReceivingRequest request) {
-        Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
-        Page<Sector> sectorsPage = sectorRepository.findAllBySearchQuery(
-                paging, request.searchQuery(), request.specialtyName(), request.createdAt(), request.updatedAt()
-        );
+        Pageable pageable = PageRequest.of(request.pageNumber(), request.pageSize());
+        Page<Sector> sectorsPage = sectorRepository.findAllBySearchQuery(pageable, request);
 
         return sectorsPage.map(sectorMapper::toDto);
     }
