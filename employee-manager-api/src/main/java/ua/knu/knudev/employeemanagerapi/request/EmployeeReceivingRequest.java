@@ -20,27 +20,22 @@ public record EmployeeReceivingRequest(
         @Schema(description = "Phone number of employee")
         String phoneNumber,
 
-        @Schema(description = "Time of employee creation",
-                implementation = LocalDateTime.class)
+        @Schema(description = "Time of employee creation")
         LocalDateTime createdAt,
 
-        @Schema(description = "Time of employee update",
-                implementation = LocalDateTime.class)
+        @Schema(description = "Time of employee update")
         LocalDateTime updatedAt,
 
-        @Schema(description = "Employee salary in UAH",
-                implementation = Double.class)
+        @Schema(description = "Employee salary in UAH")
         Double salaryInUAH,
 
-        @Schema(description = "Indicates whether the employee is a student",
-                implementation = Boolean.class)
+        @Schema(description = "Indicates whether the employee is a student")
         Boolean isStudent,
 
         @Schema(description = "Employee avatar")
         String avatar,
 
-        @Schema(description = "End date of employee contract",
-                implementation = LocalDate.class)
+        @Schema(description = "End date of employee contract")
         LocalDate contractEndDate,
 
         @Schema(description = "Field which contains start and end time of work",

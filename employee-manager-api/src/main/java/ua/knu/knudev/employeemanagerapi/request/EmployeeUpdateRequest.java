@@ -19,92 +19,67 @@ public record EmployeeUpdateRequest(
         @NotNull
         @Schema(
                 description = "Employee id",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = FullNameDto.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
         UUID id,
 
-        @NotNull(message = "Field 'fullName' cannot be null")
         @Valid
         @Schema(
                 description = "Employee full name",
-                requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = FullNameDto.class
         )
         FullNameDto fullName,
 
-        @NotNull(message = "Field 'email' cannot be null")
         @Schema(
-                description = "Employee email",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                description = "Employee email"
         )
         String email,
 
-        @NotNull(message = "Field 'phoneNumber' cannot be null")
         @Schema(
-                description = "Employee phone number",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                description = "Employee phone number"
         )
         String phoneNumber,
 
-        @NotNull(message = "Field 'salaryInUAH' cannot be null")
         @Schema(
-                description = "Employee salary in UAH",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = Double.class
+                description = "Employee salary in UAH"
         )
         Double salaryInUAH,
 
-        @NotNull(message = "Field 'isStudent' cannot be null")
         @Schema(
-                description = "Indicates whether the employee is a student",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = Boolean.class
+                description = "Indicates whether the employee is a student"
         )
         Boolean isStudent,
 
         @Schema(
-                description = "Employee avatar",
-                requiredMode = Schema.RequiredMode.NOT_REQUIRED
+                description = "Employee avatar"
         )
         String avatar,
 
-        @NotNull(message = "Field 'contractEndDate' cannot be null")
         @Schema(
-                description = "End date of employee contract",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = LocalDate.class
+                description = "End date of employee contract"
         )
         LocalDate contractEndDate,
 
-        @NotNull(message = "Field 'workHours' cannot be null")
         @Schema(
                 description = "Field which contains start and end time of work",
-                requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = WorkHoursDto.class
         )
         WorkHoursDto workHours,
 
-        @NotNull(message = "Field 'role' cannot be null")
         @Schema(
                 description = "Employee administrative role",
-                requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = EmployeeAdministrativeRole.class
         )
         EmployeeAdministrativeRole role,
 
-        @NotNull(message = "Field 'specialty' cannot be null")
         @Schema(
                 description = "Employee specialty",
-                requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = SpecialtyDto.class
         )
         SpecialtyDto specialty,
 
-        @NotNull(message = "Field 'sector' cannot be null")
         @Schema(
                 description = "Employee sector",
-                requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = SectorDto.class
         )
         SectorDto sector

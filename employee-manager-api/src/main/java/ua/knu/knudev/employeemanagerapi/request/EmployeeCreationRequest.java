@@ -41,16 +41,14 @@ public record EmployeeCreationRequest(
         @NotNull(message = "Field 'salaryInUAH' cannot be null")
         @Schema(
                 description = "Employee salary in UAH",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = Double.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
         Double salaryInUAH,
 
         @NotNull(message = "Field 'isStudent' cannot be null")
         @Schema(
                 description = "Indicates whether the employee is a student",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = Boolean.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
         Boolean isStudent,
 
@@ -63,8 +61,7 @@ public record EmployeeCreationRequest(
         @NotNull(message = "Field 'contractEndDate' cannot be null")
         @Schema(
                 description = "End date of employee contract",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = LocalDate.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
         LocalDate contractEndDate,
 
