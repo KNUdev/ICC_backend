@@ -68,15 +68,8 @@ public class EmployeeService implements EmployeeApi {
     }
 
     public Page<EmployeeDto> getAll(EmployeeReceivingRequest request) {
-        WorkHours workHours = workHoursMapper.toDomain(request.workHours());
-
         Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
-        Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(
-                paging, request.searchQuery(), request.email(), request.phoneNumber(),
-                request.createdAt(), request.updatedAt(), request.salaryInUAH(), request.isStudent(),
-                request.avatar(), request.contractEndDate(), workHours, request.role(),
-                request.specialtyName(), request.sectorName()
-        );
+        Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(paging, request);
 
         return employeePage.map(employeeMapper::toDto);
     }
@@ -85,6 +78,8 @@ public class EmployeeService implements EmployeeApi {
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
+
+        checkIfEmailIsInvalid(request.email());
 
         employee.setUpdatedAt(LocalDateTime.now());
         employee.setName(getOrDefault(request.fullName(), employee.getName(),
@@ -138,5 +133,11 @@ public class EmployeeService implements EmployeeApi {
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
+    }
+
+    private void checkIfEmailIsInvalid(String email) {
+        if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
+            throw new EmployeeException("Invalid email address:" + email);
+        }
     }
 }

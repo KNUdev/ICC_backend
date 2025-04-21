@@ -3,7 +3,6 @@ package ua.knu.knudev.employeemanager.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -14,11 +13,8 @@ import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.QEmployee;
 import ua.knu.knudev.employeemanager.domain.QSector;
 import ua.knu.knudev.employeemanager.domain.QSpecialty;
-import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
-import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
+import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -30,28 +26,43 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     QSpecialty qSpecialty = QSpecialty.specialty;
     QSector qSector = QSector.sector;
 
-    default Page<Employee> findAllBySearchQuery(
-            Pageable pageable, String searchQuery, String email, String phoneNumber,
-            LocalDateTime createdAt, LocalDateTime updatedAt, Double salaryInUAH, Boolean isStudent,
-            String avatar, LocalDate contractEndDate, WorkHours workHours, EmployeeAdministrativeRole role,
-            String specialtyName, String sectorName
-    ) {
+    default Page<Employee> findAllBySearchQuery(Pageable pageable, EmployeeReceivingRequest request) {
         BooleanBuilder predicate = new BooleanBuilder();
 
-        addBySearchQuery(predicate, searchQuery);
-        addIfNotNull(predicate, qEmployee.email, email);
-        addIfNotNull(predicate, qEmployee.phoneNumber, phoneNumber);
-        addIfNotNull(predicate, qEmployee.createdAt, createdAt);
-        addIfNotNull(predicate, qEmployee.updatedAt, updatedAt);
-        addIfNotNull(predicate, qEmployee.salaryInUAH, salaryInUAH);
-        addIfNotNull(predicate, qEmployee.isStudent, isStudent);
-        addIfNotNull(predicate, qEmployee.avatar, avatar);
-        addIfNotNull(predicate, qEmployee.contractEndDate, contractEndDate);
-        addIfNotNull(predicate, qEmployee.workHours.startTime, workHours.getStartTime());
-        addIfNotNull(predicate, qEmployee.workHours.endTime, workHours.getEndTime());
-        addIfNotNull(predicate, qEmployee.role, role);
-        addByLocalizedName(predicate, qSpecialty.name.en, qSpecialty.name.uk, specialtyName);
-        addByLocalizedName(predicate, qSector.name.en, qSector.name.uk, sectorName);
+        addBySearchQuery(predicate, request.searchQuery());
+        addIfNotNull(predicate, qEmployee.email, request.email());
+        addIfNotNull(predicate, qEmployee.phoneNumber, request.phoneNumber());
+        addIfNotNull(predicate, qEmployee.salaryInUAH, request.salaryInUAH());
+        addIfNotNull(predicate, qEmployee.isStudent, request.isStudent());
+        addIfNotNull(predicate, qEmployee.avatar, request.avatar());
+        addIfNotNull(predicate, qEmployee.workHours.startTime, request.workHours().getStartTime());
+        addIfNotNull(predicate, qEmployee.workHours.endTime, request.workHours().getEndTime());
+        addIfNotNull(predicate, qEmployee.role, request.role());
+        addIfNotNull(predicate, qSpecialty.name.en, request.specialtyName().getEn());
+        addIfNotNull(predicate, qSpecialty.name.uk, request.specialtyName().getUk());
+        addIfNotNull(predicate, qSector.name.en, request.sectorName().getEn());
+        addIfNotNull(predicate, qSector.name.uk, request.sectorName().getUk());
+
+        if (request.contractEndDateBefore() != null) {
+            predicate.and(qEmployee.contractEndDate.before(request.contractEndDateBefore()));
+        }
+        if (request.contractEndDateAfter() != null) {
+            predicate.and(qEmployee.contractEndDate.after(request.contractEndDateAfter()));
+        }
+
+        if (request.createdBefore() != null) {
+            predicate.and(qEmployee.createdAt.before(request.createdBefore()));
+        }
+        if (request.createdAfter() != null) {
+            predicate.and(qEmployee.createdAt.after(request.createdAfter()));
+        }
+        if (request.updatedBefore() != null) {
+            predicate.and(qEmployee.updatedAt.before(request.updatedBefore()));
+        }
+        if (request.updatedAfter() != null) {
+            predicate.and(qEmployee.updatedAt.after(request.updatedAfter()));
+        }
+
 
         JPAQuery<Employee> query = getQueryFactory().selectFrom(qEmployee)
                 .where(predicate)
@@ -72,12 +83,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
                     )
                     .reduce(BooleanExpression::and)
                     .ifPresent(predicate::and);
-        }
-    }
-
-    private void addByLocalizedName(BooleanBuilder predicate, StringPath en, StringPath uk, String name) {
-        if (name != null) {
-            predicate.and(en.eq(name).or(uk.eq(name)));
         }
     }
 

@@ -3,6 +3,7 @@ package ua.knu.knudev.employeemanagerapi.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 
 import java.time.LocalDate;
@@ -20,11 +21,17 @@ public record EmployeeReceivingRequest(
         @Schema(description = "Phone number of employee")
         String phoneNumber,
 
-        @Schema(description = "Time of employee creation")
-        LocalDateTime createdAt,
+        @Schema(description = "Filters employees created before the specified timestamp")
+        LocalDateTime createdBefore,
 
-        @Schema(description = "Time of employee update")
-        LocalDateTime updatedAt,
+        @Schema(description = "Filters employees created after the specified timestamp")
+        LocalDateTime createdAfter,
+
+        @Schema(description = "Filters employees updated before the specified timestamp")
+        LocalDateTime updatedBefore,
+
+        @Schema(description = "Filters employees updated after the specified timestamp")
+        LocalDateTime updatedAfter,
 
         @Schema(description = "Employee salary in UAH")
         Double salaryInUAH,
@@ -35,8 +42,11 @@ public record EmployeeReceivingRequest(
         @Schema(description = "Employee avatar")
         String avatar,
 
-        @Schema(description = "End date of employee contract")
-        LocalDate contractEndDate,
+        @Schema(description = "Filters contracts that end before the specified date")
+        LocalDate contractEndDateBefore,
+
+        @Schema(description = "Filters contracts that end after the specified date")
+        LocalDate contractEndDateAfter,
 
         @Schema(description = "Field which contains start and end time of work",
                 implementation = WorkHoursDto.class)
@@ -47,10 +57,10 @@ public record EmployeeReceivingRequest(
         EmployeeAdministrativeRole role,
 
         @Schema(description = "Employee specialty name")
-        String specialtyName,
+        MultiLanguageFieldDto specialtyName,
 
         @Schema(description = "Employee sector name")
-        String sectorName,
+        MultiLanguageFieldDto sectorName,
 
         @Schema(description = "Page number")
         Integer pageNumber,

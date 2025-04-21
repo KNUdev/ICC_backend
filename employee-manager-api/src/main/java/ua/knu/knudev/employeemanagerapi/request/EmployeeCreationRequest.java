@@ -3,6 +3,7 @@ package ua.knu.knudev.employeemanagerapi.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
@@ -29,12 +30,20 @@ public record EmployeeCreationRequest(
                 description = "Employee email",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
+        @Pattern(
+                regexp = "^[\\w.-]+@knu\\.ua$",
+                message = "Email must be a valid knu.ua address"
+        )
         String email,
 
         @NotNull(message = "Field 'phoneNumber' cannot be null")
         @Schema(
                 description = "Employee phone number",
                 requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @Pattern(
+                regexp = "^\\d{10}$",
+                message = "Phone number must be exactly 10 digits"
         )
         String phoneNumber,
 
