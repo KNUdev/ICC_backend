@@ -27,16 +27,10 @@ public record SectorReceivingRequest(
         @Schema(description = "Filters entities updated after the specified timestamp")
         LocalDateTime updatedAfter,
 
-        @Schema(
-                description = "Page number",
-                implementation = Integer.class
-        )
+        @Schema(description = "Page number")
         Integer pageNumber,
 
-        @Schema(
-                description = "Number of sectors per page",
-                implementation = Integer.class
-        )
+        @Schema(description = "Number of sectors per page")
         Integer pageSize
 ) {
 }
