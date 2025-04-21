@@ -12,6 +12,7 @@ import ua.knu.knudev.employeemanager.domain.QSector;
 import ua.knu.knudev.employeemanager.domain.QSpecialty;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -27,15 +28,18 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
         BooleanBuilder predicate = new BooleanBuilder();
 
         addBySearchQuery(predicate, request.searchQuery());
-        if (request.specialtyName() != null) {
-            predicate.and(qSpecialty.name.en.containsIgnoreCase(request.specialtyName())
-                    .or(qSpecialty.name.uk.containsIgnoreCase(request.specialtyName())));
+        addBySpecialtyName(predicate, request.specialtyName());
+        if (request.createdBefore() != null) {
+            predicate.and(qSector.createdAt.before(request.createdBefore()));
         }
-        if (request.createdAt() != null) {
-            predicate.and(qSector.createdAt.eq(request.createdAt()));
+        if (request.createdAfter() != null) {
+            predicate.and(qSector.createdAt.after(request.createdAfter()));
         }
-        if (request.updatedAt() != null) {
-            predicate.and(qSector.updatedAt.eq(request.updatedAt()));
+        if (request.updatedBefore() != null) {
+            predicate.and(qSector.updatedAt.before(request.updatedBefore()));
+        }
+        if (request.updatedAfter() != null) {
+            predicate.and(qSector.updatedAt.after(request.updatedAfter()));
         }
 
         JPAQuery<Sector> query = getQueryFactory().selectFrom(qSector)
@@ -57,6 +61,17 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
                     )
                     .reduce(BooleanExpression::and)
                     .ifPresent(predicate::and);
+        }
+    }
+
+    private void addBySpecialtyName(BooleanBuilder predicate, MultiLanguageFieldDto specialtyName) {
+        if (specialtyName != null) {
+            if (specialtyName.getEn() != null) {
+                predicate.and(qSpecialty.name.en.containsIgnoreCase(specialtyName.getEn()));
+            }
+            if (specialtyName.getUk() != null) {
+                predicate.and(qSpecialty.name.uk.containsIgnoreCase(specialtyName.getUk()));
+            }
         }
     }
 }

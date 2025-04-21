@@ -2,6 +2,7 @@ package ua.knu.knudev.employeemanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
 
@@ -11,14 +12,20 @@ public record SectorReceivingRequest(
         @Schema(description = "Substring which can be part of any Sector property with String type")
         String searchQuery,
 
-        @Schema(description = "Name of the sector specialty")
-        String specialtyName,
+        @Schema(description = "en, uk names of the sector specialty")
+        MultiLanguageFieldDto specialtyName,
 
-        @Schema(description = "Timestamp when Sector was created")
-        LocalDateTime createdAt,
+        @Schema(description = "Filters entities created before the specified timestamp")
+        LocalDateTime createdBefore,
 
-        @Schema(description = "Timestamp of the last update to Sector")
-        LocalDateTime updatedAt,
+        @Schema(description = "Filters entities created after the specified timestamp")
+        LocalDateTime createdAfter,
+
+        @Schema(description = "Filters entities updated before the specified timestamp")
+        LocalDateTime updatedBefore,
+
+        @Schema(description = "Filters entities updated after the specified timestamp")
+        LocalDateTime updatedAfter,
 
         @Schema(
                 description = "Page number",
