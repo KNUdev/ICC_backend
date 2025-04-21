@@ -1,8 +1,6 @@
 package ua.knu.knudev.employeemanagerapi.api;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;

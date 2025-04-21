@@ -12,9 +12,7 @@ import ua.knu.knudev.employeemanager.domain.QSector;
 import ua.knu.knudev.employeemanager.domain.QSpecialty;
 import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
-import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -36,15 +34,19 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
                     .ifPresent(predicate::and);
         }
         if(specialtyReceivingRequest.sectorName() != null) {
-            predicate.and(qSector.name.en.containsIgnoreCase(specialtyReceivingRequest.sectorName())
-                    .or(qSector.name.uk.containsIgnoreCase(specialtyReceivingRequest.sectorName())));
+            predicate.and(qSector.name.en.containsIgnoreCase(specialtyReceivingRequest.sectorName().getEn())
+                    .or(qSector.name.uk.containsIgnoreCase(specialtyReceivingRequest.sectorName().getUk())));
         }
         if (specialtyReceivingRequest.category() != null) {
             predicate.and(qSpecialty.category.eq(specialtyReceivingRequest.category()));
-        } else if (specialtyReceivingRequest.createdAt() != null) {
-            predicate.and(qSpecialty.createdAt.eq(specialtyReceivingRequest.createdAt()));
-        } else if (specialtyReceivingRequest.updatedAt() != null) {
-            predicate.and(qSpecialty.updatedAt.eq(specialtyReceivingRequest.updatedAt()));
+        } else if (specialtyReceivingRequest.createdAfter() != null) {
+            predicate.and(qSpecialty.createdAt.after(specialtyReceivingRequest.createdAfter()));
+        } else if (specialtyReceivingRequest.createdBefore() != null) {
+            predicate.and(qSpecialty.updatedAt.before(specialtyReceivingRequest.createdBefore()));
+        } else if (specialtyReceivingRequest.updatedAfter() != null) {
+            predicate.and(qSpecialty.updatedAt.after(specialtyReceivingRequest.updatedAfter()));
+        } else if (specialtyReceivingRequest.updatedBefore() != null) {
+            predicate.and(qSpecialty.updatedAt.before(specialtyReceivingRequest.updatedBefore()));
         }
 
         JPAQuery<Specialty> query = getQueryFactory().selectFrom(qSpecialty)
