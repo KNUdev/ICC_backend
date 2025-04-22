@@ -33,6 +33,7 @@ import java.util.function.Function;
 @Validated
 @Slf4j
 public class EmployeeService implements EmployeeApi {
+
     private final FullNameMapper fullNameMapper;
     private final WorkHoursMapper workHoursMapper;
     private final SpecialtyMapper specialtyMapper;
@@ -79,7 +80,7 @@ public class EmployeeService implements EmployeeApi {
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
 
-        checkIfEmailIsInvalid(request.email());
+        checkIfEmailIsValid(request.email());
 
         employee.setUpdatedAt(LocalDateTime.now());
         employee.setName(getOrDefault(request.fullName(), employee.getName(),
@@ -135,7 +136,7 @@ public class EmployeeService implements EmployeeApi {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
     }
 
-    private void checkIfEmailIsInvalid(String email) {
+    private void checkIfEmailIsValid(String email) {
         if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
             throw new EmployeeException("Invalid email address:" + email);
         }

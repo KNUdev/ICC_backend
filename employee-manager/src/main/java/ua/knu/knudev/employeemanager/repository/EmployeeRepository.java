@@ -11,8 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.QEmployee;
-import ua.knu.knudev.employeemanager.domain.QSector;
-import ua.knu.knudev.employeemanager.domain.QSpecialty;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 
 import java.util.Arrays;
@@ -23,8 +21,6 @@ import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     QEmployee qEmployee = QEmployee.employee;
-    QSpecialty qSpecialty = QSpecialty.specialty;
-    QSector qSector = QSector.sector;
 
     default Page<Employee> findAllBySearchQuery(Pageable pageable, EmployeeReceivingRequest request) {
         BooleanBuilder predicate = new BooleanBuilder();
@@ -38,10 +34,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         addIfNotNull(predicate, qEmployee.workHours.startTime, request.workHours().getStartTime());
         addIfNotNull(predicate, qEmployee.workHours.endTime, request.workHours().getEndTime());
         addIfNotNull(predicate, qEmployee.role, request.role());
-        addIfNotNull(predicate, qSpecialty.name.en, request.specialtyName().getEn());
-        addIfNotNull(predicate, qSpecialty.name.uk, request.specialtyName().getUk());
-        addIfNotNull(predicate, qSector.name.en, request.sectorName().getEn());
-        addIfNotNull(predicate, qSector.name.uk, request.sectorName().getUk());
+        addIfNotNull(predicate, qEmployee.specialty.name.en, request.specialtyName().getEn());
+        addIfNotNull(predicate, qEmployee.specialty.name.uk, request.specialtyName().getUk());
+        addIfNotNull(predicate, qEmployee.sector.name.en, request.sectorName().getEn());
+        addIfNotNull(predicate, qEmployee.sector.name.uk, request.sectorName().getUk());
 
         if (request.contractEndDateBefore() != null) {
             predicate.and(qEmployee.contractEndDate.before(request.contractEndDateBefore()));
@@ -49,7 +45,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         if (request.contractEndDateAfter() != null) {
             predicate.and(qEmployee.contractEndDate.after(request.contractEndDateAfter()));
         }
-
         if (request.createdBefore() != null) {
             predicate.and(qEmployee.createdAt.before(request.createdBefore()));
         }
@@ -62,7 +57,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         if (request.updatedAfter() != null) {
             predicate.and(qEmployee.updatedAt.after(request.updatedAfter()));
         }
-
 
         JPAQuery<Employee> query = getQueryFactory().selectFrom(qEmployee)
                 .where(predicate)
