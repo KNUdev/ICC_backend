@@ -22,7 +22,7 @@ public class MultiLanguageFieldDto {
 
     @Schema(description = "The field in Ukrainian.", example = "Історичний")
     @NotBlank(message = "Ukrainian field cannot be blank or empty.")
-    @Pattern(regexp = "^[А-Яа-яЇїІіЄєҐґ\\s-]+$",
+    @Pattern(regexp = "^[А-Яа-яЇїІіЄєҐґ\\s'’-]+$",
             message = "Ukrainian field contains only ukrainian-alphabet letters"
     )
     private String uk;

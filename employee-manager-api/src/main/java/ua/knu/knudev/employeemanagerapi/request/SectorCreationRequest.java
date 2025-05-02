@@ -2,7 +2,6 @@ package ua.knu.knudev.employeemanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
@@ -13,7 +12,6 @@ import java.util.Set;
 @Builder
 @Schema(description = "Request object for creating a sector")
 public record SectorCreationRequest(
-        @NotEmpty(message = "Field 'name' cannot be empty")
         @Valid
         @Schema(
                 description = "Sector name",
