@@ -78,10 +78,6 @@ public class SectorService implements SectorApi {
         return sectorsPage.map(sectorMapper::toDto);
     }
 
-    public boolean existsById(UUID sectorId) {
-        return sectorRepository.existsById(sectorId);
-    }
-
     @Override
     public SectorDto update(@Valid SectorUpdateRequest request) {
         checkIsNameValid(request.name());
@@ -108,16 +104,22 @@ public class SectorService implements SectorApi {
         sectorRepository.deleteById(sectorId);
     }
 
+    public boolean existsById(UUID sectorId) {
+        return sectorRepository.existsById(sectorId);
+    }
+
     private void checkIsNameValid(MultiLanguageFieldDto name) {
         if (name == null) {
             return;
         }
 
         if (name.getEn() != null && !Pattern.matches("^[A-Za-z\\s-]+$", name.getEn())) {
-            throw new SectorException("English name must contain only English letters, hyphens and spaces. Instead got: '" + name.getEn() + "'");
+            throw new SectorException("English name must contain only English letters, hyphens and spaces. Instead got:" +
+                    " '" + name.getEn() + "'");
         }
         if (name.getUk() != null && !Pattern.matches("^[А-Яа-яЇїІіЄєҐґ\\s'’-]+$", name.getUk())) {
-            throw new SectorException("Ukrainian name must contain only Ukrainian letters, hyphens, apostrophes and spaces. Instead got: '" + name.getUk() + "'");
+            throw new SectorException("Ukrainian name must contain only Ukrainian letters, hyphens, apostrophes and spaces." +
+                    " Instead got: '" + name.getUk() + "'");
         }
     }
 
