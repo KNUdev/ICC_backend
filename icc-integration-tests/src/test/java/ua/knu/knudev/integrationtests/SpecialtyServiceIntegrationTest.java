@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
@@ -15,9 +16,11 @@ import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanager.service.SpecialtyService;
+import ua.knu.knudev.employeemanagerapi.dto.ShortSpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
+import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyUpdateRequest;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
@@ -63,8 +66,8 @@ public class SpecialtyServiceIntegrationTest {
 
     @AfterEach
     public void tearDown() {
-        specialtyRepository.deleteAll();
         sectorRepository.deleteAll();
+        specialtyRepository.deleteAll();
     }
 
     private Sector createTestSector() {
@@ -77,7 +80,6 @@ public class SpecialtyServiceIntegrationTest {
         return sectorRepository.save(sector);
     }
 
-    @Transactional
     public Specialty createTestSpecialty() {
         Specialty specialty = new Specialty();
         specialty.setId(TEST_SPECIALTY_UUID);
@@ -170,6 +172,46 @@ public class SpecialtyServiceIntegrationTest {
         void should_ThrowExceptionWhenNotValidSpecialtyId() {
             assertThrows(SpecialtyException.class, () -> specialtyService.getById(UUID.randomUUID()));
         }
+    }
+
+//    @Nested
+//    @DisplayName("Get all scenarios")
+//    @Transactional
+//    class GetAllScenarios {
+//        @Test
+//        @DisplayName("Should successfully get all Specialties by filter")
+//        public void should_SuccessfullyGetAllSpecialtiesByFilter() {
+//            for (int i = 0; i < 9; i++){
+//                createTestSpecialty();
+//            }
+//
+//            SpecialtyReceivingRequest specialtyReceivingRequest = new SpecialtyReceivingRequest(
+//                    "name", multiLanguageFieldMapper.toDto(testSpecialty.getName()), SpecialtyCategory.SENIOR,
+//                    LocalDateTime.of(2019, 1, 1, 0, 0),
+//                    LocalDateTime.of(2023, 1, 1, 0, 0),
+//                    LocalDateTime.of(2021, 1, 1, 0, 0),
+//                    LocalDateTime.of(2024, 1, 1, 0, 0), 1,10
+//            );
+//
+//            Page<SpecialtyDto> response = specialtyService.getAll(specialtyReceivingRequest);
+//            SpecialtyDto firstResponseShortDto = response.get().findFirst().get();
+//
+//            assertNotNull(response);
+//            assertEquals(10, response.getTotalElements());
+//            assertEquals(testSpecialty.getName(), firstResponseShortDto.name());
+//            assertEquals(testSpecialty.getCategory(), firstResponseShortDto.category());
+//            assertEquals(testSpecialty.getCreatedAt(), firstResponseShortDto.createdAt());
+//            assertEquals(testSpecialty.getUpdatedAt(), firstResponseShortDto.updatedAt());
+//            assertEquals(testSpecialty.getSectors().size(), response.getTotalElements());
+//        }
+//    }
+
+    @Test
+    @DisplayName("Should successfully delete specialty when provided existing id")
+    void should_SuccessfullyDeleteSector_When_ProvidedExistingId() {
+        specialtyRepository.deleteById(testSector.getId());
+
+        assertFalse(specialtyRepository.existsById(testSector.getId()));
     }
 
 }
