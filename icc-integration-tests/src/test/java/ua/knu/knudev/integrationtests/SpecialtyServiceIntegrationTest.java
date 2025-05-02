@@ -1,4 +1,4 @@
-package ua.knu.knudev.integrationtests.utils.constants;
+package ua.knu.knudev.integrationtests;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +77,8 @@ public class SpecialtyServiceIntegrationTest {
         return sectorRepository.save(sector);
     }
 
-    private Specialty createTestSpecialty() {
+    @Transactional
+    public Specialty createTestSpecialty() {
         Specialty specialty = new Specialty();
         specialty.setId(TEST_SPECIALTY_UUID);
         specialty.setName(new MultiLanguageField(TEST_SPECIALTY_NAME_IN_ENGLISH, TEST_SPECIALTY_NAME_IN_UKRAINIAN));
@@ -85,8 +86,9 @@ public class SpecialtyServiceIntegrationTest {
         specialty.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
         specialty.setCategory(SpecialtyCategory.SENIOR);
         specialty.setSectors(Set.of(testSector));
-        testSector.getSpecialties().add(specialty);
+        testSector.addSpecialty(specialty);
 
+        sectorRepository.save(testSector);
         return specialtyRepository.save(specialty);
     }
 
@@ -148,6 +150,7 @@ public class SpecialtyServiceIntegrationTest {
 
     @Nested
     @DisplayName("Get by id scenarios")
+    @Transactional
     class GetByIdScenarios {
         @Test
         @DisplayName("Should successfully get Specialty by id when provided valid id")
