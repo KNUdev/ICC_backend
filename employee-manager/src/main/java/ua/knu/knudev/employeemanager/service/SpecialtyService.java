@@ -57,6 +57,7 @@ public class SpecialtyService implements SpecialtyApi {
         return specialtyMapper.toDto(savedSpecialty);
     }
 
+    @Transactional
     public SpecialtyDto getById(UUID specialtyId) {
         Specialty specialty = specialtyRepository.findById(specialtyId).orElseThrow(()
                 -> new SpecialtyException("Specialty with id" + specialtyId + "not found"));

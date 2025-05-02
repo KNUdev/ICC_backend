@@ -15,6 +15,6 @@ public record SpecialtyDto(
          LocalDateTime createdAt,
          LocalDateTime updatedAt,
          SpecialtyCategory category,
-         Set<SectorDto> sectors
+         Set<ShortSectorDto> sectors
 ) {
 }
