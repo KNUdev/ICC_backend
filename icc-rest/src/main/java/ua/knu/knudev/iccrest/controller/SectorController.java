@@ -151,7 +151,7 @@ public class SectorController {
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<SectorDto> getAll(
-            @ModelAttribute @Parameter(
+            @RequestBody @Parameter(
                     name = "Sector receiving request",
                     description = "Sector filtering fields",
                     in = ParameterIn.HEADER,

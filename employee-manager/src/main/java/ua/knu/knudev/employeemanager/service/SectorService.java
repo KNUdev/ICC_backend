@@ -50,7 +50,7 @@ public class SectorService implements SectorApi {
                 .map(SpecialtyDto::id)
                 .collect(Collectors.toSet());
 
-        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllByIds(ids));
 
         Sector sector = Sector.builder()
                 .createdAt(LocalDateTime.now())
@@ -72,7 +72,9 @@ public class SectorService implements SectorApi {
 
     @Override
     public Page<SectorDto> getAll(SectorReceivingRequest request) {
-        Pageable pageable = PageRequest.of(request.pageNumber(), request.pageSize());
+        int pageNumber = getOrDefault(request.pageNumber(), 0);
+        int pageSize = getOrDefault(request.pageSize(), 10);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Sector> sectorsPage = sectorRepository.findAllBySearchQuery(pageable, request);
 
         return sectorsPage.map(sectorMapper::toDto);
@@ -130,5 +132,9 @@ public class SectorService implements SectorApi {
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
+    }
+
+    private <T> T getOrDefault(T newValue, T currentValue) {
+        return newValue != null ? newValue : currentValue;
     }
 }

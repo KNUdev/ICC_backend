@@ -43,6 +43,8 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
         }
 
         JPAQuery<Sector> query = getQueryFactory().selectFrom(qSector)
+                .leftJoin(qSector.specialties, qSpecialty)
+                .fetchJoin()
                 .where(predicate)
                 .orderBy(qSector.name.en.asc(), qSector.name.uk.asc())
                 .offset(pageable.isUnpaged() ? 0 : pageable.getOffset())
@@ -67,10 +69,10 @@ public interface SectorRepository extends JpaRepository<Sector, UUID> {
     private void addBySpecialtyName(BooleanBuilder predicate, MultiLanguageFieldDto specialtyName) {
         if (specialtyName != null) {
             if (specialtyName.getEn() != null) {
-                predicate.and(qSpecialty.name.en.containsIgnoreCase(specialtyName.getEn()));
+                predicate.and(qSector.specialties.any().name.en.containsIgnoreCase(specialtyName.getEn()));
             }
             if (specialtyName.getUk() != null) {
-                predicate.and(qSpecialty.name.uk.containsIgnoreCase(specialtyName.getUk()));
+                predicate.and(qSector.specialties.any().name.uk.containsIgnoreCase(specialtyName.getUk()));
             }
         }
     }

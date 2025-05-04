@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
@@ -39,6 +40,7 @@ public class SectorServiceIntegrationTest {
     private static final String TEST_SECTOR_NAME_IN_ENGLISH = "test-sector-name";
     private static final String TEST_SECTOR_NAME_IN_UKRAINIAN = "тестове-ім'я-сектора";
     private static final UUID TEST_SECTOR_UUID = UUID.randomUUID();
+    private static final UUID TEST_SPECIALTY_UUID = UUID.randomUUID();
 
     @Autowired
     private SectorService sectorService;
@@ -80,7 +82,7 @@ public class SectorServiceIntegrationTest {
         Sector sector = new Sector();
         MultiLanguageField name = new MultiLanguageField(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN);
 
-        sector.setId(UUID.randomUUID());
+        sector.setId(TEST_SPECIALTY_UUID);
         sector.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
         sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
         sector.setName(name);
@@ -88,22 +90,6 @@ public class SectorServiceIntegrationTest {
         Sector save = sectorRepository.save(sector);
         return save;
     }
-
-//    private SectorReceivingRequest createSectorReceivingRequest() {
-//        MultiLanguageFieldDto specialtyName = new MultiLanguageFieldDto("Test Specialty for sectors", "Тестова спеціальність для секторів");
-//        SectorReceivingRequest request = SectorReceivingRequest.builder()
-//                .searchQuery(TEST_SECTOR_NAME_IN_ENGLISH)
-//                .specialtyName(specialtyName)
-//                .createdBefore(LocalDateTime.of(2021, 1, 1, 0, 0))
-//                .createdAfter(LocalDateTime.of(2019, 1, 1, 0, 0))
-//                .updatedBefore(LocalDateTime.of(2023, 1, 1, 0, 0))
-//                .updatedAfter(LocalDateTime.of(2021, 1, 1, 0, 0))
-//                .pageNumber(0)
-//                .pageSize(9)
-//                .build();
-//
-//        return request;
-//    }
 
     private SectorCreationRequest getSectorCreationRequest(String englishName, String ukrainianName) {
         SpecialtyDto specialtyDto = specialtyMapper.toDto(testSpecialty);
@@ -116,19 +102,55 @@ public class SectorServiceIntegrationTest {
         return request;
     }
 
+    private SectorReceivingRequest getValidSectorReceivingRequest() {
+        MultiLanguageFieldDto specialtyName = new MultiLanguageFieldDto("Test Specialty for sectors", "Тестова спеціальність для секторів");
+        SectorReceivingRequest request = SectorReceivingRequest.builder()
+                .searchQuery(TEST_SECTOR_NAME_IN_ENGLISH)
+                .specialtyName(specialtyName)
+                .createdBefore(LocalDateTime.of(2021, 1, 1, 0, 0))
+                .createdAfter(LocalDateTime.of(2019, 1, 1, 0, 0))
+                .updatedBefore(LocalDateTime.of(2023, 1, 1, 0, 0))
+                .updatedAfter(LocalDateTime.of(2021, 1, 1, 0, 0))
+                .pageNumber(0)
+                .pageSize(9)
+                .build();
+        return request;
+    }
+
+    private SectorReceivingRequest getSectorReceivingRequestWithSearchQuery(String searchQuery) {
+        SectorReceivingRequest request = SectorReceivingRequest.builder()
+                .searchQuery(searchQuery)
+                .build();
+        return request;
+    }
+
+    private void createManySectors() {
+        for (int i = 0; i < 9; i++) {
+            Sector sector = new Sector();
+            MultiLanguageField name = new MultiLanguageField(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN);
+
+            sector.setId(UUID.randomUUID());
+            sector.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
+            sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
+            sector.setName(name);
+            sector.setSpecialties(Set.of(testSpecialty));
+            sectorRepository.save(sector);
+        }
+    }
+
     @Nested
     @DisplayName("Get by id scenarios")
     class GetByIdScenarios {
         @Test
         @DisplayName("Should successfully get sector by id when provided valid id")
         void should_SuccessfullyGetSectorById_When_ProvidedValidId() {
-            SectorDto sector = sectorService.getById(testSector.getId());
+            SectorDto response = sectorService.getById(testSector.getId());
 
-            assertNotNull(sector);
-            assertEquals(testSector.getName().getEn(), sector.name().getEn());
-            assertEquals(testSector.getSpecialties().size(), sector.specialties().size());
-            assertEquals(testSector.getCreatedAt(), sector.createdAt());
-            assertEquals(testSector.getUpdatedAt(), sector.updatedAt());
+            assertNotNull(response);
+            assertEquals(testSector.getName().getEn(), response.name().getEn());
+            assertEquals(testSector.getSpecialties().size(), response.specialties().size());
+            assertEquals(testSector.getCreatedAt(), response.createdAt());
+            assertEquals(testSector.getUpdatedAt(), response.updatedAt());
         }
 
         @Test
@@ -145,14 +167,14 @@ public class SectorServiceIntegrationTest {
         @DisplayName("Should create sector successfully when provided valid account creation request")
         public void should_CreateSectorSuccessfully_When_ProvidedValidData() {
             SectorCreationRequest request = getSectorCreationRequest(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN);
-            SectorDto createdSector = sectorService.create(request);
+            SectorDto response = sectorService.create(request);
 
-            assertNotNull(createdSector);
-            assertEquals(TEST_SECTOR_NAME_IN_ENGLISH, createdSector.name().getEn());
-            assertEquals(TEST_SECTOR_NAME_IN_UKRAINIAN, createdSector.name().getUk());
-            assertEquals(1, createdSector.specialties().size());
+            assertNotNull(response);
+            assertEquals(TEST_SECTOR_NAME_IN_ENGLISH, response.name().getEn());
+            assertEquals(TEST_SECTOR_NAME_IN_UKRAINIAN, response.name().getUk());
+            assertEquals(1, response.specialties().size());
 
-            assertTrue(sectorRepository.existsById(createdSector.id()));
+            assertTrue(sectorRepository.existsById(response.id()));
         }
 
         @Test
@@ -169,8 +191,8 @@ public class SectorServiceIntegrationTest {
     @DisplayName("Update Sector scenarios")
     class UpdateScenarios {
         @Test
-        @DisplayName("Should successfully update sector when provided valid request")
-        void should_SuccessfullyUpdateSector_When_ProvidedValidRequest() {
+        @DisplayName("Should successfully update sector when provided valid update request")
+        void should_SuccessfullyUpdateSector_When_ProvidedValidUpdateRequest() {
             String newEnName = "new name";
             String newUkName = "нове ім'я";
 
@@ -179,16 +201,16 @@ public class SectorServiceIntegrationTest {
                     new MultiLanguageFieldDto(newEnName, newUkName),
                     Collections.emptySet()
             );
-            SectorDto updatedSector = sectorService.update(request);
+            SectorDto response = sectorService.update(request);
 
-            assertNotNull(updatedSector);
-            assertEquals(newEnName, updatedSector.name().getEn());
-            assertEquals(0, updatedSector.specialties().size());
+            assertNotNull(response);
+            assertEquals(newEnName, response.name().getEn());
+            assertEquals(0, response.specialties().size());
 
-            Optional<Sector> sectorFromDb = sectorRepository.findById(updatedSector.id());
+            Optional<Sector> foundSector = sectorRepository.findById(response.id());
 
-            assertTrue(sectorFromDb.isPresent());
-            assertEquals(newUkName, sectorFromDb.get().getName().getUk());
+            assertTrue(foundSector.isPresent());
+            assertEquals(newUkName, foundSector.get().getName().getUk());
         }
 
         @Test
@@ -206,39 +228,36 @@ public class SectorServiceIntegrationTest {
         }
     }
 
-    @Test
-    @DisplayName("Should successfully delete sector when provided existing id")
-    void should_SuccessfullyDeleteSector_When_ProvidedExistingId() {
-        sectorRepository.deleteById(testSector.getId());
+    @Nested
+    @DisplayName("Get all scenarios")
+    class GetAllScenarios {
+        @Test
+        @DisplayName("Should successfully get sectors when provided valid data")
+        void should_SuccessfullyGetAllSectors_When_ProvidedValidData() {
+            createManySectors();
 
-        assertFalse(sectorRepository.existsById(testSector.getId()));
+            SectorReceivingRequest sectorReceivingRequest = getValidSectorReceivingRequest();
+            Page<SectorDto> sectors = sectorService.getAll(sectorReceivingRequest);
+            SectorDto firstSector = sectors.get().findFirst().get();
+
+            assertNotNull(sectors);
+            assertEquals(10, sectors.getTotalElements());
+            assertEquals(testSector.getName().getEn(), firstSector.name().getEn());
+            assertEquals(testSector.getName().getUk(), firstSector.name().getUk());
+            assertEquals(testSector.getSpecialties().size(), firstSector.specialties().size());
+            assertEquals(testSector.getCreatedAt(), firstSector.createdAt());
+            assertEquals(testSector.getUpdatedAt(), firstSector.updatedAt());
+        }
+
+        @Test
+        @DisplayName("Should get zero sectors when provided not existing search query")
+        void should_GetZeroSectors_When_ProvidedNotExistingSearchQuery() {
+            createManySectors();
+
+            SectorReceivingRequest sectorReceivingRequest = getSectorReceivingRequestWithSearchQuery("not-existing-search-query");
+            Page<SectorDto> sectors = sectorService.getAll(sectorReceivingRequest);
+
+            assertEquals(0, sectors.getTotalElements());
+        }
     }
-
-//    @Test
-//    @DisplayName("Should successfully get sectors when provided valid data")
-//    void should_SuccessfullyGetAllSectors_When_ProvidedValidData() {
-//        for (int i = 0; i < 9; i++) {
-//            Sector sector = new Sector();
-//            MultiLanguageField name = new MultiLanguageField(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN);
-//
-//            sector.setId(UUID.randomUUID());
-//            sector.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
-//            sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
-//            sector.setName(name);
-//            sector.setSpecialties(Set.of(testSpecialty));
-//            Sector save = sectorRepository.save(sector);
-//        }
-//
-//        SectorReceivingRequest sectorReceivingRequest = createSectorReceivingRequest();
-//        Page<SectorDto> sectors = sectorService.getAll(sectorReceivingRequest);
-//        SectorDto firstSector = sectors.get().findFirst().get();
-//
-//        assertNotNull(sectors);
-//        assertEquals(10, sectors.getTotalElements());
-//        assertEquals(testSector.getName().getEn(), firstSector.name().getEn());
-//        assertEquals(testSector.getName().getUk(), firstSector.name().getUk());
-//        assertEquals(testSector.getSpecialties().size(), firstSector.specialties().size());
-//        assertEquals(testSector.getCreatedAt(), firstSector.createdAt());
-//        assertEquals(testSector.getUpdatedAt(), firstSector.updatedAt());
-//    }
 }

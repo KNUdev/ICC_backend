@@ -14,6 +14,8 @@ import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
@@ -56,5 +58,9 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
                 .limit(pageable.isUnpaged() ? Integer.MAX_VALUE : pageable.getPageSize());
 
         return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
+    }
+
+    default Set<Specialty> findAllByIds(Set<UUID> ids) {
+        return new HashSet<>(findAllById(ids));
     }
 }
