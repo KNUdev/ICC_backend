@@ -50,7 +50,7 @@ public class SectorService implements SectorApi {
                 .map(SpecialtyDto::id)
                 .collect(Collectors.toSet());
 
-        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllByIds(ids));
+        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
 
         Sector sector = Sector.builder()
                 .createdAt(LocalDateTime.now())
@@ -58,6 +58,7 @@ public class SectorService implements SectorApi {
                 .specialties(existingSpecialties)
                 .build();
 
+        existingSpecialties.forEach(specialty -> specialty.getSectors().add(sector));
         Sector savedSector = sectorRepository.save(sector);
         log.info("Created Sector: {}", savedSector);
         return sectorMapper.toDto(savedSector);
@@ -71,6 +72,7 @@ public class SectorService implements SectorApi {
     }
 
     @Override
+    @Transactional
     public Page<SectorDto> getAll(SectorReceivingRequest request) {
         int pageNumber = getOrDefault(request.pageNumber(), 0);
         int pageSize = getOrDefault(request.pageSize(), 10);
@@ -83,6 +85,8 @@ public class SectorService implements SectorApi {
     @Override
     public SectorDto update(@Valid SectorUpdateRequest request) {
         checkIsNameValid(request.name());
+
+
 
         Sector sector = getSectorById(request.id());
         sector.setUpdatedAt(LocalDateTime.now());

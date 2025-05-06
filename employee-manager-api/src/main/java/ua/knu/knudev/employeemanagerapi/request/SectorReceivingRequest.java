@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @Schema(description = "Request object for searching sectors")
 public record SectorReceivingRequest(
-        @Schema(description = "Substring which can be part of Sector name")
+        @Schema(description = "Substring which is a searchQuery")
         String searchQuery,
 
         @Schema(description = "en, uk names of the sector specialty")

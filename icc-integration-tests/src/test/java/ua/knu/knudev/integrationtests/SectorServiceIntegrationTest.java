@@ -1,5 +1,6 @@
 package ua.knu.knudev.integrationtests;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -87,6 +88,7 @@ public class SectorServiceIntegrationTest {
         sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
         sector.setName(name);
         sector.setSpecialties(Set.of(testSpecialty));
+        testSpecialty.getSectors().add(sector);
         Sector save = sectorRepository.save(sector);
         return save;
     }
@@ -134,6 +136,7 @@ public class SectorServiceIntegrationTest {
             sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
             sector.setName(name);
             sector.setSpecialties(Set.of(testSpecialty));
+            testSpecialty.getSectors().add(sector);
             sectorRepository.save(sector);
         }
     }
@@ -165,10 +168,12 @@ public class SectorServiceIntegrationTest {
     class CreateScenarios {
         @Test
         @DisplayName("Should create sector successfully when provided valid account creation request")
+        @Transactional
         public void should_CreateSectorSuccessfully_When_ProvidedValidData() {
             SectorCreationRequest request = getSectorCreationRequest(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN);
             SectorDto response = sectorService.create(request);
 
+            assertEquals(2, testSpecialty.getSectors().size());
             assertNotNull(response);
             assertEquals(TEST_SECTOR_NAME_IN_ENGLISH, response.name().getEn());
             assertEquals(TEST_SECTOR_NAME_IN_UKRAINIAN, response.name().getUk());
@@ -233,8 +238,11 @@ public class SectorServiceIntegrationTest {
     class GetAllScenarios {
         @Test
         @DisplayName("Should successfully get sectors when provided valid data")
+        @Transactional
         void should_SuccessfullyGetAllSectors_When_ProvidedValidData() {
             createManySectors();
+
+            specialtyRepository.findAll().forEach(specialty -> assertFalse(specialty.getSectors().isEmpty()));
 
             SectorReceivingRequest sectorReceivingRequest = getValidSectorReceivingRequest();
             Page<SectorDto> sectors = sectorService.getAll(sectorReceivingRequest);
@@ -251,6 +259,7 @@ public class SectorServiceIntegrationTest {
 
         @Test
         @DisplayName("Should get zero sectors when provided not existing search query")
+        @Transactional
         void should_GetZeroSectors_When_ProvidedNotExistingSearchQuery() {
             createManySectors();
 
