@@ -40,6 +40,7 @@ public class SpecialtyService implements SpecialtyApi {
     private final MultiLanguageFieldMapper multiLanguageFieldMapper;
 
     @Override
+    @Transactional
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
         Set<Sector> sectors = sectorMapper.toDomains
                 (specialtyCreationRequest.sectors());
@@ -69,6 +70,7 @@ public class SpecialtyService implements SpecialtyApi {
     }
 
     @Override
+    @Transactional
     public Page<SpecialtyDto> getAll(SpecialtyReceivingRequest receivingRequest) {
         Pageable paging = PageRequest.of(receivingRequest.pageNumber(), receivingRequest.pageSize());
         Page<Specialty> specialtyPage = specialtyRepository.getSpecialtiesByFilter(paging, receivingRequest);

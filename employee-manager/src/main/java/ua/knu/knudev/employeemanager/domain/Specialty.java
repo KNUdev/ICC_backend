@@ -41,4 +41,9 @@ public class Specialty {
 
     @ManyToMany(mappedBy = "specialties")
     private Set<Sector> sectors = new HashSet<>();
+
+    public void addSector(Sector sector) {
+        this.sectors.add(sector);
+        sector.getSpecialties().add(this);
+    }
 }

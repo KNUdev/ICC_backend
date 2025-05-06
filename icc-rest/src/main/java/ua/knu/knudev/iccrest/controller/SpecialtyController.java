@@ -21,9 +21,7 @@ import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyUpdateRequest;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
-import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -109,7 +107,7 @@ public class SpecialtyController {
             @RequestBody @Parameter(
                     name = "SpecialtyUpdateRequest",
                     description = "Data to update specialty",
-                    schema = @Schema(implementation = SpecialtyDto.class),
+                    schema = @Schema(implementation = SpecialtyUpdateRequest.class),
                     in = ParameterIn.HEADER
             ) SpecialtyUpdateRequest specialtyUpdateRequest) {
         return specialtyApi.update(specialtyUpdateRequest);
@@ -129,34 +127,26 @@ public class SpecialtyController {
             @Parameter(name = "searchQuery", description = "Search term to filter specialties by name or date.", example = "Engineer"),
             @Parameter(name = "sectorName", description = "Name of the specialty sector.", example = "1-st sector"),
             @Parameter(name = "category", description = "Category of the specialty", example = "Senior", schema = @Schema(implementation = SpecialtyCategory.class)),
-            @Parameter(name = "createdAfter", description = "Date after which the specialty was created", example = "2025-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "createdBefore", description = "Date before which the specialty was created", example = "2025-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "updatedAfter", description = "Date after which the specialty was updated", example = "2025-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "updatedBefore", description = "Date before which the specialty was updated", example = "2025-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "pageNumber", description = "Page number", example = "0", schema = @Schema(implementation = Integer.class)),
-            @Parameter(name = "pageSize", description = "Number of sectors per page", example = "10", schema = @Schema(implementation = Integer.class))
+            @Parameter(name = "createdAfter", description = "Date after which the specialty was created", example = "2025-01-01T00:00:00"),
+            @Parameter(name = "createdBefore", description = "Date before which the specialty was created", example = "2025-01-01T00:00:00"),
+            @Parameter(name = "updatedAfter", description = "Date after which the specialty was updated", example = "2025-01-01T00:00:00"),
+            @Parameter(name = "updatedBefore", description = "Date before which the specialty was updated", example = "2025-01-01T00:00:00"),
+            @Parameter(name = "pageNumber", description = "Page number", example = "0"),
+            @Parameter(name = "pageSize", description = "Number of sectors per page", example = "10")
     })
+
     @GetMapping("/getAll")
-    public Page<SpecialtyDto> getSpecialtiesByFilter(
-            @RequestParam(name = "searchQuery", required = false) String searchQuery,
-            @RequestParam(name = "sectorName", required = false) MultiLanguageFieldDto sectorName,
-            @RequestParam(name = "category", required = false) SpecialtyCategory category,
-            @RequestParam(name = "createdAfter", required = false) LocalDateTime createdAfter,
-            @RequestParam(name = "createdBefore", required = false) LocalDateTime createdBefore,
-            @RequestParam(name = "updatedAfter", required = false) LocalDateTime updatedAfter,
-            @RequestParam(name = "updatedBefore", required = false) LocalDateTime updatedBefore,
-            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "9") Integer pageSize) {
-        SpecialtyReceivingRequest specialtyReceivingRequest = SpecialtyReceivingRequest.builder()
-                .searchQuery(searchQuery)
-                .sectorName(sectorName)
-                .category(category)
-                .createdAfter(createdAfter)
-                .createdBefore(createdBefore)
-                .updatedAfter(updatedAfter)
-                .updatedBefore(updatedBefore)
-                .pageNumber(pageNumber)
-                .pageSize(pageSize)
+    public Page<SpecialtyDto> getSpecialtiesByFilter(@RequestBody @Valid SpecialtyReceivingRequest specialtyReceivingRequest) {
+        specialtyReceivingRequest = SpecialtyReceivingRequest.builder()
+                .searchQuery(specialtyReceivingRequest.searchQuery())
+                .sectorName(specialtyReceivingRequest.sectorName())
+                .category(specialtyReceivingRequest.category())
+                .createdAfter(specialtyReceivingRequest.createdAfter())
+                .createdBefore(specialtyReceivingRequest.createdBefore())
+                .updatedAfter(specialtyReceivingRequest.updatedAfter())
+                .updatedBefore(specialtyReceivingRequest.updatedBefore())
+                .pageNumber(specialtyReceivingRequest.pageNumber())
+                .pageSize(specialtyReceivingRequest.pageSize())
                 .build();
 
         return specialtyApi.getAll(specialtyReceivingRequest);

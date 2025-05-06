@@ -46,5 +46,6 @@ public class Sector {
 
     public void addSpecialty(Specialty specialty) {
         this.specialties.add(specialty);
+        specialty.getSectors().add(this);
     }
 }
