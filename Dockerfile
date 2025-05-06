@@ -28,7 +28,7 @@ COPY --from=builder application/security-dependencies/ ./
 COPY --from=builder application/report-manager-dependencies/ ./
 COPY --from=builder application/application-manager-dependencies/ ./
 COPY --from=builder application/employee-manager-dependencies/ ./
-COPY --from=builder application/file-service-dependencies/ ./
+#COPY --from=builder application/file-service-dependencies/ ./
 COPY --from=builder application/application/ ./
 
 CMD ["java", "org.springframework.boot.loader.launch.JarLauncher"]
