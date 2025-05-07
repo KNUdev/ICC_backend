@@ -154,6 +154,7 @@ public class SpecialtyServiceIntegrationTest {
         System.out.println("testCreateSpecialty");
     }
 
+    @Transactional
     @Nested
     @DisplayName("Create Specialty scenarios")
     class CreateSpecialtyScenarios {
@@ -169,6 +170,8 @@ public class SpecialtyServiceIntegrationTest {
 
             SpecialtyDto response = specialtyService.create(request);
 
+            Sector sector = sectorRepository.findById(response.sectors().iterator().next().id()).orElse(null);
+            assertEquals(2, sector.getSpecialties().size());
             assertNotNull(response);
             assertEquals("Test-Specialty", response.name().getEn());
             assertEquals(testSpecialty.getSectors().size(), response.sectors().size());

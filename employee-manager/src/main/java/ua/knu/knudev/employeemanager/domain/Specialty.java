@@ -46,4 +46,19 @@ public class Specialty {
         this.sectors.add(sector);
         sector.getSpecialties().add(this);
     }
+
+    public void addSectors(Set<Sector> sectors) {
+        for (Sector sector : sectors) {
+            addSector(sector);
+        }
+    }
+
+    public void updateSectors(Set<Sector> sectors) {
+        for (Sector oldSector : this.sectors) {
+            oldSector.getSpecialties().remove(this);
+        }
+
+        this.sectors.clear();
+        addSectors(sectors);
+    }
 }

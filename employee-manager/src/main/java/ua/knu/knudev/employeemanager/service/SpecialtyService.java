@@ -14,19 +14,25 @@ import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.employeemanager.mapper.SectorMapper;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
+import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanagerapi.api.SpecialtyApi;
+import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyUpdateRequest;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,20 +44,28 @@ public class SpecialtyService implements SpecialtyApi {
     private final SpecialtyMapper specialtyMapper;
     private final SectorMapper sectorMapper;
     private final MultiLanguageFieldMapper multiLanguageFieldMapper;
+    private final SectorRepository sectorRepository;
 
     @Override
     @Transactional
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
-        Set<Sector> sectors = sectorMapper.toDomains
-                (specialtyCreationRequest.sectors());
+//        Set<Sector> sectors = sectorMapper.toDomains
+//                (specialtyCreationRequest.sectors());
+        Set <UUID> ids = specialtyCreationRequest.sectors().stream()
+                .map(SectorDto::id)
+                .collect(Collectors.toSet());
+
+        Set <Sector> existingSectors = new HashSet<>(sectorRepository.findAllById(ids));
 
         Specialty specialty = Specialty.builder()
                 .createdAt(LocalDateTime.now())
                 .name(multiLanguageFieldMapper.toDomain
                         (specialtyCreationRequest.name()))
                 .category(specialtyCreationRequest.category())
-                .sectors(sectors)
+                .sectors(new HashSet<>())
                 .build();
+
+        specialty.addSectors(existingSectors);
 
         Specialty savedSpecialty = specialtyRepository.save(specialty);
         log.info("Created Specialty: {}", savedSpecialty);
@@ -86,6 +100,7 @@ public class SpecialtyService implements SpecialtyApi {
     @Override
     @Transactional
     public SpecialtyDto update(@Valid SpecialtyUpdateRequest specialtyUpdateRequest) {
+        checkIsNameValid(specialtyUpdateRequest.name());
         Specialty specialty = getSpecialtyById(specialtyUpdateRequest.id());
 
         specialty.setUpdatedAt(LocalDateTime.now());
@@ -96,8 +111,10 @@ public class SpecialtyService implements SpecialtyApi {
         specialty.setCategory(getOrDefault(specialtyUpdateRequest.category(),
                 specialty.getCategory()));
 
-        specialty.setSectors(getOrDefault(specialtyUpdateRequest.sectors(), specialty.getSectors(),
-                sectorMapper::toDomains));
+        if(specialtyUpdateRequest.sectors() != null) {
+            Set<Sector> sectors = sectorMapper.toDomains(specialtyUpdateRequest.sectors());
+            specialty.updateSectors(sectors);
+        }
 
         Specialty savedSpecialty = specialtyRepository.save(specialty);
         return specialtyMapper.toDto(savedSpecialty);
@@ -106,6 +123,21 @@ public class SpecialtyService implements SpecialtyApi {
     public Specialty getSpecialtyById(UUID id) {
         return specialtyRepository.findById(id).orElseThrow(
                 () -> new SpecialtyException("Specialty with id " + id + " not found"));
+    }
+
+    private void checkIsNameValid(MultiLanguageFieldDto name) {
+        if (name == null) {
+            return;
+        }
+
+        if (name.getEn() != null && !Pattern.matches("^[A-Za-z\\s-]+$", name.getEn())) {
+            throw new SpecialtyException("English name must contain only English letters, hyphens and spaces. Instead got:" +
+                    " '" + name.getEn() + "'");
+        }
+        if (name.getUk() != null && !Pattern.matches("^[А-Яа-яЇїІіЄєҐґ\\s'’-]+$", name.getUk())) {
+            throw new SpecialtyException("Ukrainian name must contain only Ukrainian letters, hyphens, apostrophes and spaces." +
+                    " Instead got: '" + name.getUk() + "'");
+        }
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {
