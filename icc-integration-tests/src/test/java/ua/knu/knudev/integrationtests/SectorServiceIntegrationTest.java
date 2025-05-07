@@ -26,10 +26,7 @@ import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,8 +84,7 @@ public class SectorServiceIntegrationTest {
         sector.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
         sector.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
         sector.setName(name);
-        sector.setSpecialties(Set.of(testSpecialty));
-        testSpecialty.getSectors().add(sector);
+        sector.addSpecialties(Set.of(testSpecialty));
         Sector save = sectorRepository.save(sector);
         return save;
     }
@@ -197,6 +193,7 @@ public class SectorServiceIntegrationTest {
     class UpdateScenarios {
         @Test
         @DisplayName("Should successfully update sector when provided valid update request")
+        @Transactional
         void should_SuccessfullyUpdateSector_When_ProvidedValidUpdateRequest() {
             String newEnName = "new name";
             String newUkName = "нове ім'я";
@@ -208,6 +205,8 @@ public class SectorServiceIntegrationTest {
             );
             SectorDto response = sectorService.update(request);
 
+            assertEquals(0, testSector.getSpecialties().size());
+            assertEquals(0, testSpecialty.getSectors().size());
             assertNotNull(response);
             assertEquals(newEnName, response.name().getEn());
             assertEquals(0, response.specialties().size());

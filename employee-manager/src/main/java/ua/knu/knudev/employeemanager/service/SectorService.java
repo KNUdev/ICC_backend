@@ -55,10 +55,10 @@ public class SectorService implements SectorApi {
         Sector sector = Sector.builder()
                 .createdAt(LocalDateTime.now())
                 .name(multiLanguageFieldMapper.toDomain(request.name()))
-                .specialties(existingSpecialties)
+                .specialties(new HashSet<>())
                 .build();
 
-        existingSpecialties.forEach(specialty -> specialty.getSectors().add(sector));
+        sector.addSpecialties(existingSpecialties);
         Sector savedSector = sectorRepository.save(sector);
         log.info("Created Sector: {}", savedSector);
         return sectorMapper.toDto(savedSector);
@@ -83,10 +83,9 @@ public class SectorService implements SectorApi {
     }
 
     @Override
+    @Transactional
     public SectorDto update(@Valid SectorUpdateRequest request) {
         checkIsNameValid(request.name());
-
-
 
         Sector sector = getSectorById(request.id());
         sector.setUpdatedAt(LocalDateTime.now());
@@ -95,11 +94,10 @@ public class SectorService implements SectorApi {
                 sector.getName(),
                 multiLanguageFieldMapper::toDomain
         ));
-        sector.setSpecialties(getOrDefault(
-                request.specialties(),
-                sector.getSpecialties(),
-                specialtyMapper::toDomains
-        ));
+        if (request.specialties() != null) {
+            Set<Specialty> specialties = specialtyMapper.toDomains(request.specialties());
+            sector.updateSpecialties(specialties);
+        }
 
         Sector savedSector = sectorRepository.save(sector);
         return sectorMapper.toDto(savedSector);
