@@ -1,5 +1,6 @@
 package ua.knu.knudev.employeemanagerapi.api;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.request.SectorCreationRequest;
@@ -9,7 +10,7 @@ import ua.knu.knudev.employeemanagerapi.request.SectorUpdateRequest;
 import java.util.UUID;
 
 public interface SectorApi {
-    SectorDto create(SectorCreationRequest sectorCreationRequest);
+    SectorDto create(@Valid SectorCreationRequest sectorCreationRequest);
 
     SectorDto getById(UUID sectorId);
 
@@ -17,7 +18,5 @@ public interface SectorApi {
 
     void delete(UUID sectorId);
 
-    boolean existsById(UUID sectorId);
-
-    SectorDto update(SectorUpdateRequest sectorUpdateRequest);
+    SectorDto update(@Valid SectorUpdateRequest sectorUpdateRequest);
 }

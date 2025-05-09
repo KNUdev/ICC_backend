@@ -54,8 +54,8 @@ public class Sector {
             addSpecialty(specialty);
         }
     }
-
-    public void removeAllSpecialties(Set<Specialty> specialties) {
+  
+    public void removeAllSpecialties() {
         for (Specialty specialty : this.specialties) {
             specialty.getSectors().remove(this);
         }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layers xmlns="http://www.springframework.org/schema/boot/layers"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/boot/layers
+                            https://www.springframework.org/schema/boot/layers/layers-1.0.xsd">
+    <application>
+        <into layer="spring-boot-loader">
+            <include>org/springframework/boot/loader/**</include>
+        </into>
+        <into layer="application"/>
+    </application>
+    <dependencies>
+        <into layer="snapshot-dependencies">
+            <include>*:*:*SNAPSHOT</include>
+        </into>
+        <into layer="security-dependencies">
+            <include>ua.knu.knudev:icc-security:*</include>
+        </into>
+        <into layer="report-manager-dependencies">
+            <include>ua.knu.knudev:report-manager:*</include>
+        </into>
+        <into layer="employee-manager-dependencies">
+            <include>ua.knu.knudev:employee-manager:*</include>
+        </into>
+        <into layer="application-manager-dependencies">
+            <include>ua.knu.knudev:application-manager:*</include>
+        </into>
+        <into layer="file-service-dependencies">
+            <include>ua.knu.knudev:file-service:*</include>
+        </into>
+        <into layer="dependencies"/>
+    </dependencies>
+    <layerOrder>
+        <layer>dependencies</layer>
+        <layer>spring-boot-loader</layer>
+        <layer>snapshot-dependencies</layer>
+        <layer>security-dependencies</layer>
+        <layer>report-manager-dependencies</layer>
+        <layer>application-manager-dependencies</layer>
+        <layer>employee-manager-dependencies</layer>
+        <layer>file-service-dependencies</layer>
+        <layer>application</layer>
+    </layerOrder>
+</layers>
