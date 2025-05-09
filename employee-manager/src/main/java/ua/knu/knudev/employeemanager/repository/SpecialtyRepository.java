@@ -34,22 +34,32 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
                     .ifPresent(predicate::and);
         }
         if(specialtyReceivingRequest.sectorName() != null) {
-            predicate.and(qSector.name.en.containsIgnoreCase(specialtyReceivingRequest.sectorName().getEn())
-                    .or(qSector.name.uk.containsIgnoreCase(specialtyReceivingRequest.sectorName().getUk())));
+            if(specialtyReceivingRequest.sectorName().getEn() != null) {
+                predicate.and(qSpecialty.sectors.any().name.en.containsIgnoreCase(specialtyReceivingRequest.sectorName().getEn()));
+            }
+            if(specialtyReceivingRequest.sectorName().getUk() != null) {
+                predicate.and(qSpecialty.sectors.any().name.uk.containsIgnoreCase(specialtyReceivingRequest.sectorName().getUk()));
+            }
         }
         if (specialtyReceivingRequest.category() != null) {
             predicate.and(qSpecialty.category.eq(specialtyReceivingRequest.category()));
-        } else if (specialtyReceivingRequest.createdAfter() != null) {
+        }
+        if (specialtyReceivingRequest.createdAfter() != null) {
             predicate.and(qSpecialty.createdAt.after(specialtyReceivingRequest.createdAfter()));
-        } else if (specialtyReceivingRequest.createdBefore() != null) {
-            predicate.and(qSpecialty.updatedAt.before(specialtyReceivingRequest.createdBefore()));
-        } else if (specialtyReceivingRequest.updatedAfter() != null) {
+        }
+        if (specialtyReceivingRequest.createdBefore() != null) {
+            predicate.and(qSpecialty.createdAt.before(specialtyReceivingRequest.createdBefore()));
+        }
+        if (specialtyReceivingRequest.updatedAfter() != null) {
             predicate.and(qSpecialty.updatedAt.after(specialtyReceivingRequest.updatedAfter()));
-        } else if (specialtyReceivingRequest.updatedBefore() != null) {
+        }
+        if (specialtyReceivingRequest.updatedBefore() != null) {
             predicate.and(qSpecialty.updatedAt.before(specialtyReceivingRequest.updatedBefore()));
         }
 
         JPAQuery<Specialty> query = getQueryFactory().selectFrom(qSpecialty)
+                .leftJoin(qSpecialty.sectors, qSector)
+                .fetchJoin()
                 .where(predicate)
                 .orderBy(qSpecialty.name.en.asc(), qSpecialty.name.uk.asc())
                 .offset(pageable.isUnpaged() ? 0 : pageable.getOffset())

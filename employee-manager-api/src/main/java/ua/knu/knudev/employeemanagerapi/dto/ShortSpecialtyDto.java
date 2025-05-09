@@ -12,5 +12,5 @@ public record ShortSpecialtyDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         SpecialtyCategory category
-) {
+        ) {
 }
