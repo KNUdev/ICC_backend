@@ -65,8 +65,6 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, UUID> {
                 .offset(pageable.isUnpaged() ? 0 : pageable.getOffset())
                 .limit(pageable.isUnpaged() ? Integer.MAX_VALUE : pageable.getPageSize());
 
-        System.out.println("Predicate: " + predicate);
-
         return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
     }
 }

@@ -144,16 +144,6 @@ public class SpecialtyServiceIntegrationTest {
                 .build();
     }
 
-    @Test
-    public void testCreateSector() {
-        System.out.println("testCreateSector");
-    }
-
-    @Test
-    public void testCreateSpecialty() {
-        System.out.println("testCreateSpecialty");
-    }
-
     @Transactional
     @Nested
     @DisplayName("Create Specialty scenarios")

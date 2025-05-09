@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,8 +50,6 @@ public class SpecialtyService implements SpecialtyApi {
     @Override
     @Transactional
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
-//        Set<Sector> sectors = sectorMapper.toDomains
-//                (specialtyCreationRequest.sectors());
         Set <UUID> ids = specialtyCreationRequest.sectors().stream()
                 .map(SectorDto::id)
                 .collect(Collectors.toSet());
@@ -70,17 +69,6 @@ public class SpecialtyService implements SpecialtyApi {
         Specialty savedSpecialty = specialtyRepository.save(specialty);
         log.info("Created Specialty: {}", savedSpecialty);
         return specialtyMapper.toDto(savedSpecialty);
-    }
-
-    @Transactional
-    public SpecialtyDto getById(UUID specialtyId) {
-        Specialty specialty = specialtyRepository.findById(specialtyId).orElseThrow(()
-                -> new SpecialtyException("Specialty with id" + specialtyId + "not found"));
-        return specialtyMapper.toDto(specialty);
-    }
-
-    public boolean existsById(UUID specialtyId) {
-        return specialtyRepository.existsById(specialtyId);
     }
 
     @Override
@@ -113,11 +101,19 @@ public class SpecialtyService implements SpecialtyApi {
 
         if(specialtyUpdateRequest.sectors() != null) {
             Set<Sector> sectors = sectorMapper.toDomains(specialtyUpdateRequest.sectors());
-            specialty.updateSectors(sectors);
+            specialty.removeAllSectors(sectors);
+            specialty.addSectors(sectors);
         }
 
         Specialty savedSpecialty = specialtyRepository.save(specialty);
         return specialtyMapper.toDto(savedSpecialty);
+    }
+
+    @Transactional
+    public SpecialtyDto getById(UUID specialtyId) {
+        Specialty specialty = specialtyRepository.findById(specialtyId).orElseThrow(()
+                -> new SpecialtyException("Specialty with id" + specialtyId + "not found"));
+        return specialtyMapper.toDto(specialty);
     }
 
     public Specialty getSpecialtyById(UUID id) {
@@ -125,8 +121,13 @@ public class SpecialtyService implements SpecialtyApi {
                 () -> new SpecialtyException("Specialty with id " + id + " not found"));
     }
 
+
+    public boolean existsById(UUID specialtyId) {
+        return specialtyRepository.existsById(specialtyId);
+    }
+
     private void checkIsNameValid(MultiLanguageFieldDto name) {
-        if (name == null) {
+        if (ObjectUtils.isEmpty(name)) {
             return;
         }
 

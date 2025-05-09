@@ -66,7 +66,7 @@ public class SpecialtyController {
             @Valid @ModelAttribute @Parameter(
                     name = "Specialty creation request",
                     description = "Specialty creation details",
-                    in = ParameterIn.HEADER,
+                    in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = SpecialtyCreationRequest.class)
             ) SpecialtyCreationRequest specialtyCreationRequest) {
@@ -108,7 +108,7 @@ public class SpecialtyController {
                     name = "SpecialtyUpdateRequest",
                     description = "Data to update specialty",
                     schema = @Schema(implementation = SpecialtyUpdateRequest.class),
-                    in = ParameterIn.HEADER
+                    in = ParameterIn.QUERY
             ) SpecialtyUpdateRequest specialtyUpdateRequest) {
         return specialtyApi.update(specialtyUpdateRequest);
     }
@@ -134,21 +134,9 @@ public class SpecialtyController {
             @Parameter(name = "pageNumber", description = "Page number", example = "0"),
             @Parameter(name = "pageSize", description = "Number of sectors per page", example = "10")
     })
-
     @GetMapping("/getAll")
-    public Page<SpecialtyDto> getSpecialtiesByFilter(@RequestBody @Valid SpecialtyReceivingRequest specialtyReceivingRequest) {
-        specialtyReceivingRequest = SpecialtyReceivingRequest.builder()
-                .searchQuery(specialtyReceivingRequest.searchQuery())
-                .sectorName(specialtyReceivingRequest.sectorName())
-                .category(specialtyReceivingRequest.category())
-                .createdAfter(specialtyReceivingRequest.createdAfter())
-                .createdBefore(specialtyReceivingRequest.createdBefore())
-                .updatedAfter(specialtyReceivingRequest.updatedAfter())
-                .updatedBefore(specialtyReceivingRequest.updatedBefore())
-                .pageNumber(specialtyReceivingRequest.pageNumber())
-                .pageSize(specialtyReceivingRequest.pageSize())
-                .build();
-
+    public Page<SpecialtyDto> getSpecialtiesByFilter
+            (@RequestBody @Valid SpecialtyReceivingRequest specialtyReceivingRequest) {
         return specialtyApi.getAll(specialtyReceivingRequest);
     }
 }

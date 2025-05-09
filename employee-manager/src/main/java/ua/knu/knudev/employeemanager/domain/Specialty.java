@@ -53,12 +53,11 @@ public class Specialty {
         }
     }
 
-    public void updateSectors(Set<Sector> sectors) {
-        for (Sector oldSector : this.sectors) {
-            oldSector.getSpecialties().remove(this);
+    public void removeAllSectors(Set<Sector> sectors) {
+        for (Sector Sector : this.sectors) {
+            Sector.getSpecialties().remove(this);
         }
 
         this.sectors.clear();
-        addSectors(sectors);
     }
 }
