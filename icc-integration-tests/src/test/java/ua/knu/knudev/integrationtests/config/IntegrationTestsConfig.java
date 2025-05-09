@@ -5,7 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = {
         "ua.knu.knudev.applicationmanager",
         "ua.knu.knudev.employeemanager",
-        "ua.knu.knudev.fileservice"
+        "ua.knu.knudev.fileservice",
+        "ua.knu.knudev.icccommon"
 })
 public class IntegrationTestsConfig {
 }
