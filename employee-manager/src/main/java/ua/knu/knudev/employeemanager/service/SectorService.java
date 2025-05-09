@@ -96,7 +96,8 @@ public class SectorService implements SectorApi {
         ));
         if (request.specialties() != null) {
             Set<Specialty> specialties = specialtyMapper.toDomains(request.specialties());
-            sector.updateSpecialties(specialties);
+            sector.removeAllSpecialties();
+            sector.addSpecialties(specialties);
         }
 
         Sector savedSector = sectorRepository.save(sector);
