@@ -56,7 +56,7 @@ public class SectorController {
             @Valid @ModelAttribute @Parameter(
                     name = "Sector creation request",
                     description = "Sector details",
-                    in = ParameterIn.HEADER,
+                    in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = SectorCreationRequest.class)
             ) SectorCreationRequest request
@@ -92,7 +92,7 @@ public class SectorController {
             @Valid @ModelAttribute @Parameter(
                     name = "Sector update request",
                     description = "Sector update data",
-                    in = ParameterIn.HEADER,
+                    in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = SectorUpdateRequest.class)
             ) SectorUpdateRequest request
@@ -154,7 +154,7 @@ public class SectorController {
             @RequestBody @Parameter(
                     name = "Sector receiving request",
                     description = "Sector filtering fields",
-                    in = ParameterIn.HEADER,
+                    in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = SectorReceivingRequest.class)
             ) SectorReceivingRequest request

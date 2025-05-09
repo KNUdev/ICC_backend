@@ -13,7 +13,7 @@ import java.util.UUID;
 public record SectorDto(
         @Schema(description = "UUID format sector id", example = "1d87b3e3-44a7-4915-ac13-33180ed448ff")
         UUID id,
-        @Schema(description = "Sector`s name")
+        @Schema(description = "Sector`s name", implementation = MultiLanguageFieldDto.class)
         MultiLanguageFieldDto name,
         @Schema(description = "Datetime of sector creation", example = "2025-03-23T11:50:23.223")
         LocalDateTime createdAt,
