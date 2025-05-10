@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
@@ -62,10 +63,10 @@ public record EmployeeCreationRequest(
         Boolean isStudent,
 
         @Schema(
-                description = "Employee avatar",
+                description = "Avatar file of employee",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
-        String avatar,
+        MultipartFile avatarFile,
 
         @NotNull(message = "Field 'contractEndDate' cannot be null")
         @Schema(
