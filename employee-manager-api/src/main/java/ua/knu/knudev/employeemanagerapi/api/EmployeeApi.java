@@ -1,6 +1,7 @@
 package ua.knu.knudev.employeemanagerapi.api;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
@@ -20,4 +21,8 @@ public interface EmployeeApi {
     boolean existsById(UUID id);
 
     EmployeeDto update(EmployeeUpdateRequest request);
+
+    String updateAvatar(UUID id, MultipartFile avatarFile);
+
+    void removeAvatar(UUID employeeId);
 }

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
@@ -51,9 +52,14 @@ public record EmployeeUpdateRequest(
         Boolean isStudent,
 
         @Schema(
-                description = "Employee avatar"
+                description = "Employee avatar file"
         )
-        String avatar,
+        MultipartFile avatarFile,
+
+        @Schema(
+                description = "Is need to delete avatar", example = "true"
+        )
+        Boolean deleteAvatar,
 
         @Schema(
                 description = "End date of employee contract"
