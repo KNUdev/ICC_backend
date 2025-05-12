@@ -27,7 +27,9 @@
             <artifactId>icc-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>employee-manager</artifactId>
+        </dependency>
     </dependencies>
-
-
 </project>

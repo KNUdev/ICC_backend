@@ -27,6 +27,10 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>file-service-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

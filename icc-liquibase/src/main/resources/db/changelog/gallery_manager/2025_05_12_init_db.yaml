@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_galleryItem_table
+      author: AndriiPikulia
+      changes:
+        - createTable:
+            schemaName: gallery_manager
+            tableName: galleryItem
+            columns:
+              - column:
+                  name: creatorId
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: itemName
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uploaded_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+  - changeSet:
+      id: rename_table
+      author: Andrii Pikulia
+      changes:
+        - renameTable:
+            oldTableName: galleryItem
+            newTableName: gallery_item
+            schemaName: gallery_manager
+  - changeSet:
+      id: rename_creator_id_column
+      author: Andrii Pikulia
+      changes:
+        - renameColumn:
+            oldColumnName: creatorId
+            newColumnName: creator_id
+            schemaName: gallery_manager
+            tableName: gallery_item
+  - changeSet:
+      id: rename_item_name_column
+      author: Andrii Pikulia
+      changes:
+        - renameColumn:
+            oldColumnName: itemName
+            newColumnName: item_name
+            schemaName: gallery_manager
+            tableName: gallery_item

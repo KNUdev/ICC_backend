@@ -15,7 +15,7 @@ import java.util.Set;
 public record SpecialtyCreationRequest(
         @Valid
         @Schema(
-                description = "Specialty ID",
+                description = "Specialty name",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = MultiLanguageFieldDto.class
         )

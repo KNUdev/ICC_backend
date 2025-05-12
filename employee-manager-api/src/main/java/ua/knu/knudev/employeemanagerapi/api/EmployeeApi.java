@@ -1,5 +1,6 @@
 package ua.knu.knudev.employeemanagerapi.api;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
@@ -9,7 +10,7 @@ import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
 import java.util.UUID;
 
 public interface EmployeeApi {
-    EmployeeDto create(EmployeeCreationRequest request);
+    EmployeeDto create(@Valid EmployeeCreationRequest request);
 
     EmployeeDto getById(UUID id);
 
@@ -19,5 +20,5 @@ public interface EmployeeApi {
 
     boolean existsById(UUID id);
 
-    EmployeeDto update(EmployeeUpdateRequest request);
+    EmployeeDto update(@Valid EmployeeUpdateRequest request);
 }
