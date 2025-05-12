@@ -21,12 +21,17 @@ import ua.knu.knudev.employeemanager.mapper.*;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
+import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
+import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.icccommon.dto.FullNameDto;
+import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -77,11 +82,11 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
-    public Page<EmployeeDto> getAll(EmployeeReceivingRequest request) {
+    public Page<GetEmployeeResponse> getAll(EmployeeReceivingRequest request) {
         Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
         Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(paging, request);
 
-        return employeePage.map(employeeMapper::toDto);
+        return employeePage.map(this::mapEmployeeToResponse);
     }
 
     @Override
@@ -110,12 +115,8 @@ public class EmployeeService implements EmployeeApi {
                 sectorMapper::toDomain
         ));
 
-        if (request.avatarFile() != null && !request.deleteAvatar()) {
-            String newAvatarFilename = updateAvatar(request.id(), request.avatarFile());
-            employee.setAvatar(newAvatarFilename);
-        }
-        if (request.deleteAvatar()) {
-            removeAvatar(request.id());
+        if (request.avatarFile() != null) {
+            updateAvatar(request.id(), request.avatarFile());
         }
 
         Employee savedEmployee = employeeRepository.save(employee);
@@ -123,9 +124,9 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
-    public EmployeeDto getById(UUID id) {
+    public GetEmployeeResponse getById(UUID id) {
         Employee employee = getEmployeeById(id);
-        return employeeMapper.toDto(employee);
+        return mapEmployeeToResponse(employee);
     }
 
     @Override
@@ -138,7 +139,12 @@ public class EmployeeService implements EmployeeApi {
         employee.setAvatar(newAvatarFilename);
         employeeRepository.save(employee);
 
-        return newAvatarFilename;
+        return imageServiceApi.getPathByFilename(newAvatarFilename, ImageSubfolder.EMPLOYEE_AVATARS);
+    }
+
+    @Override
+    public String addAvatar(MultipartFile avatarFile) {
+        return imageServiceApi.uploadFile(avatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
     }
 
     @Override
@@ -164,6 +170,32 @@ public class EmployeeService implements EmployeeApi {
         return employeeRepository.existsById(id);
     }
 
+    private GetEmployeeResponse mapEmployeeToResponse(Employee employee) {
+        FullNameDto fullNameDto = fullNameMapper.toDto(employee.getName());
+        WorkHoursDto workHoursDto = workHoursMapper.toDto(employee.getWorkHours());
+        SpecialtyDto specialtyDto = specialtyMapper.toDto(employee.getSpecialty());
+        SectorDto sectorDto = sectorMapper.toDto(employee.getSector());
+        String avatarUrl = employee.getAvatar() == null
+                ? null
+                : imageServiceApi.getPathByFilename(employee.getAvatar(), ImageSubfolder.EMPLOYEE_AVATARS);
+
+        return new GetEmployeeResponse(
+                employee.getId(),
+                fullNameDto,
+                employee.getEmail(),
+                employee.getPhoneNumber(),
+                employee.getCreatedAt(),
+                employee.getUpdatedAt(),
+                employee.getSalaryInUAH(),
+                employee.getIsStudent(),
+                avatarUrl,
+                employee.getContractEndDate(),
+                workHoursDto,
+                employee.getRole(),
+                specialtyDto,
+                sectorDto
+        );
+    }
 
     private Employee getEmployeeById(UUID id) {
         return employeeRepository.findById(id).orElseThrow(

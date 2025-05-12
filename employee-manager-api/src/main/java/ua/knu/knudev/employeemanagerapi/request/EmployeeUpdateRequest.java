@@ -57,11 +57,6 @@ public record EmployeeUpdateRequest(
         MultipartFile avatarFile,
 
         @Schema(
-                description = "Is need to delete avatar", example = "true"
-        )
-        Boolean deleteAvatar,
-
-        @Schema(
                 description = "End date of employee contract"
         )
         LocalDate contractEndDate,
