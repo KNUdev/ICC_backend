@@ -4,11 +4,14 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
@@ -18,10 +21,17 @@ import ua.knu.knudev.employeemanager.mapper.*;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
+import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
+import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
+import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.icccommon.dto.FullNameDto;
+import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -40,6 +50,7 @@ public class EmployeeService implements EmployeeApi {
     private final SectorMapper sectorMapper;
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
+    private final ImageServiceApi imageServiceApi;
 
     @Override
     public EmployeeDto create(EmployeeCreationRequest request) {
@@ -48,13 +59,15 @@ public class EmployeeService implements EmployeeApi {
         Specialty specialty = specialtyMapper.toDomain(request.specialty());
         Sector sector = sectorMapper.toDomain(request.sector());
 
+        String uploadedAvatarFilename = uploadEmployeeImage(request.avatarFile(), ImageSubfolder.EMPLOYEE_AVATARS);
+
         Employee employee = Employee.builder()
                 .name(fullName)
                 .email(request.email())
                 .phoneNumber(request.phoneNumber())
                 .salaryInUAH(request.salaryInUAH())
                 .isStudent(request.isStudent())
-                .avatar(request.avatar())
+                .avatar(uploadedAvatarFilename)
                 .contractEndDate(request.contractEndDate())
                 .workHours(workHours)
                 .role(request.role())
@@ -68,11 +81,12 @@ public class EmployeeService implements EmployeeApi {
         return employeeMapper.toDto(savedEmployee);
     }
 
-    public Page<EmployeeDto> getAll(EmployeeReceivingRequest request) {
+    @Override
+    public Page<GetEmployeeResponse> getAll(EmployeeReceivingRequest request) {
         Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
         Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(paging, request);
 
-        return employeePage.map(employeeMapper::toDto);
+        return employeePage.map(this::mapEmployeeToResponse);
     }
 
     @Override
@@ -89,7 +103,6 @@ public class EmployeeService implements EmployeeApi {
         employee.setEmail(getOrDefault(request.email(), employee.getEmail()));
         employee.setSalaryInUAH(getOrDefault(request.salaryInUAH(), employee.getSalaryInUAH()));
         employee.setIsStudent(getOrDefault(request.isStudent(), employee.getIsStudent()));
-        employee.setAvatar(getOrDefault(request.avatar(), employee.getAvatar()));
         employee.setContractEndDate(getOrDefault(request.contractEndDate(), employee.getContractEndDate()));
         employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(),
                 workHoursMapper::toDomain
@@ -102,14 +115,49 @@ public class EmployeeService implements EmployeeApi {
                 sectorMapper::toDomain
         ));
 
+        if (request.avatarFile() != null) {
+            updateAvatar(request.id(), request.avatarFile());
+        }
+
         Employee savedEmployee = employeeRepository.save(employee);
         return employeeMapper.toDto(savedEmployee);
     }
 
     @Override
-    public EmployeeDto getById(UUID id) {
+    public GetEmployeeResponse getById(UUID id) {
         Employee employee = getEmployeeById(id);
-        return employeeMapper.toDto(employee);
+        return mapEmployeeToResponse(employee);
+    }
+
+    @Override
+    public String updateAvatar(UUID id, MultipartFile avatarFile) {
+        Employee employee = getEmployeeById(id);
+
+        String oldAvatarFilename = employee.getAvatar();
+        String newAvatarFilename = imageServiceApi.updateByFilename(oldAvatarFilename, avatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
+
+        employee.setAvatar(newAvatarFilename);
+        employeeRepository.save(employee);
+
+        return imageServiceApi.getPathByFilename(newAvatarFilename, ImageSubfolder.EMPLOYEE_AVATARS);
+    }
+
+    @Override
+    public String addAvatar(MultipartFile avatarFile) {
+        return imageServiceApi.uploadFile(avatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
+    }
+
+    @Override
+    public void removeAvatar(UUID employeeId) {
+        Employee employee = getEmployeeById(employeeId);
+        String avatarFilename = employee.getAvatar();
+        if (StringUtils.isEmpty(avatarFilename)) {
+            throw new EmployeeException("Employee with id: " + employeeId + " does not have an avatar");
+        }
+
+        imageServiceApi.removeByFilename(avatarFilename, ImageSubfolder.EMPLOYEE_AVATARS);
+        employee.setAvatar(null);
+        employeeRepository.save(employee);
     }
 
     @Override
@@ -122,10 +170,43 @@ public class EmployeeService implements EmployeeApi {
         return employeeRepository.existsById(id);
     }
 
+    private GetEmployeeResponse mapEmployeeToResponse(Employee employee) {
+        FullNameDto fullNameDto = fullNameMapper.toDto(employee.getName());
+        WorkHoursDto workHoursDto = workHoursMapper.toDto(employee.getWorkHours());
+        SpecialtyDto specialtyDto = specialtyMapper.toDto(employee.getSpecialty());
+        SectorDto sectorDto = sectorMapper.toDto(employee.getSector());
+        String avatarUrl = employee.getAvatar() == null
+                ? null
+                : imageServiceApi.getPathByFilename(employee.getAvatar(), ImageSubfolder.EMPLOYEE_AVATARS);
+
+        return new GetEmployeeResponse(
+                employee.getId(),
+                fullNameDto,
+                employee.getEmail(),
+                employee.getPhoneNumber(),
+                employee.getCreatedAt(),
+                employee.getUpdatedAt(),
+                employee.getSalaryInUAH(),
+                employee.getIsStudent(),
+                avatarUrl,
+                employee.getContractEndDate(),
+                workHoursDto,
+                employee.getRole(),
+                specialtyDto,
+                sectorDto
+        );
+    }
 
     private Employee getEmployeeById(UUID id) {
         return employeeRepository.findById(id).orElseThrow(
                 () -> new EmployeeException("Employee with id " + id + " not found"));
+    }
+
+    private String uploadEmployeeImage(MultipartFile avatarFile, ImageSubfolder subfolder) {
+        if (ObjectUtils.isEmpty(avatarFile)) {
+            return null;
+        }
+        return imageServiceApi.uploadFile(avatarFile, subfolder);
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {
