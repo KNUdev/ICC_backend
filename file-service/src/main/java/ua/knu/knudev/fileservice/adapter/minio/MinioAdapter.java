@@ -80,7 +80,7 @@ public class MinioAdapter implements FileUploadAdapter {
     public void deleteByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         minioClient.removeObject(RemoveObjectArgs.builder()
                 .bucket(fileFolderProperties.getFolder().getName())
-                .object(filename)
+                .object(fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename)
                 .build());
     }
 

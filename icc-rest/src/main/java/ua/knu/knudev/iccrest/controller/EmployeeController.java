@@ -14,32 +14,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-import ua.knu.knudev.employeemanagerapi.api.SectorApi;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
-import ua.knu.knudev.employeemanagerapi.request.SectorCreationRequest;
-import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
-import ua.knu.knudev.employeemanagerapi.request.SectorUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
+import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
+import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
+import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
+import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
+import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sector")
-public class SectorController {
+@RequestMapping("/employee")
+public class EmployeeController {
 
-    private final SectorApi sectorApi;
+    private final EmployeeApi employeeApi;
 
     @Operation(
-            summary = "Create a new sector",
-            description = "Creates a sector and returns it."
+            summary = "Create a new employee",
+            description = "Creates an employee"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Sector successfully created.",
+                    description = "Employee successfully created.",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SectorDto.class)
+                            schema = @Schema(implementation = EmployeeDto.class)
                     )),
             @ApiResponse(
                     responseCode = "400",
@@ -52,97 +54,97 @@ public class SectorController {
     })
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public SectorDto create(
+    public EmployeeDto create(
             @Valid @RequestBody @Parameter(
-                    name = "Sector creation request",
-                    description = "Sector details",
+                    name = "Employee creation request",
+                    description = "Employee details",
                     in = ParameterIn.QUERY,
                     required = true,
-                    schema = @Schema(implementation = SectorCreationRequest.class)
-            ) SectorCreationRequest request
+                    schema = @Schema(implementation = EmployeeCreationRequest.class)
+            ) EmployeeCreationRequest request
     ) {
-        return sectorApi.create(request);
+        return employeeApi.create(request);
     }
 
     @Operation(
-            summary = "Update sector",
-            description = "Allows to update a sector"
+            summary = "Update employee",
+            description = "Allows to update an employee"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Sector successfully updated",
+                    description = "Employee successfully updated",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SectorDto.class)
+                            schema = @Schema(implementation = EmployeeDto.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Sector is not found",
+                    description = "Employee is not found",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
     })
-    @PatchMapping(value = "/update", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SectorDto update(
+    public EmployeeDto update(
             @Valid @RequestBody @Parameter(
-                    name = "Sector update request",
-                    description = "Sector update data",
+                    name = "Employee update request",
+                    description = "Employee update data",
                     in = ParameterIn.QUERY,
                     required = true,
-                    schema = @Schema(implementation = SectorUpdateRequest.class)
-            ) SectorUpdateRequest request
+                    schema = @Schema(implementation = EmployeeUpdateRequest.class)
+            ) EmployeeUpdateRequest request
     ) {
-        return sectorApi.update(request);
+        return employeeApi.update(request);
     }
 
     @Operation(
-            summary = "Retrieve sector",
-            description = "Fetches detailed information about a sector based on the provided sector ID"
+            summary = "Retrieve employee",
+            description = "Fetches detailed information about an employee based on the provided employee ID"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Sector was successfully retrieved",
+                    description = "Employee was successfully retrieved",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SectorDto.class)
+                            schema = @Schema(implementation = GetEmployeeResponse.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Sector is not found",
+                    description = "Employee is not found",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
     })
-    @GetMapping("/{sectorId}")
+    @GetMapping("/{employeeId}")
     @ResponseStatus(HttpStatus.OK)
-    public SectorDto getById(@PathVariable UUID sectorId) {
-        return sectorApi.getById(sectorId);
+    public GetEmployeeResponse getById(@PathVariable UUID employeeId) {
+        return employeeApi.getById(employeeId);
     }
 
     @Operation(
-            summary = "Retrieve a page of sectors",
-            description = "Fetches information about filtered sectors."
+            summary = "Retrieve a page of employees",
+            description = "Fetches information about filtered employees."
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Sectors were successfully retrieved.",
+                    description = "Employees were successfully retrieved.",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SectorDto.class))
+                            schema = @Schema(implementation = GetEmployeeResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Sectors are not found.",
+                    description = "Employees are not found.",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))
@@ -150,21 +152,31 @@ public class SectorController {
     })
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Page<SectorDto> getAll(
+    public Page<GetEmployeeResponse> getAll(
             @RequestBody @Parameter(
-                    name = "Sector receiving request",
+                    name = "Employee receiving request",
                     description = "Sector filtering fields",
                     in = ParameterIn.QUERY,
                     required = true,
-                    schema = @Schema(implementation = SectorReceivingRequest.class)
-            ) SectorReceivingRequest request
+                    schema = @Schema(implementation = EmployeeReceivingRequest.class)
+            ) EmployeeReceivingRequest request
     ) {
-        return sectorApi.getAll(request);
+        return employeeApi.getAll(request);
     }
 
-    @DeleteMapping("/{sectorId}/delete")
+    @DeleteMapping("/{employeeId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID sectorId) {
-        sectorApi.delete(sectorId);
+    public void delete(@PathVariable UUID employeeId) {
+        employeeApi.deleteById(employeeId);
+    }
+
+    @PatchMapping(value = "/{employeeId}/avatar/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateAvatar(@PathVariable UUID employeeId, @RequestParam("newAvatar") MultipartFile newAvatar) {
+        return employeeApi.updateAvatar(employeeId, newAvatar);
+    }
+
+    @DeleteMapping(value = "/{employeeId}/avatar/remove")
+    public void deleteAvatar(@PathVariable UUID employeeId) {
+        employeeApi.removeAvatar(employeeId);
     }
 }
