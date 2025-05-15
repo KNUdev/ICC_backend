@@ -17,7 +17,6 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.fileserviceapi.api.GalleryItemServiceApi;
 import ua.knu.knudev.fileserviceapi.dto.GalleryItemDto;
-import ua.knu.knudev.fileserviceapi.request.GalleryItemReceivingRequest;
 import ua.knu.knudev.fileserviceapi.request.GalleryItemUpdateRequest;
 import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 
@@ -112,23 +111,19 @@ public class GalleryItemController {
         return galleryItemServiceApi.update(galleryItemUpdateRequest);
     }
 
-    @DeleteMapping("/{creatorId}/delete")
-    public void deleteGalleryItem(@PathVariable UUID creatorId) {
-        galleryItemServiceApi.delete(creatorId);
+    @DeleteMapping("/{itemId}/delete")
+    public void deleteGalleryItem(@PathVariable UUID itemId) {
+        galleryItemServiceApi.delete(itemId);
     }
 
-    @GetMapping("/{creatorId}")
-    public GalleryItemDto getGalleryItemById(@PathVariable UUID creatorId) {
-        return galleryItemServiceApi.getDtoById(creatorId);
+    @GetMapping("/{itemId}")
+    public GalleryItemDto getGalleryItemById(@PathVariable UUID itemId) {
+        return galleryItemServiceApi.getDtoById(itemId);
     }
 
-    @Parameters({
-            @Parameter(name = "pageNumber", description = "Page number", example = "0"),
-            @Parameter(name = "pageSize", description = "Number of sectors per page", example = "10")
-    })
     @GetMapping("/getAll")
     public Page<GalleryItemDto> getAllGalleryItems
-            (@RequestBody @Valid GalleryItemReceivingRequest galleryItemReceivingRequest) {
-        return galleryItemServiceApi.getAll(galleryItemReceivingRequest);
+            (@RequestBody @Valid int pageNumber, int pageSize) {
+        return galleryItemServiceApi.getAll(pageNumber, pageSize);
     }
 }

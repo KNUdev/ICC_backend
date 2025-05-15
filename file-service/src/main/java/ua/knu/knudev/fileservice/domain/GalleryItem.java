@@ -21,12 +21,15 @@ public class GalleryItem {
     @Id
     @UuidGenerator
     @Column(nullable = false, updatable = false)
+    private UUID itemId;
+
+    @Column(nullable = false, updatable = false)
     private UUID creatorId;
 
     @Column(nullable = false)
     private String itemName;
 
-    private String description;
+    private String itemDescription;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime uploadedAt;

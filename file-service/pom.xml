@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
-            <artifactId>employee-manager</artifactId>
+            <artifactId>employee-manager-api</artifactId>
         </dependency>
     </dependencies>
 </project>

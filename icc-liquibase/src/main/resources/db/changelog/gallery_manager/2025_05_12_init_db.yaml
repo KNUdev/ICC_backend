@@ -5,22 +5,28 @@ databaseChangeLog:
       changes:
         - createTable:
             schemaName: gallery_manager
-            tableName: galleryItem
+            tableName: gallery_item
             columns:
               - column:
-                  name: creatorId
+                  name: creator_id
                   type: uuid
                   constraints:
                     nullable: false
                     unique: true
                     primaryKey: true
               - column:
-                  name: itemName
+                  name: item_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: item_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: description
+                  name: item_description
                   type: varchar(255)
                   constraints:
                     nullable: false
@@ -32,29 +38,3 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: datetime
-  - changeSet:
-      id: rename_table
-      author: Andrii Pikulia
-      changes:
-        - renameTable:
-            oldTableName: galleryItem
-            newTableName: gallery_item
-            schemaName: gallery_manager
-  - changeSet:
-      id: rename_creator_id_column
-      author: Andrii Pikulia
-      changes:
-        - renameColumn:
-            oldColumnName: creatorId
-            newColumnName: creator_id
-            schemaName: gallery_manager
-            tableName: gallery_item
-  - changeSet:
-      id: rename_item_name_column
-      author: Andrii Pikulia
-      changes:
-        - renameColumn:
-            oldColumnName: itemName
-            newColumnName: item_name
-            schemaName: gallery_manager
-            tableName: gallery_item

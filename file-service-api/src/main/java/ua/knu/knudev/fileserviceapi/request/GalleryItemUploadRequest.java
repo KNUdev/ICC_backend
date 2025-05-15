@@ -14,11 +14,16 @@ public record GalleryItemUploadRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         MultipartFile image,
-
+        @NotNull(message = "Item name cannot be empty")
+        @Schema(
+                description = "Image which was uploaded",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        String itemName,
         @NotNull(message = "Item cannot be without description")
         @Schema(
-                description = "Image description"
+                description = "item description"
         )
-        String description
+        String itemDescription
 ) {
 }

@@ -12,11 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.employeemanager.domain.Employee;
-import ua.knu.knudev.employeemanager.mapper.EmployeeMapper;
-import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
-import ua.knu.knudev.employeemanager.service.EmployeeService;
-import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
+import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
+import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileservice.domain.GalleryItem;
 import ua.knu.knudev.fileservice.mapper.GalleryItemMapper;
 import ua.knu.knudev.fileservice.repository.GalleryItemRepository;
@@ -24,7 +21,6 @@ import ua.knu.knudev.fileserviceapi.api.GalleryItemServiceApi;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.dto.GalleryItemDto;
 import ua.knu.knudev.fileserviceapi.exception.GalleryItemException;
-import ua.knu.knudev.fileserviceapi.request.GalleryItemReceivingRequest;
 import ua.knu.knudev.fileserviceapi.request.GalleryItemUpdateRequest;
 import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
@@ -42,24 +38,22 @@ public class GalleryItemService implements GalleryItemServiceApi {
 
     private final GalleryItemMapper galleryItemMapper;
     private final GalleryItemRepository galleryItemRepository;
-    private final EmployeeService employeeService;
+    private final EmployeeApi employeeApi;
     private final ImageServiceApi imageServiceApi;
-    private final EmployeeRepository employeeRepository;
-    private final EmployeeMapper employeeMapper;
 
     @Override
     @Transactional
     public GalleryItemDto upload(@Valid GalleryItemUploadRequest request, UUID employeeId) {
-        Employee employee = employeeMapper.toDomain(employeeService.getById(employeeId));
+        GetEmployeeResponse employee = employeeApi.getById(employeeId);
 
         MultipartFile file = request.image();
-        String savedGalleryItemName = uploadImage(file, ImageSubfolder.GALLERY);
+        String savedGalleryItemName = uploadImage(file, request.itemName(), ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()
                 .uploadedAt(LocalDateTime.now())
-                .creatorId(employee.getId())
+                .creatorId(employee.id())
                 .itemName(savedGalleryItemName)
-                .description(request.description())
+                .itemDescription(request.itemDescription())
                 .build();
 
         GalleryItem savedImage = galleryItemRepository.save(image);
@@ -69,28 +63,28 @@ public class GalleryItemService implements GalleryItemServiceApi {
 
     @Override
     @Transactional
-    public Page<GalleryItemDto> getAll(GalleryItemReceivingRequest request) {
-        Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize(), Sort.by("uploadedAt").descending());
+    public Page<GalleryItemDto> getAll(int pageNumber, int pageSize) {
+        Pageable paging = PageRequest.of(1, 10, Sort.by("uploadedAt").descending());
         Page<GalleryItem> galleryItems = galleryItemRepository.findAll(paging);
 
         return galleryItems.map(galleryItemMapper::toDto);
     }
     @Override
-    public void delete(UUID creatorID) {
-        galleryItemRepository.deleteById(creatorID);
+    public void delete(UUID itemId) {
+        galleryItemRepository.deleteById(itemId);
     }
 
     @Override
     @Transactional
     public GalleryItemDto update(@Valid GalleryItemUpdateRequest request) {
-        GalleryItem item = getById(request.creatorID());
+        GalleryItem item = getById(request.itemId());
 
         item.setUpdatedAt(LocalDateTime.now());
 
-        item.setDescription(getOrDefault(request.description(), item.getDescription()));
+        item.setItemDescription(getOrDefault(request.itemDescription(), item.getItemDescription()));
 
-        if (request.image() != null) {
-            String newImage = uploadImage(request.image(), ImageSubfolder.GALLERY);
+        if (request.item() != null) {
+            String newImage = uploadImage(request.item(), request.itemName(), ImageSubfolder.GALLERY);
             item.setItemName(newImage);
         }
         GalleryItem savedItem = galleryItemRepository.save(item);
@@ -111,15 +105,15 @@ public class GalleryItemService implements GalleryItemServiceApi {
         return galleryItemMapper.toDto(item);
     }
 
-    public boolean existsById(UUID creatorID) {
-        return galleryItemRepository.existsById(creatorID);
+    public boolean existsById(UUID itemID) {
+        return galleryItemRepository.existsById(itemID);
     }
 
-    private String uploadImage(MultipartFile avatarFile, ImageSubfolder subfolder) {
-        if (ObjectUtils.isEmpty(avatarFile)) {
+    private String uploadImage(MultipartFile imageFile, String imageName , ImageSubfolder subfolder) {
+        if (ObjectUtils.isEmpty(imageFile)) {
             return null;
         }
-        return imageServiceApi.uploadFile(avatarFile, subfolder);
+        return imageServiceApi.uploadFile(imageFile, imageName, subfolder);
     }
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
