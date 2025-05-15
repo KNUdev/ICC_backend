@@ -9,7 +9,7 @@ import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 import java.util.UUID;
 
 public interface GalleryItemServiceApi {
-    GalleryItemDto upload(@Valid GalleryItemUploadRequest request, UUID employeeId);
+    GalleryItemDto upload(@Valid GalleryItemUploadRequest request);
 
     Page<GalleryItemDto> getAll(int page, int size);
 

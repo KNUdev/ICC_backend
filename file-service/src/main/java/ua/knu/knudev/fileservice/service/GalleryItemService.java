@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
-import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
+import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
 import ua.knu.knudev.fileservice.domain.GalleryItem;
 import ua.knu.knudev.fileservice.mapper.GalleryItemMapper;
 import ua.knu.knudev.fileservice.repository.GalleryItemRepository;
@@ -43,15 +43,18 @@ public class GalleryItemService implements GalleryItemServiceApi {
 
     @Override
     @Transactional
-    public GalleryItemDto upload(@Valid GalleryItemUploadRequest request, UUID employeeId) {
-        GetEmployeeResponse employee = employeeApi.getById(employeeId);
+    public GalleryItemDto upload(@Valid GalleryItemUploadRequest request){
+        if(!employeeApi.existsById(request.creatorId()))
+        {
+            throw new EmployeeException("Employee does not exist");
+        }
 
         MultipartFile file = request.image();
         String savedGalleryItemName = uploadImage(file, request.itemName(), ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()
                 .uploadedAt(LocalDateTime.now())
-                .creatorId(employee.id())
+                .creatorId(request.creatorId())
                 .itemName(savedGalleryItemName)
                 .itemDescription(request.itemDescription())
                 .build();
@@ -91,18 +94,18 @@ public class GalleryItemService implements GalleryItemServiceApi {
         return galleryItemMapper.toDto(savedItem);
     }
 
-    @Transactional
-    public GalleryItem getById(UUID id) {
-        return galleryItemRepository.findById(id).orElseThrow(
-                () -> new GalleryItemException("GalleryItem with id " + id + " not found"));
-    }
-
     @Override
     public GalleryItemDto getDtoById(UUID id) {
         GalleryItem item = galleryItemRepository.findById(id).orElseThrow(
                 () -> new GalleryItemException("GalleryItem with id " + id + " not found")
         );
         return galleryItemMapper.toDto(item);
+    }
+
+    @Transactional
+    public GalleryItem getById(UUID id) {
+        return galleryItemRepository.findById(id).orElseThrow(
+                () -> new GalleryItemException("GalleryItem with id " + id + " not found"));
     }
 
     public boolean existsById(UUID itemID) {

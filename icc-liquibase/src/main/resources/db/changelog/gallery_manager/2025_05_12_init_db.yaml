@@ -8,14 +8,14 @@ databaseChangeLog:
             tableName: gallery_item
             columns:
               - column:
-                  name: creator_id
+                  name: item_id
                   type: uuid
                   constraints:
                     nullable: false
                     unique: true
                     primaryKey: true
               - column:
-                  name: item_id
+                  name: creator_id
                   type: uuid
                   constraints:
                     nullable: false

@@ -1,6 +1,7 @@
 package ua.knu.knudev.fileserviceapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,7 @@ public record GalleryItemUpdateRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         MultipartFile item,
+        @NotNull
         @Schema(
                 description = "Item id",
                 requiredMode = Schema.RequiredMode.REQUIRED

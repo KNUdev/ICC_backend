@@ -2,7 +2,6 @@ package ua.knu.knudev.iccrest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -67,8 +66,8 @@ public class GalleryItemController {
                     in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = GalleryItemUploadRequest.class)
-            ) GalleryItemUploadRequest galleryItemUploadRequest, @RequestParam UUID employeeId) {
-        return galleryItemServiceApi.upload(galleryItemUploadRequest, employeeId);
+            ) GalleryItemUploadRequest galleryItemUploadRequest) {
+        return galleryItemServiceApi.upload(galleryItemUploadRequest);
     }
 
     @Operation(
