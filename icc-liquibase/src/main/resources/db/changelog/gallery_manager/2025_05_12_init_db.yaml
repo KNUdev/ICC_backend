@@ -19,7 +19,7 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     nullable: false
-                    unique: true
+                    unique: false
               - column:
                   name: item_name
                   type: varchar(255)
@@ -29,7 +29,7 @@ databaseChangeLog:
                   name: item_description
                   type: varchar(255)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: uploaded_at
                   type: datetime

@@ -26,9 +26,7 @@ import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +41,8 @@ public class GalleryItemService implements GalleryItemServiceApi {
 
     @Override
     @Transactional
-    public GalleryItemDto upload(@Valid GalleryItemUploadRequest request){
-        if(!employeeApi.existsById(request.creatorId()))
-        {
+    public GalleryItemDto upload(@Valid GalleryItemUploadRequest request) {
+        if (!employeeApi.existsById(request.creatorId())) {
             throw new EmployeeException("Employee does not exist");
         }
 
@@ -72,6 +69,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
 
         return galleryItems.map(galleryItemMapper::toDto);
     }
+
     @Override
     public void delete(UUID itemId) {
         galleryItemRepository.deleteById(itemId);
@@ -80,7 +78,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
     @Override
     @Transactional
     public GalleryItemDto update(@Valid GalleryItemUpdateRequest request) {
-        GalleryItem item = getById(request.itemId());
+        GalleryItem item = getGalleryItemById(request.itemId());
 
         item.setUpdatedAt(LocalDateTime.now());
 
@@ -95,39 +93,27 @@ public class GalleryItemService implements GalleryItemServiceApi {
     }
 
     @Override
-    public GalleryItemDto getDtoById(UUID id) {
+    @Transactional
+    public GalleryItemDto getById(UUID id) {
         GalleryItem item = galleryItemRepository.findById(id).orElseThrow(
                 () -> new GalleryItemException("GalleryItem with id " + id + " not found")
         );
         return galleryItemMapper.toDto(item);
     }
 
-    @Transactional
-    public GalleryItem getById(UUID id) {
+    public GalleryItem getGalleryItemById(UUID id) {
         return galleryItemRepository.findById(id).orElseThrow(
                 () -> new GalleryItemException("GalleryItem with id " + id + " not found"));
     }
 
-    public boolean existsById(UUID itemID) {
-        return galleryItemRepository.existsById(itemID);
-    }
-
-    private String uploadImage(MultipartFile imageFile, String imageName , ImageSubfolder subfolder) {
+    private String uploadImage(MultipartFile imageFile, String imageName, ImageSubfolder subfolder) {
         if (ObjectUtils.isEmpty(imageFile)) {
             return null;
         }
         return imageServiceApi.uploadFile(imageFile, imageName, subfolder);
     }
 
-    private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
-        return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
-    }
-
     private <T> T getOrDefault(T newValue, T currentValue) {
         return newValue != null ? newValue : currentValue;
-    }
-
-    private <T, R> R mapIfNull(R currentValue, T newValue, Function<T, R> mapper) {
-        return (currentValue == null && newValue != null) ? mapper.apply(newValue) : currentValue;
     }
 }

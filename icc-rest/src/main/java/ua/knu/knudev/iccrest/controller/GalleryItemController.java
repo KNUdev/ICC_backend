@@ -57,7 +57,7 @@ public class GalleryItemController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public GalleryItemDto uploadGalleryItem(
             @Valid @ModelAttribute @Parameter(
@@ -99,7 +99,7 @@ public class GalleryItemController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PatchMapping("/update")
+    @PatchMapping("/image/update")
     public GalleryItemDto updateGalleryItem(
             @RequestBody @Parameter(
                     name = "Gallery item update request",
@@ -110,19 +110,19 @@ public class GalleryItemController {
         return galleryItemServiceApi.update(galleryItemUpdateRequest);
     }
 
-    @DeleteMapping("/{itemId}/delete")
+    @DeleteMapping("/image/{itemId}/delete")
     public void deleteGalleryItem(@PathVariable UUID itemId) {
         galleryItemServiceApi.delete(itemId);
     }
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/image/{itemId}")
     public GalleryItemDto getGalleryItemById(@PathVariable UUID itemId) {
-        return galleryItemServiceApi.getDtoById(itemId);
+        return galleryItemServiceApi.getById(itemId);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping
     public Page<GalleryItemDto> getAllGalleryItems
-            (@RequestBody @Valid int pageNumber, int pageSize) {
+            (@RequestBody int pageNumber, int pageSize) {
         return galleryItemServiceApi.getAll(pageNumber, pageSize);
     }
 }

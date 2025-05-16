@@ -17,5 +17,5 @@ public interface GalleryItemServiceApi {
 
     GalleryItemDto update(@Valid GalleryItemUpdateRequest request);
 
-    GalleryItemDto getDtoById(UUID id);
+    GalleryItemDto getById(UUID id);
 }

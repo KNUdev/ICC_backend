@@ -28,7 +28,6 @@ public record GalleryItemUploadRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         String itemName,
-        @NotNull(message = "Item cannot be without description")
         @Schema(
                 description = "item description"
         )
