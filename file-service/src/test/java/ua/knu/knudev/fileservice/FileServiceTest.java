@@ -12,7 +12,7 @@
 //import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 //import ua.knu.knudev.fileservice.service.FileService;
 //import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
-//import ua.knu.knudev.knudevcommon.exception.FileException;
+//import ua.knu.knudev.icccommon.exception.FileException;
 //import ua.knu.knudev.fileserviceapi.folder.FileFolder;
 //import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 //import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;

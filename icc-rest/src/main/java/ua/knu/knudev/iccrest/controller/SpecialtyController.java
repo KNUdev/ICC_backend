@@ -60,10 +60,10 @@ public class SpecialtyController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public SpecialtyDto createSpecialty(
-            @Valid @ModelAttribute @Parameter(
+            @Valid @RequestBody @Parameter(
                     name = "Specialty creation request",
                     description = "Specialty creation details",
                     in = ParameterIn.QUERY,

@@ -50,11 +50,11 @@ public class SpecialtyService implements SpecialtyApi {
     @Override
     @Transactional
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
-        Set <UUID> ids = specialtyCreationRequest.sectors().stream()
+        Set<UUID> ids = specialtyCreationRequest.sectors().stream()
                 .map(SectorDto::id)
                 .collect(Collectors.toSet());
 
-        Set <Sector> existingSectors = new HashSet<>(sectorRepository.findAllById(ids));
+        Set<Sector> existingSectors = new HashSet<>(sectorRepository.findAllById(ids));
 
         Specialty specialty = Specialty.builder()
                 .createdAt(LocalDateTime.now())
@@ -99,7 +99,7 @@ public class SpecialtyService implements SpecialtyApi {
         specialty.setCategory(getOrDefault(specialtyUpdateRequest.category(),
                 specialty.getCategory()));
 
-        if(specialtyUpdateRequest.sectors() != null) {
+        if (specialtyUpdateRequest.sectors() != null) {
             Set<Sector> sectors = sectorMapper.toDomains(specialtyUpdateRequest.sectors());
             specialty.removeAllSectors(sectors);
             specialty.addSectors(sectors);
@@ -119,11 +119,6 @@ public class SpecialtyService implements SpecialtyApi {
     public Specialty getSpecialtyById(UUID id) {
         return specialtyRepository.findById(id).orElseThrow(
                 () -> new SpecialtyException("Specialty with id " + id + " not found"));
-    }
-
-
-    public boolean existsById(UUID specialtyId) {
-        return specialtyRepository.existsById(specialtyId);
     }
 
     private void checkIsNameValid(MultiLanguageFieldDto name) {
@@ -147,9 +142,5 @@ public class SpecialtyService implements SpecialtyApi {
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
-    }
-
-    private <T, R> R mapIfNull(R currentValue, T newValue, Function<T, R> mapper) {
-        return (currentValue == null && newValue != null) ? mapper.apply(newValue) : currentValue;
     }
 }
