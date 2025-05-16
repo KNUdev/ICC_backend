@@ -7,14 +7,19 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
-import ua.knu.knudev.employeemanager.mapper.*;
+import ua.knu.knudev.employeemanager.mapper.FullNameMapper;
+import ua.knu.knudev.employeemanager.mapper.SectorMapper;
+import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
+import ua.knu.knudev.employeemanager.mapper.WorkHoursMapper;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
@@ -27,19 +32,20 @@ import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ua.knu.knudev.integrationtests.utils.constants.EmployeeTestsConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -47,6 +53,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class EmployeeServiceIntegrationTest {
 
+    @Autowired
+    private FullNameMapper fullNameMapper;
+    @Autowired
+    private WorkHoursMapper workHoursMapper;
     @Autowired
     private SpecialtyMapper specialtyMapper;
     @Autowired
@@ -68,10 +78,42 @@ public class EmployeeServiceIntegrationTest {
 
     private final List<String> uploadedAvatarFiles = new ArrayList<>();
 
+    public static final String TEST_EMPLOYEE_FIRST_NAME = "EmployeeFirstName";
+    public static final String TEST_EMPLOYEE_MIDDLE_NAME = "EmployeeMiddleName";
+    public static final String TEST_EMPLOYEE_LAST_NAME = "EmployeeLastName";
+    public static final String TEST_EMPLOYEE_EMAIL = "ivan@knu.ua";
+    public static final String TEST_EMPLOYEE_PHONE_NUMBER = "380960000000";
+    public static final LocalDateTime TEST_EMPLOYEE_CREATED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
+    public static final LocalDateTime TEST_EMPLOYEE_UPDATED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
+    public static final Double TEST_EMPLOYEE_SALARY_IN_UAH = 18000.;
+    public static final Boolean TEST_EMPLOYEE_IS_STUDENT = true;
+    public static final MultipartFile TEST_AVATAR_FILE = new MockMultipartFile("avatar.jpg", "avatar.jpeg", "image/jpeg", "image".getBytes());
+    public static final LocalDate TEST_EMPLOYEE_CONTRACT_END_DATE = LocalDate.of(2026, 1, 1);
+    public static final Time TEST_EMPLOYEE_WORK_START_TIME = Time.valueOf("09:00:00");
+    public static final Time TEST_EMPLOYEE_WORK_END_TIME = Time.valueOf("16:00:00");
+    public static final EmployeeAdministrativeRole TEST_EMPLOYEE_ROLE = EmployeeAdministrativeRole.COMMON_USER;
+
+    public static final FullName TEST_NEW_EMPLOYEE_FULLNAME = new FullName("first", "middle", "last");
+    public static final String TEST_NEW_EMPLOYEE_EMAIL = "new@knu.ua";
+    public static final String TEST_NEW_EMPLOYEE_PHONE_NUMBER = "1234567890";
+    public static final Double TEST_NEW_EMPLOYEE_SALARYInUAH = 25000.;
+    public static final Boolean TEST_NEW_EMPLOYEE_IS_STUDENT = false;
+    public static final MultipartFile TEST_NEW_EMPLOYEE_AVATAR_FILE = new MockMultipartFile("avatar2", "avatar2.jpg", "image/jpeg", "avatar2".getBytes());
+    public static final LocalDate TEST_NEW_EMPLOYEE_CONTRACT_DATE_END= LocalDate.of(2030, 1, 1);
+    public static final WorkHours TEST_NEW_EMPLOYEE_WORK_HOURS = new WorkHours(Time.valueOf("10:00:00"), Time.valueOf("13:00:00"));
+    public static final EmployeeAdministrativeRole TEST_NEW_EMPLOYEE_ROLE = EmployeeAdministrativeRole.SECRETARY;
+
+
+    public static final String TEST_SECTOR_NAME_IN_ENGLISH = "test-sector-name";
+    public static final String TEST_SECTOR_NAME_IN_UKRAINIAN = "тестове-ім'я-сектора";
+
+    public static final String TEST_SPECIALTY_NAME_IN_ENGLISH = "test-specialty-name";
+    public static final String TEST_SPECIALTY_NAME_IN_UKRAINIAN = "тестове-ім'я-спеціальності";
+
     @BeforeEach
     public void setUp() {
         testSector = createTestSector();
-        testSpecialty = createTestSpecialty();
+        testSpecialty = createTestSpecialty(testSector);
         testEmployee = createTestEmployee();
     }
 
@@ -97,13 +139,13 @@ public class EmployeeServiceIntegrationTest {
         return newSector;
     }
 
-    private Specialty createTestSpecialty() {
+    private Specialty createTestSpecialty(Sector sector) {
         Specialty specialty = new Specialty();
         specialty.setName(new MultiLanguageField(TEST_SPECIALTY_NAME_IN_ENGLISH, TEST_SPECIALTY_NAME_IN_UKRAINIAN));
         specialty.setCreatedAt(LocalDateTime.of(2015, 1, 1, 0, 0));
         specialty.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
         specialty.setCategory(SpecialtyCategory.SENIOR);
-        specialty.addSector(testSector);
+        specialty.addSector(sector);
 
         Specialty newSpecialty = specialtyRepository.save(specialty);
         return newSpecialty;
@@ -135,7 +177,7 @@ public class EmployeeServiceIntegrationTest {
         return newEmployee;
     }
 
-    EmployeeCreationRequest getEmployeeCreationRequest(String phoneNumber, Sector sector, Specialty specialty) {
+    private EmployeeCreationRequest getEmployeeCreationRequest(String phoneNumber, Sector sector, Specialty specialty) {
         FullNameDto fullNameDto = new FullNameDto(TEST_EMPLOYEE_FIRST_NAME, TEST_EMPLOYEE_MIDDLE_NAME, TEST_EMPLOYEE_LAST_NAME);
         WorkHoursDto workHoursDto = new WorkHoursDto(TEST_EMPLOYEE_WORK_START_TIME, TEST_EMPLOYEE_WORK_END_TIME);
 
@@ -156,12 +198,12 @@ public class EmployeeServiceIntegrationTest {
         return request;
     }
 
-    EmployeeUpdateRequest getEmployeeUpdateRequest(String email, String phoneNumber, Sector sector) {
+    private EmployeeUpdateRequest getEmployeeUpdateRequest(String email, Sector sector) {
         EmployeeUpdateRequest request = new EmployeeUpdateRequest(
                 testEmployee.getId(),
                 null,
                 email,
-                phoneNumber,
+                null,
                 null,
                 null,
                 null,
@@ -175,14 +217,13 @@ public class EmployeeServiceIntegrationTest {
         return request;
     }
 
-    void createManyEmployees() {
-        EmployeeCreationRequest creationRequest = getEmployeeCreationRequest(TEST_EMPLOYEE_PHONE_NUMBER, testSector, testSpecialty);
+    private void createManyEmployees() {
         for (int i = 0; i < 9; i++) {
             createTestEmployee();
         }
     }
 
-    EmployeeReceivingRequest getEmployeeReceivingRequest(String searchQuery) {
+    private EmployeeReceivingRequest getEmployeeReceivingRequest(String searchQuery) {
         LocalDateTime createdBefore = LocalDateTime.now().plusWeeks(1);
         LocalDateTime createdAfter = TEST_EMPLOYEE_CREATED_AT.minusWeeks(1);
         LocalDateTime updatedBefore = LocalDateTime.now().plusWeeks(1);
@@ -220,7 +261,7 @@ public class EmployeeServiceIntegrationTest {
         @Test
         @DisplayName("Should successfully get Employee when provided valid id")
         @Transactional
-        void should_SuccessfullyGetEmployee_When_ProvidedValidId() {
+        public void should_SuccessfullyGetEmployee_When_ProvidedValidId() {
             GetEmployeeResponse response = employeeService.getById(testEmployee.getId());
 
             assertNotNull(response);
@@ -234,7 +275,7 @@ public class EmployeeServiceIntegrationTest {
 
         @Test
         @DisplayName("Should throw EmployeeException when provided invalid id")
-        void should_ThrowEmployeeException_When_ProvidedInvalidId() {
+        public void should_ThrowEmployeeException_When_ProvidedInvalidId() {
             assertThrows(EmployeeException.class, () -> employeeService.getById(UUID.randomUUID()));
         }
     }
@@ -243,8 +284,8 @@ public class EmployeeServiceIntegrationTest {
     @DisplayName("Create Employee scenarios")
     class CreateEmployeeScenarios {
         @Test
-        @DisplayName("should successfully create employee when provided valid request")
-        void should_SuccessfullyCreateEmployee_When_ProvidedValidRequest() {
+        @DisplayName("should successfully create employee when provided valid data in request")
+        public void should_SuccessfullyCreateEmployee_When_ProvidedValidDataInRequest() {
             EmployeeCreationRequest request = getEmployeeCreationRequest(TEST_EMPLOYEE_PHONE_NUMBER, testSector, testSpecialty);
             EmployeeDto response = employeeService.create(request);
 
@@ -259,7 +300,7 @@ public class EmployeeServiceIntegrationTest {
 
         @Test
         @DisplayName("Should throw ConstraintViolationException when provided invalid phone number")
-        void should_ThrowConstraintViolationException_When_ProvidedInvalidPhoneNumber() {
+        public void should_ThrowConstraintViolationException_When_ProvidedInvalidPhoneNumber() {
             EmployeeCreationRequest request = getEmployeeCreationRequest("1234", testSector, testSpecialty);
 
             assertThrows(ConstraintViolationException.class, () -> employeeService.create(request));
@@ -267,7 +308,7 @@ public class EmployeeServiceIntegrationTest {
 
         @Test
         @DisplayName("Should throw EmployeeException when provided non-existent sector")
-        void should_ThrowEmployeeException_When_ProvidedNonExistentSector() {
+        public void should_ThrowEmployeeException_When_ProvidedNonExistentSector() {
             Sector nonExistingSector = new Sector();
             nonExistingSector.setId(UUID.randomUUID());
             nonExistingSector.setName(new MultiLanguageField(TEST_SECTOR_NAME_IN_ENGLISH, TEST_SECTOR_NAME_IN_UKRAINIAN));
@@ -278,7 +319,7 @@ public class EmployeeServiceIntegrationTest {
 
         @Test
         @DisplayName("Should throw EmployeeException when provided non-existent specialty")
-        void should_ThrowEmployeeException_When_ProvidedNonExistentSpecialty() {
+        public void should_ThrowEmployeeException_When_ProvidedNonExistentSpecialty() {
             Specialty nonExistingSpecialty = new Specialty();
             nonExistingSpecialty.setId(UUID.randomUUID());
             nonExistingSpecialty.setName(new MultiLanguageField(TEST_SPECIALTY_NAME_IN_ENGLISH, TEST_SPECIALTY_NAME_IN_UKRAINIAN));
@@ -293,43 +334,61 @@ public class EmployeeServiceIntegrationTest {
     class UpdateEmployeeScenarios {
         @Test
         @DisplayName("Should successfully update employee when provided valid data")
-        void should_SuccessfullyUpdateEmployee_When_ProvidedValidData() {
-            String newPhoneNumber = "1234567890";
+        public void should_SuccessfullyUpdateEmployee_When_ProvidedValidData() {
+            Sector newSector = createTestSector();
+            Specialty newSpecialty = createTestSpecialty(newSector);
 
-            EmployeeUpdateRequest request = getEmployeeUpdateRequest(null, newPhoneNumber, null);
+            EmployeeUpdateRequest request = new EmployeeUpdateRequest(
+                    testEmployee.getId(),
+                    fullNameMapper.toDto(TEST_NEW_EMPLOYEE_FULLNAME),
+                    TEST_NEW_EMPLOYEE_EMAIL,
+                    TEST_NEW_EMPLOYEE_PHONE_NUMBER,
+                    TEST_NEW_EMPLOYEE_SALARYInUAH,
+                    TEST_NEW_EMPLOYEE_IS_STUDENT,
+                    TEST_NEW_EMPLOYEE_AVATAR_FILE,
+                    TEST_NEW_EMPLOYEE_CONTRACT_DATE_END,
+                    workHoursMapper.toDto(TEST_NEW_EMPLOYEE_WORK_HOURS),
+                    TEST_NEW_EMPLOYEE_ROLE,
+                    specialtyMapper.toDto(newSpecialty),
+                    sectorMapper.toDto(newSector)
+            );
 
             EmployeeDto response = employeeService.update(request);
 
             assertNotNull(response);
             uploadedAvatarFiles.removeLast();
             uploadedAvatarFiles.add(response.avatar());
-            assertEquals(TEST_EMPLOYEE_FIRST_NAME, response.name().getFirstName());
-            assertEquals(TEST_EMPLOYEE_EMAIL, response.email());
-            assertEquals(newPhoneNumber, response.phoneNumber());
-            assertEquals(TEST_EMPLOYEE_ROLE, response.role());
-            assertEquals(testSector.getId(), response.sector().id());
-            assertEquals(testSpecialty.getId(), response.specialty().id());
+            assertEquals(TEST_NEW_EMPLOYEE_FULLNAME, fullNameMapper.toDomain(response.name()));
+            assertEquals(TEST_NEW_EMPLOYEE_EMAIL, response.email());
+            assertEquals(TEST_NEW_EMPLOYEE_PHONE_NUMBER, response.phoneNumber());
+            assertEquals(TEST_NEW_EMPLOYEE_SALARYInUAH, response.salaryInUAH());
+            assertEquals(TEST_NEW_EMPLOYEE_IS_STUDENT, response.isStudent());
+            assertEquals(TEST_NEW_EMPLOYEE_CONTRACT_DATE_END, response.contractEndDate());
+            assertEquals(TEST_NEW_EMPLOYEE_WORK_HOURS, workHoursMapper.toDomain(response.workHours()));
+            assertEquals(TEST_NEW_EMPLOYEE_ROLE, response.role());
+            assertEquals(newSector.getId(), response.sector().id());
+            assertEquals(newSpecialty.getId(), response.specialty().id());
             assertTrue(employeeRepository.existsById(response.id()));
         }
 
         @Test
         @DisplayName("Should throw EmployeeException when provided invalid email")
-        void should_ThrowEmployeeException_When_ProvidedInvalidEmail() {
+        public void should_ThrowEmployeeException_When_ProvidedInvalidEmail() {
             String invalidEmail = "invalid@email.com";
 
-            EmployeeUpdateRequest request = getEmployeeUpdateRequest(invalidEmail, null, null);
+            EmployeeUpdateRequest request = getEmployeeUpdateRequest(invalidEmail, null);
 
             assertThrows(EmployeeException.class, () -> employeeService.update(request));
         }
 
         @Test
         @DisplayName("Should throw EmployeeException when provided non-existent sector")
-        void should_ThrowEmployeeException_When_ProvidedNonExistentSector() {
+        public void should_ThrowEmployeeException_When_ProvidedNonExistentSector() {
             Sector nonExistingSector = new Sector();
             nonExistingSector.setId(UUID.randomUUID());
             nonExistingSector.setName(new MultiLanguageField(TEST_SPECIALTY_NAME_IN_ENGLISH, TEST_SPECIALTY_NAME_IN_UKRAINIAN));
 
-            EmployeeUpdateRequest request = getEmployeeUpdateRequest(null, null, nonExistingSector);
+            EmployeeUpdateRequest request = getEmployeeUpdateRequest(null, nonExistingSector);
 
             assertThrows(EmployeeException.class, () -> employeeService.update(request));
         }
@@ -340,7 +399,7 @@ public class EmployeeServiceIntegrationTest {
     class GetAllScenarios {
         @Test
         @DisplayName("Should successfully get all employees when provided appropriate request")
-        void should_SuccessfullyGetAll_When_ProvidedAppropriateRequest() {
+        public void should_SuccessfullyGetAll_When_ProvidedAppropriateRequest() {
             createManyEmployees();
 
             EmployeeReceivingRequest request = getEmployeeReceivingRequest(TEST_EMPLOYEE_FIRST_NAME);
@@ -354,7 +413,7 @@ public class EmployeeServiceIntegrationTest {
 
         @Test
         @DisplayName("Should get zero employees when provided not existing search query")
-        void should_getZeroEmployees_When_ProvidedNotExistingSearchQuery() {
+        public void should_getZeroEmployees_When_ProvidedNotExistingSearchQuery() {
             createManyEmployees();
 
             EmployeeReceivingRequest request = getEmployeeReceivingRequest("not-existing-search-query");
