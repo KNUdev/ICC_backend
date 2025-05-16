@@ -43,8 +43,8 @@ public record EmployeeCreationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @Pattern(
-                regexp = "^\\d{10}$",
-                message = "Phone number must be exactly 10 digits"
+                regexp = "^\\d{10,15}$",
+                message = "Phone number must be from 10 to 15 digits"
         )
         String phoneNumber,
 

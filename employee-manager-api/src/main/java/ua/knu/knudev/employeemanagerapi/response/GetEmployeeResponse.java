@@ -21,7 +21,7 @@ public record GetEmployeeResponse(
         FullNameDto name,
         @Schema(description = "Email field", example = "ivan@knu.ua")
         String email,
-        @Schema(description = "12 digits phone number", example = "380960222321")
+        @Schema(description = "From 10 to 15 digits phone number", example = "380960222321")
         String phoneNumber,
         @Schema(description = "Datetime of employee creation", example = "2025-05-11T14:15:40")
         LocalDateTime createdAt,
