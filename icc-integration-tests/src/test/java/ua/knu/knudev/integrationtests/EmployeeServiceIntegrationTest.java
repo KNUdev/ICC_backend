@@ -103,7 +103,6 @@ public class EmployeeServiceIntegrationTest {
     public static final WorkHours TEST_NEW_EMPLOYEE_WORK_HOURS = new WorkHours(Time.valueOf("10:00:00"), Time.valueOf("13:00:00"));
     public static final EmployeeAdministrativeRole TEST_NEW_EMPLOYEE_ROLE = EmployeeAdministrativeRole.SECRETARY;
 
-
     public static final String TEST_SECTOR_NAME_IN_ENGLISH = "test-sector-name";
     public static final String TEST_SECTOR_NAME_IN_UKRAINIAN = "тестове-ім'я-сектора";
 
