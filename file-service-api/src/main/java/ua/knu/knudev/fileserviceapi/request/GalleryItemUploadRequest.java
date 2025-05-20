@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 @Schema(description = "Request object for uploading gallery item")
 public record GalleryItemUploadRequest(
-        @NotNull
+        @NotNull(message = "Creator ID cannot be null")
         @Schema(
                 description = "Id of person which uploaded the gallery item",
                 requiredMode = Schema.RequiredMode.REQUIRED
