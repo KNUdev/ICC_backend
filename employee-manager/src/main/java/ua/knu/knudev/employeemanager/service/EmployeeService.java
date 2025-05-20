@@ -57,7 +57,7 @@ public class EmployeeService implements EmployeeApi {
     private final SpecialtyRepository specialtyRepository;
 
     @Override
-    public EmployeeDto create(@Valid EmployeeCreationRequest request) {
+    public EmployeeDto create(EmployeeCreationRequest request) {
         FullName fullName = fullNameMapper.toDomain(request.fullName());
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
         Specialty specialty = specialtyMapper.toDomain(request.specialty());
@@ -101,7 +101,7 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
-    public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
+    public EmployeeDto update(EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
 
         validateUpdate(request);

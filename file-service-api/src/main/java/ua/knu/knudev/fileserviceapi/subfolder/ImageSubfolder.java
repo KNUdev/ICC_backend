@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ImageSubfolder implements FileSubfolder {
-    EMPLOYEE_AVATARS("/employee/avatars");
+    EMPLOYEE_AVATARS("/employee/avatars"),
+    GALLERY("/gallery");
 
     private final String subfolderPath;
 

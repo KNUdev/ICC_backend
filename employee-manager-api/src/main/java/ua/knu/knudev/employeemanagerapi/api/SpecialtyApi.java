@@ -14,8 +14,6 @@ public interface SpecialtyApi {
 
     SpecialtyDto getById(UUID specialtyId);
 
-    boolean existsById(UUID specialtyId);
-
     void delete(UUID specialtyId);
 
     SpecialtyDto update(@Valid SpecialtyUpdateRequest specialtyUpdateRequest);
