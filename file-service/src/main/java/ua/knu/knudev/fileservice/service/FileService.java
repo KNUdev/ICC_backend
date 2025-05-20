@@ -73,7 +73,7 @@ public class FileService {
     }
 
     protected void assertFileHasAllowedExtension(MultipartFile file, Set<String> ALLOWED_FILE_EXTENSIONS) {
-        String fileExtension = getExtension(file);
+        String fileExtension = getExtension(file).toLowerCase();
         String allowedExtensionsList = String.join(", ", ALLOWED_FILE_EXTENSIONS);
 
         boolean hasForbiddenFileExtension = ALLOWED_FILE_EXTENSIONS.stream()

@@ -19,6 +19,8 @@ import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.employeemanager.mapper.*;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
+import ua.knu.knudev.employeemanager.repository.SectorRepository;
+import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
@@ -51,6 +53,8 @@ public class EmployeeService implements EmployeeApi {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final ImageServiceApi imageServiceApi;
+    private final SectorRepository sectorRepository;
+    private final SpecialtyRepository specialtyRepository;
 
     @Override
     public EmployeeDto create(@Valid EmployeeCreationRequest request) {
@@ -58,6 +62,9 @@ public class EmployeeService implements EmployeeApi {
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
         Specialty specialty = specialtyMapper.toDomain(request.specialty());
         Sector sector = sectorMapper.toDomain(request.sector());
+
+        validateSectorNonExistence(request.sector());
+        validateSpecialtyNonExistence(request.specialty());
 
         String uploadedAvatarFilename = uploadEmployeeImage(request.avatarFile(), ImageSubfolder.EMPLOYEE_AVATARS);
 
@@ -82,8 +89,11 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
+    @Transactional
     public Page<GetEmployeeResponse> getAll(EmployeeReceivingRequest request) {
-        Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
+        int pageNumber = getOrDefault(request.pageNumber(), 0);
+        int pageSize = getOrDefault(request.pageSize(), 10);
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
         Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(paging, request);
 
         return employeePage.map(this::mapEmployeeToResponse);
@@ -94,13 +104,14 @@ public class EmployeeService implements EmployeeApi {
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
 
-        checkIfEmailIsValid(request.email());
+        validateUpdate(request);
 
         employee.setUpdatedAt(LocalDateTime.now());
         employee.setName(getOrDefault(request.fullName(), employee.getName(),
                 fullNameMapper::toDomain
         ));
         employee.setEmail(getOrDefault(request.email(), employee.getEmail()));
+        employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
         employee.setSalaryInUAH(getOrDefault(request.salaryInUAH(), employee.getSalaryInUAH()));
         employee.setIsStudent(getOrDefault(request.isStudent(), employee.getIsStudent()));
         employee.setContractEndDate(getOrDefault(request.contractEndDate(), employee.getContractEndDate()));
@@ -137,6 +148,7 @@ public class EmployeeService implements EmployeeApi {
         String newAvatarFilename = imageServiceApi.updateByFilename(oldAvatarFilename, avatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
 
         employee.setAvatar(newAvatarFilename);
+        employee.setUpdatedAt(LocalDateTime.now());
         employeeRepository.save(employee);
 
         return imageServiceApi.getPathByFilename(newAvatarFilename, ImageSubfolder.EMPLOYEE_AVATARS);
@@ -221,5 +233,34 @@ public class EmployeeService implements EmployeeApi {
         if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
             throw new EmployeeException("Invalid email address:" + email);
         }
+    }
+
+    private void validateUpdate(EmployeeUpdateRequest request) {
+        checkIfEmailIsValid(request.email());
+        validatePhoneNumber(request.phoneNumber());
+        if (request.sector() != null) {
+            validateSectorNonExistence(request.sector());
+        }
+        if (request.specialty() != null) {
+            validateSpecialtyNonExistence(request.specialty());
+        }
+    }
+
+    private void validatePhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.matches("^\\d{10,15}$")) {
+            throw new EmployeeException("Invalid phone number:" + phoneNumber);
+        }
+    }
+
+    private void validateSectorNonExistence(SectorDto sector) {
+        sectorRepository.findById(sector.id()).orElseThrow(
+                () -> new EmployeeException("Sector (passed to employee) with id " + sector.id() + " does not exist")
+        );
+    }
+
+    private void validateSpecialtyNonExistence(SpecialtyDto specialty) {
+        specialtyRepository.findById(specialty.id()).orElseThrow(
+                () -> new EmployeeException("Specialty (passed to employee) with id " + specialty.id() + " does not exist")
+        );
     }
 }
