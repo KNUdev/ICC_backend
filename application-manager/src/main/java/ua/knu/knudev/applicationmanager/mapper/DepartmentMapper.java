@@ -1,27 +1,21 @@
 package ua.knu.knudev.applicationmanager.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import ua.knu.knudev.applicationmanager.domain.Department;
-import ua.knu.knudev.applicationmanager.domain.embedded.MultiLanguageField;
-import ua.knu.knudev.applicationmanager.dto.DepartmentDto;
+import ua.knu.knudev.applicationmanagerapi.dto.DepartmentDto;
+import ua.knu.knudev.applicationmanagerapi.request.DepartmentCreateRequest;
+import ua.knu.knudev.applicationmanagerapi.request.DepartmentUpdateRequest;
+import ua.knu.knudev.icccommon.mapper.BaseMapper;
 
-public class DepartmentMapper {
+@Mapper(componentModel = "spring", uses = {MultiLanguageFieldMapper.class})
+public interface DepartmentMapper extends BaseMapper<Department, DepartmentDto> {
 
-    public static Department toEntity(DepartmentDto dto) {
-        return Department.builder()
-                .id(dto.getId())
-                .Name(new MultiLanguageField(dto.getNameEn(), dto.getNameUk()))
-                .createdAt(dto.getCreatedAt())
-                .updatedAt(dto.getUpdatedAt())
-                .build();
-    }
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Department fromCreateRequest(DepartmentCreateRequest request);
 
-    public static DepartmentDto toDto(Department department) {
-        return DepartmentDto.builder()
-                .id(department.getId())
-                .nameEn(department.getName().getEn())
-                .nameUk(department.getName().getUk())
-                .createdAt(department.getCreatedAt())
-                .updatedAt(department.getUpdatedAt())
-                .build();
-    }
+    void updateFromRequest(DepartmentUpdateRequest request, @MappingTarget Department department);
 }
+
