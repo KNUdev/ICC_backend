@@ -114,11 +114,11 @@
                     </execution>
                 </executions>
                 <configuration>
-<!--                    <layers>-->
-<!--                        <enabled>true</enabled>-->
-<!--                        <includeLayerTools>true</includeLayerTools>-->
-<!--                        <configuration>${project.basedir}/layers.xml</configuration>-->
-<!--                    </layers>-->
+                    <layers>
+                        <enabled>true</enabled>
+                        <includeLayerTools>true</includeLayerTools>
+                        <configuration>${project.basedir}/layers.xml</configuration>
+                    </layers>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

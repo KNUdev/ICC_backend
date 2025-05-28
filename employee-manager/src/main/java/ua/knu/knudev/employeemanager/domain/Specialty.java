@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
+import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -40,4 +41,23 @@ public class Specialty {
 
     @ManyToMany(mappedBy = "specialties")
     private Set<Sector> sectors = new HashSet<>();
+
+    public void addSector(Sector sector) {
+        this.sectors.add(sector);
+        sector.getSpecialties().add(this);
+    }
+
+    public void addSectors(Set<Sector> sectors) {
+        for (Sector sector : sectors) {
+            addSector(sector);
+        }
+    }
+
+    public void removeAllSectors(Set<Sector> sectors) {
+
+        for (Sector Sector : this.sectors) {
+            Sector.getSpecialties().remove(this);
+        }
+        this.sectors.clear();
+    }
 }

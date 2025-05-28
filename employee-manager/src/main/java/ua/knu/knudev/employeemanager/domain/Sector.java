@@ -43,4 +43,22 @@ public class Sector {
             inverseJoinColumns = @JoinColumn(name= "specialty_id")
     )
     private Set<Specialty> specialties = new HashSet<>();
+
+    public void addSpecialty(Specialty specialty) {
+        this.specialties.add(specialty);
+        specialty.getSectors().add(this);
+    }
+
+    public void addSpecialties(Set<Specialty> specialties) {
+        for (Specialty specialty : specialties) {
+            addSpecialty(specialty);
+        }
+    }
+  
+    public void removeAllSpecialties() {
+        for (Specialty specialty : this.specialties) {
+            specialty.getSectors().remove(this);
+        }
+        this.specialties.clear();
+    }
 }
