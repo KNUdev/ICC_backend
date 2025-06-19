@@ -49,35 +49,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class GalleryItemServiceIntegrationTest {
 
-    @Autowired
-    private GalleryItemService galleryItemService;
-    @Autowired
-    private ImageServiceApi imageServiceApi;
-    @Autowired
-    private SpecialtyMapper specialtyMapper;
-    @Autowired
-    private SectorMapper sectorMapper;
-    @Autowired
-    private EmployeeMapper employeeMapper;
-    @Autowired
-    private GalleryItemMapper galleryItemMapper;
-    @Autowired
-    private GalleryItemRepository galleryItemRepository;
-    @Autowired
-    private SectorRepository sectorRepository;
-    @Autowired
-    private SpecialtyRepository specialtyRepository;
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-    private GalleryItem testGalleryItem;
-    private Sector testSector;
-    private Specialty testSpecialty;
-    private Employee testEmployee;
-
-    private final List<String> uploadedAvatarFiles = new ArrayList<>();
-    private final List<String> uploadedGalleryItems = new ArrayList<>();
-
     public static final String TEST_EMPLOYEE_FIRST_NAME = "EmployeeFirstName";
     public static final String TEST_EMPLOYEE_MIDDLE_NAME = "EmployeeMiddleName";
     public static final String TEST_EMPLOYEE_LAST_NAME = "EmployeeLastName";
@@ -104,6 +75,27 @@ public class GalleryItemServiceIntegrationTest {
     public static final MultipartFile TEST_GALLERY_ITEM_FILE = new MockMultipartFile("test1.jpg", "test1.jpeg", "image/jpeg", "image".getBytes());
     public static final LocalDateTime TEST_GALLERY_ITEM_UPLOADED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
     public static final LocalDateTime TEST_GALLERY_ITEM_UPDATED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
+
+    private final List<String> uploadedAvatarFiles = new ArrayList<>();
+    private final List<String> uploadedGalleryItems = new ArrayList<>();
+
+    @Autowired
+    private GalleryItemService galleryItemService;
+    @Autowired
+    private ImageServiceApi imageServiceApi;
+    @Autowired
+    private GalleryItemRepository galleryItemRepository;
+    @Autowired
+    private SectorRepository sectorRepository;
+    @Autowired
+    private SpecialtyRepository specialtyRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    private GalleryItem testGalleryItem;
+    private Sector testSector;
+    private Specialty testSpecialty;
+    private Employee testEmployee;
 
     @BeforeEach
     public void setUp() {
