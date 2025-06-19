@@ -1,26 +1,33 @@
 package ua.knu.knudev.reportmanager.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.commons.csv.CSVFormat;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
+
+import java.io.*;
+import java.util.List;
 
 @Service
 public class ReportService {
-    private final EmployeeRepository employeeRepository;
+    //TODO: Implement interaction with database to gather information needed for report
 
-    public ReportService(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
-    }
+    @Autowired
+    private EmployeeRepository repository;
 
-    final Workbook excelWorkbook = new XSSFWorkbook();
-    private Sheet excelSheet;
+    final static Workbook excelWorkbook = new XSSFWorkbook();
+    private static Sheet excelSheet;
 
-    public void extractReportToExcel(String reportName) {
+    public static void extractReportToExcel(String reportName) {
         excelSheet = excelWorkbook.createSheet(reportName);
 
         createExcelTable(reportName);
@@ -33,7 +40,7 @@ public class ReportService {
         }
     }
 
-    public void exctractReportToCSV(String reportName) {
+    public static void exctractReportToCSV(String reportName) {
         try {
             createCSVFile("testCSV");
         } catch (IOException e) {
@@ -41,8 +48,8 @@ public class ReportService {
         }
     }
 
-    private void createCSVFile(String fileName) throws IOException {
-        String[] headers = {"Id", "Ім'я по батькові", "Посада", "Бали", "Дата"};
+    private static void createCSVFile(String fileName) throws IOException {
+        String[] headers = {"Id", "Name Surname", "Position", "Points", "Date"};
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setHeader(headers)
@@ -59,7 +66,7 @@ public class ReportService {
         };
     }
 
-    private void createExcelTable(String reportName) {
+    private static void createExcelTable(String reportName) {
         excelSheet.setColumnWidth(0, 1500);
         excelSheet.setColumnWidth(1, 12000);
         excelSheet.setColumnWidth(2, 8000);
@@ -78,29 +85,30 @@ public class ReportService {
         font.setBold(true);
         headerStyle.setFont(font);
 
-
+        // Column names
         Cell headerCell = header.createCell(0);
         headerCell.setCellValue("Id");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(1);
-        headerCell.setCellValue("Ім'я по батькові");
+        headerCell.setCellValue("Name Surname");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(2);
-        headerCell.setCellValue("Посада");
+        headerCell.setCellValue("Position");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(3);
-        headerCell.setCellValue("Бали");
+        headerCell.setCellValue("Points");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(4);
-        headerCell.setCellValue("Дата");
+        headerCell.setCellValue("Date");
         headerCell.setCellStyle(headerStyle);
     }
 
-    private void fillExcelTable() {
+    //Here we should pass data to convert report in
+    private static void fillExcelTable() {
         Row row = excelSheet.createRow(2);
 
         CellStyle style = excelWorkbook.createCellStyle();
@@ -110,6 +118,7 @@ public class ReportService {
         font.setFontHeightInPoints((short) 12);
         style.setFont(font);
 
+        // Pass values here
         Cell cell = row.createCell(0);
         cell.setCellValue("1");
         cell.setCellStyle(style);
@@ -131,7 +140,7 @@ public class ReportService {
         cell.setCellStyle(style);
     }
 
-    private void createExcelFile(String fileName) throws IOException {
+    private static void createExcelFile(String fileName) throws IOException {
         File currentDir = new File(".");
         String path = currentDir.getAbsolutePath();
         String fileLocation = path.substring(0, path.length() - 1) + fileName + ".xlsx";
