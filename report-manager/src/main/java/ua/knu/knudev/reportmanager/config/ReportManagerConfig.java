@@ -10,9 +10,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 @ComponentScan("ua.knu.knudev.reportmanager")
-@EnableJpaRepositories(basePackages = "ua.knu.knudev.reportmanager.repository")
+//@EnableJpaRepositories(basePackages = "ua.knu.knudev.reportmanager.repository")
 @EntityScan("ua.knu.knudev.reportmanager.domain")
 @EnableScheduling
 public class ReportManagerConfig {
-
 }
