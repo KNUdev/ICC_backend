@@ -46,7 +46,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
             throw new EmployeeException("Employee does not exist");
         }
 
-        MultipartFile file = request.image();
+        MultipartFile file = request.item();
         String savedGalleryItemName = uploadImage(file, request.itemName(), ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()

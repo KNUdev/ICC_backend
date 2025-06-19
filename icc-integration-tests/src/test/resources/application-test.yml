@@ -3,7 +3,8 @@ spring:
     url: '
       jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=
       CREATE SCHEMA IF NOT EXISTS APPLICATION_MANAGER\; 
-      CREATE SCHEMA IF NOT EXISTS EMPLOYEE_MANAGER
+      CREATE SCHEMA IF NOT EXISTS EMPLOYEE_MANAGER\;
+      CREATE SCHEMA IF NOT EXISTS GALLERY_MANAGER\;
     '
     driver-class-name: org.h2.Driver
     username: sa
