@@ -20,6 +20,8 @@ public class UrlRegistry {
             "/actuator/*",
             "/swagger-ui/**",
             "/error/**",
+//            TODO remove in future
+            "/admin/**",
     };
     public static final Set<String> AUTH_EXCLUDED_URLS = Set.of(
             "/account/create-password",
@@ -33,7 +35,9 @@ public class UrlRegistry {
             "/api/public/**",
             "/api/public/authenticate",
             "/actuator/*",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+//            TODO remove in future
+            "/admin/**"
     );
     public static String AUTH_URL = "/auth";
 
