@@ -56,6 +56,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_USE_PROXY: "true"
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=}
 
       # Application Configuration
       BASE_URL: http://localhost:5003

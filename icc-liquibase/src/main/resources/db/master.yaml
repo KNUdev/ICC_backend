@@ -8,3 +8,6 @@ databaseChangeLog:
   - includeAll:
       path: changelog/gallery_manager/
       relativeToChangelogFile: true
+  - includeAll:
+      path: changelog/security_manager/
+      relativeToChangelogFile: true

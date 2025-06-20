@@ -14,11 +14,16 @@ import ua.knu.knudev.employeemanager.domain.QEmployee;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
 
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
+
+    boolean existsByEmail(String email);
+
+    Optional<Employee> findByEmail(String email);
 
     QEmployee qEmployee = QEmployee.employee;
 

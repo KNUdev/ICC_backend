@@ -31,6 +31,10 @@
             <groupId>ua.knu</groupId>
             <artifactId>file-service-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>icc-security-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
