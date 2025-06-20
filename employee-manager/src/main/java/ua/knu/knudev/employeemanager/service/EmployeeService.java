@@ -22,16 +22,22 @@ import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.ShortEmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
+import ua.knu.knudev.employeemanagerapi.request.*;
+import ua.knu.knudev.employeemanagerapi.response.AccountReceivingResponse;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
+import ua.knu.knudev.iccsecurityapi.api.EmployeeAuthServiceApi;
+import ua.knu.knudev.iccsecurityapi.dto.AuthenticatedEmployeeDto;
+import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
+import ua.knu.knudev.iccsecurityapi.request.EmployeeRegistrationRequest;
+import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -51,6 +57,7 @@ public class EmployeeService implements EmployeeApi {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final ImageServiceApi imageServiceApi;
+    private final EmployeeAuthServiceApi employeeAuthServiceApi;
 
     @Override
     public EmployeeDto create(@Valid EmployeeCreationRequest request) {
@@ -82,6 +89,71 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
+    @Transactional
+    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) {
+        if (!employeeRepository.existsByEmail(request.email())) {
+            return AccountReceivingResponse.builder()
+                    .shortEmployeeDto(null)
+                    .responseMessage("Account was not registered!")
+                    .build();
+        }
+
+        Employee employee = employeeRepository.findByEmail(request.email())
+                .orElseThrow(() -> new EmployeeException("Employee with email " + request.email() + " not found!"));
+
+        EmployeeRegistrationRequest registrationRequest = EmployeeRegistrationRequest.builder()
+                .email(request.email())
+                .password(request.password())
+                .role(employee.getRole())
+                .build();
+
+        EmployeeRegistrationResponse registrationResponse = employeeAuthServiceApi.create(registrationRequest);
+
+        return AccountReceivingResponse.builder()
+                .shortEmployeeDto(mapEmployeeToShortDto(
+                        employee,
+                        registrationResponse.email()))
+                .responseMessage("The account was successfully registered!")
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public AccountReceivingResponse updateCredentials(AccountCredentialsUpdateRequest request) {
+        Employee employee = employeeRepository.findById(request.id())
+                .orElseThrow(() -> new EmployeeException("Employee with id " + request.id() + " not found!"));
+
+        AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
+
+        if (!authenticatedEmployee.password().equals(request.oldPassword())) {
+            throw new EmployeeException("Passwords don't match, you cannot change credentials!");
+        }
+
+        AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
+                authenticatedEmployee.id(),
+                request.email(),
+                request.newPassword(),
+                employee.getRole()
+        );
+
+        employeeAuthServiceApi.update(updateRequest);
+
+        if (!employee.getEmail().equals(request.email()) &&
+                request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+            employee.setEmail(request.email());
+            employee = employeeRepository.save(employee);
+        }
+
+        return AccountReceivingResponse.builder()
+                .shortEmployeeDto(mapEmployeeToShortDto(
+                        employee,
+                        employee.getEmail()
+                ))
+                .responseMessage("The account credentials was successfully updated!")
+                .build();
+    }
+
+    @Override
     public Page<GetEmployeeResponse> getAll(EmployeeReceivingRequest request) {
         Pageable paging = PageRequest.of(request.pageNumber(), request.pageSize());
         Page<Employee> employeePage = employeeRepository.findAllBySearchQuery(paging, request);
@@ -93,14 +165,12 @@ public class EmployeeService implements EmployeeApi {
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
-
-        checkIfEmailIsValid(request.email());
+        AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
         employee.setUpdatedAt(LocalDateTime.now());
         employee.setName(getOrDefault(request.fullName(), employee.getName(),
                 fullNameMapper::toDomain
         ));
-        employee.setEmail(getOrDefault(request.email(), employee.getEmail()));
         employee.setSalaryInUAH(getOrDefault(request.salaryInUAH(), employee.getSalaryInUAH()));
         employee.setIsStudent(getOrDefault(request.isStudent(), employee.getIsStudent()));
         employee.setContractEndDate(getOrDefault(request.contractEndDate(), employee.getContractEndDate()));
@@ -118,7 +188,18 @@ public class EmployeeService implements EmployeeApi {
         if (request.avatarFile() != null) {
             updateAvatar(request.id(), request.avatarFile());
         }
+        if (!employee.getEmail().equals(request.email()) &&
+                request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+            employee.setEmail(request.email());
+        }
 
+        AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
+                authenticatedEmployee.id(),
+                request.email(),
+                authenticatedEmployee.password(),
+                request.role());
+
+        employeeAuthServiceApi.update(updateRequest);
         Employee savedEmployee = employeeRepository.save(employee);
         return employeeMapper.toDto(savedEmployee);
     }
@@ -161,7 +242,10 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID id) {
+        employeeRepository.findById(id).ifPresent(employee ->
+                employeeAuthServiceApi.deleteByEmail(employee.getEmail()));
         employeeRepository.deleteById(id);
     }
 
@@ -197,6 +281,37 @@ public class EmployeeService implements EmployeeApi {
         );
     }
 
+    private ShortEmployeeDto mapEmployeeToShortDto(
+            Employee employee,
+            String updatedEmail
+    ) {
+        return ShortEmployeeDto.builder()
+                .fullNameDto(
+                        FullNameDto.builder()
+                                .firstName(employee.getName().getFirstName())
+                                .middleName(employee.getName().getMiddleName())
+                                .lastName(employee.getName().getLastName())
+                                .build()
+                )
+                .updatedAt(LocalDateTime.now())
+                .email(updatedEmail)
+                .build();
+    }
+
+    private AuthenticatedEmployeeUpdateRequest buildAuthenticatedEmployeeUpdateRequest(
+            UUID authenticatedEmployeeId,
+            String email,
+            String password,
+            EmployeeAdministrativeRole role
+    ) {
+        return AuthenticatedEmployeeUpdateRequest.builder()
+                .employeeId(authenticatedEmployeeId)
+                .email(email)
+                .password(password)
+                .role(role)
+                .build();
+    }
+
     private Employee getEmployeeById(UUID id) {
         return employeeRepository.findById(id).orElseThrow(
                 () -> new EmployeeException("Employee with id " + id + " not found"));
@@ -217,9 +332,4 @@ public class EmployeeService implements EmployeeApi {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
     }
 
-    private void checkIfEmailIsValid(String email) {
-        if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
-            throw new EmployeeException("Invalid email address:" + email);
-        }
-    }
 }
