@@ -6,5 +6,8 @@ databaseChangeLog:
       path: changelog/employee_manager/
       relativeToChangelogFile: true
   - includeAll:
+      path: changelog/gallery_manager/
+      relativeToChangelogFile: true
+  - includeAll:
       path: changelog/security_manager/
       relativeToChangelogFile: true

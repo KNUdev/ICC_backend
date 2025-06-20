@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_galleryItem_table
+      author: AndriiPikulia
+      changes:
+        - createTable:
+            schemaName: gallery_manager
+            tableName: gallery_item
+            columns:
+              - column:
+                  name: item_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: creator_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: false
+              - column:
+                  name: item_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: uploaded_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
