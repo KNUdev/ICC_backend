@@ -178,29 +178,26 @@ public class EmployeeService implements EmployeeApi {
         AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
         employee.setUpdatedAt(LocalDateTime.now());
-        employee.setName(getOrDefault(request.fullName(), employee.getName(),
-                fullNameMapper::toDomain
-        ));
-        employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
+        employee.setName(getOrDefault(request.fullName(), employee.getName(), fullNameMapper::toDomain));
         employee.setSalaryInUAH(getOrDefault(request.salaryInUAH(), employee.getSalaryInUAH()));
         employee.setIsStudent(getOrDefault(request.isStudent(), employee.getIsStudent()));
         employee.setContractEndDate(getOrDefault(request.contractEndDate(), employee.getContractEndDate()));
-        employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(),
-                workHoursMapper::toDomain
-        ));
+        employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(), workHoursMapper::toDomain));
         employee.setRole(getOrDefault(request.role(), employee.getRole()));
-        employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(),
-                specialtyMapper::toDomain
-        ));
-        employee.setSector(getOrDefault(request.sector(), employee.getSector(),
-                sectorMapper::toDomain
-        ));
 
+        if (request.phoneNumber().matches("^\\d{10,15}$")) {
+            employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
+        }
+        if (specialtyRepository.existsById(request.specialty().id())) {
+            employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(), specialtyMapper::toDomain));
+        }
+        if (sectorRepository.existsById(request.sector().id())) {
+            employee.setSector(getOrDefault(request.sector(), employee.getSector(), sectorMapper::toDomain));
+        }
         if (request.avatarFile() != null) {
             updateAvatar(request.id(), request.avatarFile());
         }
-        if (!employee.getEmail().equals(request.email()) &&
-                request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+        if (!employee.getEmail().equals(request.email()) && request.email().matches("^[\\w.-]+@knu\\.ua$")) {
             employee.setEmail(request.email());
         }
 
@@ -212,6 +209,7 @@ public class EmployeeService implements EmployeeApi {
 
         employeeAuthServiceApi.update(updateRequest);
         Employee savedEmployee = employeeRepository.save(employee);
+
         return employeeMapper.toDto(savedEmployee);
     }
 
@@ -342,29 +340,6 @@ public class EmployeeService implements EmployeeApi {
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
-    }
-
-    private void checkIfEmailIsValid(String email) {
-        if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
-            throw new EmployeeException("Invalid email address:" + email);
-        }
-    }
-
-    private void validateUpdate(EmployeeUpdateRequest request) {
-        checkIfEmailIsValid(request.email());
-        validatePhoneNumber(request.phoneNumber());
-        if (request.sector() != null) {
-            validateSectorNonExistence(request.sector());
-        }
-        if (request.specialty() != null) {
-            validateSpecialtyNonExistence(request.specialty());
-        }
-    }
-
-    private void validatePhoneNumber(String phoneNumber) {
-        if (phoneNumber != null && !phoneNumber.matches("^\\d{10,15}$")) {
-            throw new EmployeeException("Invalid phone number:" + phoneNumber);
-        }
     }
 
     private void validateSectorNonExistence(SectorDto sector) {
