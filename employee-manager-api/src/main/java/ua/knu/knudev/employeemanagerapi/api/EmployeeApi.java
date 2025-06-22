@@ -9,6 +9,7 @@ import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface EmployeeApi {
@@ -29,4 +30,6 @@ public interface EmployeeApi {
     String updateAvatar(UUID id, MultipartFile avatarFile);
 
     void removeAvatar(UUID employeeId);
+
+    Set<GetEmployeeResponse> getAll();
 }

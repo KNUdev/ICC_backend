@@ -35,8 +35,10 @@ import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -161,6 +163,13 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
+    public Set<GetEmployeeResponse> getAll() {
+        return employeeRepository.findAll().stream()
+                .map(this::mapEmployeeToResponse)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public void deleteById(UUID id) {
         employeeRepository.deleteById(id);
     }
@@ -169,6 +178,8 @@ public class EmployeeService implements EmployeeApi {
     public boolean existsById(UUID id) {
         return employeeRepository.existsById(id);
     }
+
+
 
     private GetEmployeeResponse mapEmployeeToResponse(Employee employee) {
         FullNameDto fullNameDto = fullNameMapper.toDto(employee.getName());

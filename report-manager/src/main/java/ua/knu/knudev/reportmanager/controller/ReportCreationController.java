@@ -19,7 +19,7 @@ public class ReportCreationController {
         try{
             switch (formatType) {
                 case "csv":
-                    reportService.exctractReportToCSV(reportName);
+                    reportService.extractReportToCSV(reportName);
                     break;
 
                 case "excel":
