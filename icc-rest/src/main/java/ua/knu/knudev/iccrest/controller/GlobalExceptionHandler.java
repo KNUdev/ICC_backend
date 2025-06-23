@@ -42,46 +42,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GalleryItemException.class)
     public ResponseEntity<ErrorResponse> handleGalleryItemException(GalleryItemException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "GALLERY_ITEM_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("GALLERY_ITEM_EXCEPTION", exception.getMessage(), 400);
     }
 
     @ExceptionHandler(FileException.class)
     public ResponseEntity<ErrorResponse> handleFileException(FileException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "FILE_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("FILE_EXCEPTION", exception.getMessage(), 400);
     }
 
     @ExceptionHandler(AccountAuthException.class)
     public ResponseEntity<ErrorResponse> handleAccountAuthException(AccountAuthException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "ACCOUNT_AUTH_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("ACCOUNT_AUTH_EXCEPTION", exception.getMessage(), 400);
     }
 
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<ErrorResponse> handleTokenException(TokenException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "TOKEN_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("TOKEN_EXCEPTION", exception.getMessage(), 400);
     }
 
 }
