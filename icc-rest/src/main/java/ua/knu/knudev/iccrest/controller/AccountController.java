@@ -110,7 +110,7 @@ public class AccountController {
                     name = "Account credentials update request",
                     description = "Account credentials update request",
                     in = ParameterIn.QUERY,
-                    schema = @Schema(implementation = AccountReceivingRequest.class),
+                    schema = @Schema(implementation = AccountCredentialsUpdateRequest.class),
                     required = true
             ) @Valid AccountCredentialsUpdateRequest request
     ) {
