@@ -137,7 +137,8 @@ public class EmployeeService implements EmployeeApi {
                 request.email(),
                 request.oldPassword(),
                 request.newPassword(),
-                employee.getRole()
+                employee.getRole(),
+                false
         );
 
         employeeAuthServiceApi.update(updateRequest);
@@ -168,7 +169,6 @@ public class EmployeeService implements EmployeeApi {
         return employeePage.map(this::mapEmployeeToResponse);
     }
 
-    //todo test manually (not tested yet)
     @Override
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
@@ -203,8 +203,10 @@ public class EmployeeService implements EmployeeApi {
                 authenticatedEmployee.id(),
                 request.email(),
                 authenticatedEmployee.password(),
-                null,
-                request.role());
+                request.password(),
+                request.role(),
+                true
+        );
 
         employeeAuthServiceApi.update(updateRequest);
         Employee savedEmployee = employeeRepository.save(employee);
@@ -312,7 +314,8 @@ public class EmployeeService implements EmployeeApi {
             String email,
             String oldPassword,
             String newPassword,
-            EmployeeAdministrativeRole role
+            EmployeeAdministrativeRole role,
+            boolean isAdminUsage
     ) {
         return AuthenticatedEmployeeUpdateRequest.builder()
                 .employeeId(authenticatedEmployeeId)
@@ -320,6 +323,7 @@ public class EmployeeService implements EmployeeApi {
                 .oldPassword(oldPassword)
                 .newPassword(newPassword)
                 .role(role)
+                .isAdminUsage(isAdminUsage)
                 .build();
     }
 

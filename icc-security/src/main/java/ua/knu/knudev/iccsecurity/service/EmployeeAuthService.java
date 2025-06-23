@@ -54,14 +54,16 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
         AuthenticatedEmployee employee = authenticatedEmployeeRepository.findById(request.employeeId())
                 .orElseThrow(() -> new AccountAuthException("Employee with id " + request.employeeId() + " does not exist"));
 
-        boolean isAuthenticated = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.oldPassword())
-        ).isAuthenticated();
+        if (!request.isAdminUsage()) {
+            boolean isAuthenticated = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.oldPassword())
+            ).isAuthenticated();
 
-        if (!isAuthenticated) {
-            throw new AccountAuthException("Credentials is mismatch!");
+            if (!isAuthenticated) {
+                throw new AccountAuthException("Credentials is mismatch!");
+            }
         }
 
         if (request.newPassword() != null) {

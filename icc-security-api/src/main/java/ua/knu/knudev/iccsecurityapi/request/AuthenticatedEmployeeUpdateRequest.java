@@ -11,6 +11,7 @@ public record AuthenticatedEmployeeUpdateRequest(
        String email,
        String oldPassword,
        String newPassword,
-       EmployeeAdministrativeRole role
+       EmployeeAdministrativeRole role,
+       boolean isAdminUsage
 ) {
 }
