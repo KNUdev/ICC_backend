@@ -25,6 +25,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.valueOf(status)).body(errorResponse);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleException(RuntimeException exception) {
+        return createErrorResponse("RUNTIME_EXCEPTION", exception.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+
     @ExceptionHandler(EmployeeException.class)
     public ResponseEntity<ErrorResponse> handleEmployeeException(EmployeeException exception) {
         return createErrorResponse("EMPLOYEE_EXCEPTION", exception.getMessage(), 400);
