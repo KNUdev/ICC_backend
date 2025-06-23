@@ -9,6 +9,6 @@ public sealed interface AccountManagementApi permits EmployeeApi {
 
     AccountReceivingResponse register(@Valid AccountReceivingRequest  request);
 
-    AccountReceivingResponse updateCredentials(AccountCredentialsUpdateRequest request);
+    AccountReceivingResponse updateCredentials(@Valid AccountCredentialsUpdateRequest request);
 
 }

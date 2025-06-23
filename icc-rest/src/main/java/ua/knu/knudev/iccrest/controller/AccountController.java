@@ -112,7 +112,7 @@ public class AccountController {
                     in = ParameterIn.QUERY,
                     schema = @Schema(implementation = AccountCredentialsUpdateRequest.class),
                     required = true
-            ) @Valid AccountCredentialsUpdateRequest request
+            ) AccountCredentialsUpdateRequest request
     ) {
         return employeeApi.updateCredentials(request);
     }

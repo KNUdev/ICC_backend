@@ -126,7 +126,7 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
-    public AccountReceivingResponse updateCredentials(AccountCredentialsUpdateRequest request) {
+    public AccountReceivingResponse updateCredentials(@Valid AccountCredentialsUpdateRequest request) {
         Employee employee = employeeRepository.findById(request.id())
                 .orElseThrow(() -> new EmployeeException("Employee with id " + request.id() + " not found!"));
 
