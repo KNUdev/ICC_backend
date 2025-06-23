@@ -22,7 +22,8 @@ public class JWTSigningKeyProvider {
     private final SecretKey signingKey;
 
     public JWTSigningKeyProvider() {
-        String jwtSecretKey = System.getenv("JWT_SECRET_KEY");
+//        String jwtSecretKey = System.getenv("JWT_SECRET_KEY");
+        String jwtSecretKey = "OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=";
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecretKey);
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }

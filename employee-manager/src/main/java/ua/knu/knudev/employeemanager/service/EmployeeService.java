@@ -171,6 +171,7 @@ public class EmployeeService implements EmployeeApi {
         return employeePage.map(this::mapEmployeeToResponse);
     }
 
+    //todo test manually (not tested yet)
     @Override
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {

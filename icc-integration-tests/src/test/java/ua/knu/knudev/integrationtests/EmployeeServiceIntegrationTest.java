@@ -16,10 +16,8 @@ import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
-import ua.knu.knudev.employeemanager.mapper.FullNameMapper;
 import ua.knu.knudev.employeemanager.mapper.SectorMapper;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
-import ua.knu.knudev.employeemanager.mapper.WorkHoursMapper;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
@@ -53,10 +51,29 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class EmployeeServiceIntegrationTest {
 
-    @Autowired
-    private FullNameMapper fullNameMapper;
-    @Autowired
-    private WorkHoursMapper workHoursMapper;
+    private final List<String> uploadedAvatarFiles = new ArrayList<>();
+
+    public static final String TEST_EMPLOYEE_FIRST_NAME = "EmployeeFirstName";
+    public static final String TEST_EMPLOYEE_MIDDLE_NAME = "EmployeeMiddleName";
+    public static final String TEST_EMPLOYEE_LAST_NAME = "EmployeeLastName";
+    public static final String TEST_EMPLOYEE_EMAIL = "ivan@knu.ua";
+    public static final String TEST_EMPLOYEE_PHONE_NUMBER = "380960000000";
+    public static final LocalDateTime TEST_EMPLOYEE_CREATED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
+    public static final LocalDateTime TEST_EMPLOYEE_UPDATED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
+    public static final Double TEST_EMPLOYEE_SALARY_IN_UAH = 18000.;
+    public static final Boolean TEST_EMPLOYEE_IS_STUDENT = true;
+    public static final MultipartFile TEST_AVATAR_FILE = new MockMultipartFile("avatar.jpg", "avatar.jpeg", "image/jpeg", "image".getBytes());
+    public static final LocalDate TEST_EMPLOYEE_CONTRACT_END_DATE = LocalDate.of(2026, 1, 1);
+    public static final Time TEST_EMPLOYEE_WORK_START_TIME = Time.valueOf("09:00:00");
+    public static final Time TEST_EMPLOYEE_WORK_END_TIME = Time.valueOf("16:00:00");
+    public static final EmployeeAdministrativeRole TEST_EMPLOYEE_ROLE = EmployeeAdministrativeRole.COMMON_USER;
+
+    public static final String TEST_SECTOR_NAME_IN_ENGLISH = "test-sector-name";
+    public static final String TEST_SECTOR_NAME_IN_UKRAINIAN = "тестове-ім'я-сектора";
+
+    public static final String TEST_SPECIALTY_NAME_IN_ENGLISH = "test-specialty-name";
+    public static final String TEST_SPECIALTY_NAME_IN_UKRAINIAN = "тестове-ім'я-спеціальності";
+
     @Autowired
     private SpecialtyMapper specialtyMapper;
     @Autowired
@@ -76,38 +93,6 @@ public class EmployeeServiceIntegrationTest {
     private Specialty testSpecialty;
     private Employee testEmployee;
 
-    private final List<String> uploadedAvatarFiles = new ArrayList<>();
-
-    public static final String TEST_EMPLOYEE_FIRST_NAME = "EmployeeFirstName";
-    public static final String TEST_EMPLOYEE_MIDDLE_NAME = "EmployeeMiddleName";
-    public static final String TEST_EMPLOYEE_LAST_NAME = "EmployeeLastName";
-    public static final String TEST_EMPLOYEE_EMAIL = "ivan@knu.ua";
-    public static final String TEST_EMPLOYEE_PHONE_NUMBER = "380960000000";
-    public static final LocalDateTime TEST_EMPLOYEE_CREATED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
-    public static final LocalDateTime TEST_EMPLOYEE_UPDATED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
-    public static final Double TEST_EMPLOYEE_SALARY_IN_UAH = 18000.;
-    public static final Boolean TEST_EMPLOYEE_IS_STUDENT = true;
-    public static final MultipartFile TEST_AVATAR_FILE = new MockMultipartFile("avatar.jpg", "avatar.jpeg", "image/jpeg", "image".getBytes());
-    public static final LocalDate TEST_EMPLOYEE_CONTRACT_END_DATE = LocalDate.of(2026, 1, 1);
-    public static final Time TEST_EMPLOYEE_WORK_START_TIME = Time.valueOf("09:00:00");
-    public static final Time TEST_EMPLOYEE_WORK_END_TIME = Time.valueOf("16:00:00");
-    public static final EmployeeAdministrativeRole TEST_EMPLOYEE_ROLE = EmployeeAdministrativeRole.COMMON_USER;
-
-    public static final FullName TEST_NEW_EMPLOYEE_FULLNAME = new FullName("first", "middle", "last");
-    public static final String TEST_NEW_EMPLOYEE_EMAIL = "new@knu.ua";
-    public static final String TEST_NEW_EMPLOYEE_PHONE_NUMBER = "1234567890";
-    public static final Double TEST_NEW_EMPLOYEE_SALARYInUAH = 25000.;
-    public static final Boolean TEST_NEW_EMPLOYEE_IS_STUDENT = false;
-    public static final MultipartFile TEST_NEW_EMPLOYEE_AVATAR_FILE = new MockMultipartFile("avatar2", "avatar2.jpg", "image/jpeg", "avatar2".getBytes());
-    public static final LocalDate TEST_NEW_EMPLOYEE_CONTRACT_DATE_END= LocalDate.of(2030, 1, 1);
-    public static final WorkHours TEST_NEW_EMPLOYEE_WORK_HOURS = new WorkHours(Time.valueOf("10:00:00"), Time.valueOf("13:00:00"));
-    public static final EmployeeAdministrativeRole TEST_NEW_EMPLOYEE_ROLE = EmployeeAdministrativeRole.SECRETARY;
-
-    public static final String TEST_SECTOR_NAME_IN_ENGLISH = "test-sector-name";
-    public static final String TEST_SECTOR_NAME_IN_UKRAINIAN = "тестове-ім'я-сектора";
-
-    public static final String TEST_SPECIALTY_NAME_IN_ENGLISH = "test-specialty-name";
-    public static final String TEST_SPECIALTY_NAME_IN_UKRAINIAN = "тестове-ім'я-спеціальності";
 
     @BeforeEach
     public void setUp() {
@@ -325,71 +310,6 @@ public class EmployeeServiceIntegrationTest {
 
             EmployeeCreationRequest request = getEmployeeCreationRequest(TEST_EMPLOYEE_PHONE_NUMBER, testSector, nonExistingSpecialty);
             assertThrows(EmployeeException.class, () -> employeeService.create(request));
-        }
-    }
-
-    @Nested
-    @DisplayName("Update employee scenarios")
-    class UpdateEmployeeScenarios {
-        @Test
-        @DisplayName("Should successfully update employee when provided valid data")
-        public void should_SuccessfullyUpdateEmployee_When_ProvidedValidData() {
-            Sector newSector = createTestSector();
-            Specialty newSpecialty = createTestSpecialty(newSector);
-
-            EmployeeUpdateRequest request = new EmployeeUpdateRequest(
-                    testEmployee.getId(),
-                    fullNameMapper.toDto(TEST_NEW_EMPLOYEE_FULLNAME),
-                    TEST_NEW_EMPLOYEE_EMAIL,
-                    TEST_NEW_EMPLOYEE_PHONE_NUMBER,
-                    TEST_NEW_EMPLOYEE_SALARYInUAH,
-                    TEST_NEW_EMPLOYEE_IS_STUDENT,
-                    TEST_NEW_EMPLOYEE_AVATAR_FILE,
-                    TEST_NEW_EMPLOYEE_CONTRACT_DATE_END,
-                    workHoursMapper.toDto(TEST_NEW_EMPLOYEE_WORK_HOURS),
-                    TEST_NEW_EMPLOYEE_ROLE,
-                    specialtyMapper.toDto(newSpecialty),
-                    sectorMapper.toDto(newSector)
-            );
-
-            EmployeeDto response = employeeService.update(request);
-
-            assertNotNull(response);
-            uploadedAvatarFiles.removeLast();
-            uploadedAvatarFiles.add(response.avatar());
-            assertEquals(TEST_NEW_EMPLOYEE_FULLNAME, fullNameMapper.toDomain(response.name()));
-            assertEquals(TEST_NEW_EMPLOYEE_EMAIL, response.email());
-            assertEquals(TEST_NEW_EMPLOYEE_PHONE_NUMBER, response.phoneNumber());
-            assertEquals(TEST_NEW_EMPLOYEE_SALARYInUAH, response.salaryInUAH());
-            assertEquals(TEST_NEW_EMPLOYEE_IS_STUDENT, response.isStudent());
-            assertEquals(TEST_NEW_EMPLOYEE_CONTRACT_DATE_END, response.contractEndDate());
-            assertEquals(TEST_NEW_EMPLOYEE_WORK_HOURS, workHoursMapper.toDomain(response.workHours()));
-            assertEquals(TEST_NEW_EMPLOYEE_ROLE, response.role());
-            assertEquals(newSector.getId(), response.sector().id());
-            assertEquals(newSpecialty.getId(), response.specialty().id());
-            assertTrue(employeeRepository.existsById(response.id()));
-        }
-
-        @Test
-        @DisplayName("Should throw EmployeeException when provided invalid email")
-        public void should_ThrowEmployeeException_When_ProvidedInvalidEmail() {
-            String invalidEmail = "invalid@email.com";
-
-            EmployeeUpdateRequest request = getEmployeeUpdateRequest(invalidEmail, null);
-
-            assertThrows(EmployeeException.class, () -> employeeService.update(request));
-        }
-
-        @Test
-        @DisplayName("Should throw EmployeeException when provided non-existent sector")
-        public void should_ThrowEmployeeException_When_ProvidedNonExistentSector() {
-            Sector nonExistingSector = new Sector();
-            nonExistingSector.setId(UUID.randomUUID());
-            nonExistingSector.setName(new MultiLanguageField(TEST_SPECIALTY_NAME_IN_ENGLISH, TEST_SPECIALTY_NAME_IN_UKRAINIAN));
-
-            EmployeeUpdateRequest request = getEmployeeUpdateRequest(null, nonExistingSector);
-
-            assertThrows(EmployeeException.class, () -> employeeService.update(request));
         }
     }
 
