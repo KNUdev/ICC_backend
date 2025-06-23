@@ -59,7 +59,7 @@ public class AccountController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public AccountReceivingResponse registerAccount(
             @Valid @ModelAttribute @Parameter(
@@ -104,7 +104,7 @@ public class AccountController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PutMapping(value = "/credentials/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/credentials/update")
     public AccountReceivingResponse updateAccountCredentials(
             @Parameter(
                     name = "Account credentials update request",
