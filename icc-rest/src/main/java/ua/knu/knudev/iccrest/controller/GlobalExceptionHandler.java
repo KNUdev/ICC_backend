@@ -16,7 +16,11 @@ import ua.knu.knudev.iccsecurity.exception.TokenException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private ResponseEntity<ErrorResponse> createErrorResponse(String errorCode, String message, int status) {
+    private ResponseEntity<ErrorResponse> createErrorResponse(
+            String errorCode,
+            String message,
+            int status
+    ) {
         ErrorResponse errorResponse = ErrorResponse.of(
                 errorCode,
                 message,
