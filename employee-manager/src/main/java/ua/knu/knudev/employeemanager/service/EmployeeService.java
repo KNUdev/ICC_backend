@@ -132,13 +132,10 @@ public class EmployeeService implements EmployeeApi {
 
         AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
-        if (!authenticatedEmployee.password().equals(request.oldPassword())) {
-            throw new EmployeeException("Passwords don't match, you cannot change credentials!");
-        }
-
         AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
                 authenticatedEmployee.id(),
                 request.email(),
+                request.oldPassword(),
                 request.newPassword(),
                 employee.getRole()
         );
@@ -206,6 +203,7 @@ public class EmployeeService implements EmployeeApi {
                 authenticatedEmployee.id(),
                 request.email(),
                 authenticatedEmployee.password(),
+                null,
                 request.role());
 
         employeeAuthServiceApi.update(updateRequest);
@@ -312,13 +310,15 @@ public class EmployeeService implements EmployeeApi {
     private AuthenticatedEmployeeUpdateRequest buildAuthenticatedEmployeeUpdateRequest(
             UUID authenticatedEmployeeId,
             String email,
-            String password,
+            String oldPassword,
+            String newPassword,
             EmployeeAdministrativeRole role
     ) {
         return AuthenticatedEmployeeUpdateRequest.builder()
                 .employeeId(authenticatedEmployeeId)
                 .email(email)
-                .password(password)
+                .oldPassword(oldPassword)
+                .newPassword(newPassword)
                 .role(role)
                 .build();
     }
