@@ -16,37 +16,28 @@ import ua.knu.knudev.iccsecurity.exception.TokenException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private ResponseEntity<ErrorResponse> createErrorResponse(String errorCode, String message, int status) {
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode,
+                message,
+                status
+        );
+        return ResponseEntity.status(HttpStatus.valueOf(status)).body(errorResponse);
+    }
+
     @ExceptionHandler(EmployeeException.class)
     public ResponseEntity<ErrorResponse> handleEmployeeException(EmployeeException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "EMPLOYEE_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("EMPLOYEE_EXCEPTION", exception.getMessage(), 400);
     }
     
     @ExceptionHandler(SectorException.class)
     public ResponseEntity<ErrorResponse> handleSectorException(SectorException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "SECTOR_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("SECTOR_EXCEPTION", exception.getMessage(), 400);
     }
 
     @ExceptionHandler(SpecialtyException.class)
     public ResponseEntity<ErrorResponse> handleSpecialtyException(SpecialtyException exception) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                "SPECIALTY_EXCEPTION",
-                exception.getMessage(),
-                400
-        );
-
-        return ResponseEntity.status(HttpStatus.valueOf(400)).body(errorResponse);
+        return createErrorResponse("SPECIALTY_EXCEPTION", exception.getMessage(), 400);
     }
 
     @ExceptionHandler(GalleryItemException.class)
