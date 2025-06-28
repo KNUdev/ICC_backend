@@ -54,28 +54,16 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
         AuthenticatedEmployee employee = authenticatedEmployeeRepository.findById(request.employeeId())
                 .orElseThrow(() -> new AccountAuthException("Employee with id " + request.employeeId() + " does not exist"));
 
-        if (!request.isAdminUsage()) {
-            boolean isAuthenticated = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.email(),
-                            request.oldPassword())
-            ).isAuthenticated();
+        String newEmail = request.email();
 
-            if (!isAuthenticated) {
-                throw new AccountAuthException("Credentials is mismatch!");
-            }
+        checkIfIsAdminUsage(request, newEmail);
+        updatePassword(request, employee);
+
+        if (newEmail.matches("^[\\w.-]+@knu\\.ua$") &&
+                !authenticatedEmployeeRepository.existsByEmail(newEmail)) {
+            updateField(newEmail, employee::setEmail);
         }
 
-        if (request.newPassword() != null) {
-            String encodedNewPassword = passwordEncoder.encode(request.newPassword());
-            if (request.newPassword().matches("^(?=.*[a-zA-Z])(?=.*\\d).*$")) {
-                updateField(encodedNewPassword, employee::setPassword);
-            }
-        }
-
-        if (request.email().matches("^[\\w.-]+@knu\\.ua$")) {
-            updateField(request.email(), employee::setEmail);
-        }
         updateField(request.role(), employee::setRole);
 
         authenticatedEmployeeRepository.save(employee);
@@ -93,6 +81,29 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
     public void deleteByEmail(String email) {
         getDomainByEmail(email).ifPresent(authenticatedEmployee ->
                 authenticatedEmployeeRepository.deleteById(authenticatedEmployee.getId()));
+    }
+
+    private void updatePassword(AuthenticatedEmployeeUpdateRequest request, AuthenticatedEmployee employee) {
+        if (request.newPassword() != null) {
+            String encodedNewPassword = passwordEncoder.encode(request.newPassword());
+            if (request.newPassword().matches("^(?=.*[a-zA-Z])(?=.*\\d).*$")) {
+                updateField(encodedNewPassword, employee::setPassword);
+            }
+        }
+    }
+
+    private void checkIfIsAdminUsage(AuthenticatedEmployeeUpdateRequest request, String newEmail) {
+        if (!request.isAdminUsage()) {
+            boolean isAuthenticated = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            newEmail,
+                            request.oldPassword())
+            ).isAuthenticated();
+
+            if (!isAuthenticated) {
+                throw new AccountAuthException("Credentials is mismatch!");
+            }
+        }
     }
 
     public Optional<AuthenticatedEmployee> getDomainByEmail(String email) {
