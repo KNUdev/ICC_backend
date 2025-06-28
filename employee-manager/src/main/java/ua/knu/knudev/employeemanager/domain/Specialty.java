@@ -3,8 +3,8 @@ package ua.knu.knudev.employeemanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
+import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

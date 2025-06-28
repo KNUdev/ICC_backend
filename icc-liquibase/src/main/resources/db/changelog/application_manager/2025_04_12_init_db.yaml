@@ -33,7 +33,7 @@ databaseChangeLog:
                   name: updated_at
                   type: timestamp
                   constraints:
-                    nullable: false
+                    nullable: true
 
   - changeSet:
       id: create_application_table
@@ -51,12 +51,22 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: applicant_name
+                  name: first_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: email
+                  name: middle_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applicant_email
                   type: varchar(255)
                   constraints:
                     nullable: false

@@ -35,10 +35,6 @@
             <groupId>ua.knu</groupId>
             <artifactId>icc-security-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>ua.knu</groupId>
-            <artifactId>icc-security</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
