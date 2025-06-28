@@ -2,7 +2,11 @@ package ua.knu.knudev.applicationmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
+import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 
 import java.time.LocalDateTime;
@@ -20,11 +24,11 @@ public record ApplicationUpdateRequest(
 
         @Schema(description = "Name of the applicant",
                 example = "John Doe")
-        String applicantName,
+        FullNameDto applicantName,
 
         @Schema(description = "Email of the applicant",
-                example = "john.doe@example.com")
-        String email,
+                example = "john.doe@knu.ua")
+        String applicantEmail,
 
         @Schema(description = "Date and time when the application was completed",
                 example = "2024-05-02T17:45:00")
@@ -34,9 +38,16 @@ public record ApplicationUpdateRequest(
                 example = "Internet connectivity issue in room 302")
         String problemDescription,
 
-        @Schema(description = "URL or path to the photo of the problem",
-                example = "http://example.com/images/problem-photo.jpg")
-        String problemPhoto,
+        @Schema(description = "Photo of the reported problem (URL or file path)",
+                example = "http://example.com/images/ac-issue.jpg",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "This field cannot be null")
+        String problemPhotoName,
+
+        @Schema(description = "Photo which was uploaded to describe the problem",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "This field cannot be null")
+        MultipartFile problemPhoto,
 
         @Schema(description = "Current status of the application",
                 example = "IN_PROGRESS")

@@ -3,6 +3,7 @@ package ua.knu.knudev.applicationmanagerapi.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.*;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

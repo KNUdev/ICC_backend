@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import ua.knu.knudev.applicationmanagerapi.dto.MultiLanguageFieldDto;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.util.UUID;
 

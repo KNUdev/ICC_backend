@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.employeemanager.mapper.SectorMapper;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
@@ -25,6 +24,7 @@ import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyUpdateRequest;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
+import ua.knu.knudev.icccommon.mapper.MultiLanguageFieldMapper;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

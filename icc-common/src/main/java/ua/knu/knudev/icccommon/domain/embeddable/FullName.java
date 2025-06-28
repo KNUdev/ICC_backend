@@ -1,4 +1,4 @@
-package ua.knu.knudev.employeemanager.domain.embeddable;
+package ua.knu.knudev.icccommon.domain.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

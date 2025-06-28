@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
@@ -22,6 +21,7 @@ import ua.knu.knudev.employeemanagerapi.request.SectorCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SectorUpdateRequest;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
+import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
