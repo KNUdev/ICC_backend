@@ -9,9 +9,7 @@ import java.util.UUID;
 public record AuthenticatedEmployeeUpdateRequest(
        UUID employeeId,
        String email,
-       String oldPassword,
-       String newPassword,
-       EmployeeAdministrativeRole role,
-       boolean isAdminUsage
+       String password,
+       EmployeeAdministrativeRole role
 ) {
 }

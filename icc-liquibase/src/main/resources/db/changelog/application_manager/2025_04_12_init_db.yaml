@@ -11,9 +11,9 @@ databaseChangeLog:
                   name: id
                   type: uuid
                   constraints:
+                    primaryKey: true
                     nullable: false
                     unique: true
-                    primaryKey: true
               - column:
                   name: en_name
                   type: varchar(255)
@@ -26,14 +26,14 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: created_at
-                  type: datetime
+                  type: timestamp
                   constraints:
                     nullable: false
               - column:
                   name: updated_at
-                  type: datetime
+                  type: timestamp
                   constraints:
-                    nullable: false
+                    nullable: true
 
   - changeSet:
       id: create_application_table
@@ -47,29 +47,37 @@ databaseChangeLog:
                   name: id
                   type: uuid
                   constraints:
+                    primaryKey: true
                     nullable: false
                     unique: true
-                    primaryKey: true
               - column:
-                  name: applicant_name
+                  name: first_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: email
+                  name: middle_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applicant_email
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: received_at
-                  type: datetime
+                  type: timestamp
                   constraints:
                     nullable: false
               - column:
                   name: completed_at
-                  type: datetime
-                  constraints:
-                    nullable: false
+                  type: timestamp
               - column:
                   name: problem_description
                   type: varchar(255)
@@ -78,8 +86,6 @@ databaseChangeLog:
               - column:
                   name: problem_photo
                   type: varchar(255)
-                  constraints:
-                    nullable: false
               - column:
                   name: status
                   type: varchar(50)
@@ -102,8 +108,8 @@ databaseChangeLog:
       author: MariaDemydovych
       changes:
         - createTable:
-            tableName: application_assigned_employee_ids
             schemaName: application_manager
+            tableName: application_assigned_employee_ids
             columns:
               - column:
                   name: application_id
@@ -116,18 +122,18 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addPrimaryKey:
-            tableName: application_assigned_employee_ids
             schemaName: application_manager
+            tableName: application_assigned_employee_ids
             columnNames: application_id, assigned_employee_id
-            constraintName: pk_application_assigned_employee_id
+            constraintName: pk_application_assigned_employee_ids
         - addForeignKeyConstraint:
             baseTableSchemaName: application_manager
             baseTableName: application_assigned_employee_ids
             baseColumnNames: application_id
-            constraintName: fk_application_assigned_employee_ids
-            referencedTableName: application
             referencedTableSchemaName: application_manager
+            referencedTableName: application
             referencedColumnNames: id
+            constraintName: fk_application_assigned_employee_ids
             onDelete: CASCADE
 
   - changeSet:

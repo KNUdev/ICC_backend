@@ -1,4 +1,4 @@
-package ua.knu.knudev.applicationmanager.domain.embedded;
+package ua.knu.knudev.icccommon.enums;
 
 public enum ApplicationStatus {
     IN_QUEUE,

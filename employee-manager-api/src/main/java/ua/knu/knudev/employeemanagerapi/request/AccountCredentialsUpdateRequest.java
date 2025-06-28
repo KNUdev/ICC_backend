@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Builder
 public record AccountCredentialsUpdateRequest(
+        @NotBlank(message = "Id can`t be blank or empty")
         UUID id,
 
         @Schema(description = "User`s password", example = "QwerTy123!", requiredMode = Schema.RequiredMode.REQUIRED,

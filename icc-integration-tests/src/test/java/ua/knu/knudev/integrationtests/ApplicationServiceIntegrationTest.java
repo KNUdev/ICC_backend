@@ -5,45 +5,52 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.applicationmanager.domain.Application;
+import ua.knu.knudev.applicationmanager.domain.Department;
+import ua.knu.knudev.applicationmanager.mapper.ApplicationMapper;
+import ua.knu.knudev.applicationmanager.mapper.DepartmentMapper;
+import ua.knu.knudev.applicationmanager.repository.ApplicationRepository;
+import ua.knu.knudev.applicationmanager.repository.DepartmentRepository;
+import ua.knu.knudev.applicationmanager.service.ApplicationService;
+import ua.knu.knudev.applicationmanager.service.DepartmentService;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
+import ua.knu.knudev.employeemanager.mapper.SectorMapper;
+import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
-import ua.knu.knudev.fileservice.domain.GalleryItem;
-import ua.knu.knudev.fileservice.repository.GalleryItemRepository;
-import ua.knu.knudev.fileservice.service.GalleryItemService;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
-import ua.knu.knudev.fileserviceapi.dto.GalleryItemDto;
-import ua.knu.knudev.fileserviceapi.exception.GalleryItemException;
-import ua.knu.knudev.fileserviceapi.request.GalleryItemUpdateRequest;
-import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
+import ua.knu.knudev.icccommon.enums.ApplicationStatus;
+import ua.knu.knudev.icccommon.mapper.FullNameMapper;
+import ua.knu.knudev.icccommon.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @SpringBootTest(classes = IntegrationTestsConfig.class)
 @ActiveProfiles("test")
-public class GalleryItemServiceIntegrationTest {
+public class ApplicationServiceIntegrationTest {
 
     public static final String TEST_EMPLOYEE_FIRST_NAME = "EmployeeFirstName";
     public static final String TEST_EMPLOYEE_MIDDLE_NAME = "EmployeeMiddleName";
@@ -66,39 +73,65 @@ public class GalleryItemServiceIntegrationTest {
     public static final String TEST_SPECIALTY_NAME_IN_ENGLISH = "test-specialty-name";
     public static final String TEST_SPECIALTY_NAME_IN_UKRAINIAN = "тестове-ім'я-спеціальності";
 
-    public static final String TEST_GALLERY_ITEM_NAME = "test-gallery-item-name";
-    public static final String TEST_GALLERY_ITEM_DESCRIPTION = "test-gallery-item-description";
-    public static final MultipartFile TEST_GALLERY_ITEM_FILE = new MockMultipartFile("test1.jpg", "test1.jpeg", "image/jpeg", "image".getBytes());
-    public static final LocalDateTime TEST_GALLERY_ITEM_UPLOADED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
-    public static final LocalDateTime TEST_GALLERY_ITEM_UPDATED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
+    public static final String TEST_APPLICANT_FIRST_NAME = "ApplicantFirstName";
+    public static final String TEST_APPLICANT_MIDDLE_NAME = "ApplicantMiddleName";
+    public static final String TEST_APPLICANT_LAST_NAME = "ApplicantLastName";
+    public static final String TEST_APPLICANT_EMAIL = "applicant@knu.ua";
+    public static final LocalDateTime TEST_APPLICATION_RECEIVED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
+    public static final LocalDateTime TEST_APPLICATION_COMPLETED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
+    public static final String TEST_APPLICATION_PROBLEM_DESCRIPTION = "test-application-problem";
+    public static final String TEST_APPLICATION_PROBLEM_PHOTO_NAME = "test-application-problem-photo";
+    public static final MultipartFile TEST_APPLICATION_PHOTO_FILE = new MockMultipartFile("problem-photo.jpg", "problem-photo.jpeg", "image/jpeg", "image".getBytes());
+    public static final ApplicationStatus TEST_APPLICATION_STATUS = ApplicationStatus.IN_WORK;
+
+    public static final String TEST_DEPARTMENT_NAME_IN_ENGLISH = "test-department-name";
+    public static final String TEST_DEPARTMENT_NAME_IN_UKRAINIAN = "тестове-ім'я-факультету";
 
     private final List<String> uploadedAvatarFiles = new ArrayList<>();
-    private final List<String> uploadedGalleryItems = new ArrayList<>();
+    private final List<String> uploadedProblemPhotoFiles = new ArrayList<>();
 
     @Autowired
-    private GalleryItemService galleryItemService;
+    private FullNameMapper fullNameMapper;
     @Autowired
-    private ImageServiceApi imageServiceApi;
+    private MultiLanguageFieldMapper multiLanguageFieldMapper;
     @Autowired
-    private GalleryItemRepository galleryItemRepository;
+    private ApplicationMapper applicationMapper;
+    @Autowired
+    private DepartmentMapper departmentMapper;
+    @Autowired
+    private SpecialtyMapper specialtyMapper;
+    @Autowired
+    private SectorMapper sectorMapper;
+    @Autowired
+    private ApplicationRepository applicationRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
     @Autowired
     private SectorRepository sectorRepository;
     @Autowired
     private SpecialtyRepository specialtyRepository;
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private ApplicationService applicationService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private ImageServiceApi imageServiceApi;
 
-    private GalleryItem testGalleryItem;
+    private Application testApplication;
+    private Department testDepartment;
+    private Employee testEmployee;
     private Sector testSector;
     private Specialty testSpecialty;
-    private Employee testEmployee;
 
     @BeforeEach
     public void setUp() {
         testSector = createTestSector();
         testSpecialty = createTestSpecialty(testSector);
         testEmployee = createTestEmployee();
-        testGalleryItem = createTestGalleryItem();
+        testApplication = createTestApplication();
+        testDepartment = createTestDepartment();
     }
 
     @AfterEach
@@ -107,13 +140,11 @@ public class GalleryItemServiceIntegrationTest {
             imageServiceApi.removeByFilename(uploadedAvatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
         });
         uploadedAvatarFiles.clear();
-        uploadedGalleryItems.forEach(uploadedGalleryItem -> {
-            imageServiceApi.removeByFilename(uploadedGalleryItem, ImageSubfolder.GALLERY);});
-        uploadedGalleryItems.clear();
+        uploadedProblemPhotoFiles.forEach(uploadedProblemPhotoFile ->
+                imageServiceApi.removeByFilename(uploadedProblemPhotoFile, ImageSubfolder.APPLICATION));
         employeeRepository.deleteAll();
         sectorRepository.deleteAll();
         specialtyRepository.deleteAll();
-        galleryItemRepository.deleteAll();
     }
 
     private Sector createTestSector() {
@@ -165,103 +196,53 @@ public class GalleryItemServiceIntegrationTest {
         return newEmployee;
     }
 
-    private GalleryItem createTestGalleryItem() {
-        GalleryItem galleryItem = new GalleryItem();
+    private Department createTestDepartment() {
+        Department department = new Department();
+        department.setName(new MultiLanguageField(TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN));
+        department.setCreatedAt(LocalDateTime.of(2015, 1, 1, 0, 0));
+        department.setUpdatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
+        department.setApplications(new HashSet<>());
 
-        String itemName = imageServiceApi.uploadFile(TEST_GALLERY_ITEM_FILE, TEST_GALLERY_ITEM_NAME + "_" + UUID.randomUUID() + ".jpg", ImageSubfolder.GALLERY);
-
-        galleryItem.setCreatorId(testEmployee.getId());
-        galleryItem.setItemName(itemName);
-        uploadedGalleryItems.add(itemName);
-        galleryItem.setItemDescription(TEST_GALLERY_ITEM_DESCRIPTION);
-        galleryItem.setUploadedAt(TEST_GALLERY_ITEM_UPLOADED_AT);
-        galleryItem.setUpdatedAt(TEST_GALLERY_ITEM_UPDATED_AT);
-
-        GalleryItem newGalleryItem = galleryItemRepository.save(galleryItem);
-        return newGalleryItem;
+        Department newDepartment = departmentRepository.save(department);
+        return newDepartment;
     }
 
-    private GalleryItemUploadRequest createTestGalleryItemUploadRequest() {
-        return GalleryItemUploadRequest.builder()
-                .creatorId(testEmployee.getId())
-                .item(TEST_GALLERY_ITEM_FILE)
-                .itemDescription(TEST_GALLERY_ITEM_DESCRIPTION)
-                .itemName(TEST_GALLERY_ITEM_FILE.getName())
-                .build();
-    }
+    private Application createTestApplication() {
+        Application application = new Application();
+        FullName fullName = new FullName(TEST_APPLICANT_FIRST_NAME, TEST_APPLICANT_MIDDLE_NAME, TEST_APPLICANT_LAST_NAME);
 
-    private void createManyGalleryItems() {
-        for(int i = 0; i < 9; i++) {
-            createTestGalleryItem();
-        }
+        String problemPhotoName = imageServiceApi.uploadFile(TEST_APPLICATION_PHOTO_FILE, TEST_APPLICATION_PROBLEM_PHOTO_NAME, ImageSubfolder.APPLICATION);
+
+        application.setApplicantEmail(TEST_APPLICANT_EMAIL);
+        application.setApplicantName(fullName);
+        application.setDepartment(testDepartment);
+        application.setProblemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION);
+        application.setProblemPhoto(problemPhotoName);
+        uploadedProblemPhotoFiles.add(problemPhotoName);
+        application.setReceivedAt(TEST_APPLICATION_RECEIVED_AT);
+        application.setStatus(TEST_APPLICATION_STATUS);
+
+        Application newApplication = applicationRepository.save(application);
+        return newApplication;
     }
 
     @Nested
     @DisplayName("Get by id scenarios")
     class GetByIdScenarios {
         @Test
-        @DisplayName("Should successfully get GalleryItem when provided valid id")
+        @DisplayName("Should successfully get application when provided valid id")
         @Transactional
         public void should_SuccessfullyGet_When_ProvidedValidId() {
-            GalleryItem response = galleryItemService.getGalleryItemById(testGalleryItem.getItemId());
+            Application response = applicationMapper.toDomain(applicationService.getById(testApplication.getId()));
 
             assertNotNull(response);
-            assertEquals(testGalleryItem.getItemName(), response.getItemName());
-            assertEquals(testGalleryItem.getItemDescription(), response.getItemDescription());
-            assertEquals(testGalleryItem.getUploadedAt(), response.getUploadedAt());
-            assertEquals(testGalleryItem.getUpdatedAt(), response.getUpdatedAt());
-            assertEquals(testGalleryItem.getCreatorId(), response.getCreatorId());
+            assertEquals(testApplication.getApplicantEmail(), response.getApplicantEmail());
+            assertEquals(testApplication.getApplicantName(), response.getApplicantName());
+            assertEquals(testApplication.getDepartment().getName(), response.getDepartment().getName());
+            assertEquals(testApplication.getStatus(), response.getStatus());
+            assertEquals(testApplication.getProblemDescription(), response.getProblemDescription());
+            assertEquals(testApplication.getProblemPhoto(), response.getProblemPhoto());
+            assertEquals(testApplication.getReceivedAt(), response.getReceivedAt());
         }
-
-        @Test
-        @DisplayName("Should throw GalleryItemException when provided invalid id")
-        public void should_ThrowGalleryItemException_When_ProvidedInvalidId() {
-            assertThrows(GalleryItemException.class, () -> galleryItemService.getById(UUID.randomUUID()));
-        }
-    }
-
-    @Test
-    @DisplayName("Should successfully upload gallery item when provided valid data in request")
-    public void should_SuccessfullyUpload_When_ProvidedValidDataInRequest() {
-        GalleryItemUploadRequest request = createTestGalleryItemUploadRequest();
-        GalleryItemDto response = galleryItemService.upload(request);
-
-        assertNotNull(response);
-        uploadedGalleryItems.add(response.itemName());
-        assertEquals(testEmployee.getId(), response.creatorId());
-        assertEquals(TEST_GALLERY_ITEM_FILE.getName(), response.itemName());
-        assertEquals(TEST_GALLERY_ITEM_DESCRIPTION, response.itemDescription());
-        assertTrue(galleryItemRepository.existsById(response.itemId()));
-    }
-
-    @Test
-    @DisplayName("Should successfully update gallery item when provided valid data in request")
-    public void should_SuccessfullyUpdate_When_ProvidedValidDataInRequest() {
-        GalleryItemUpdateRequest request = new GalleryItemUpdateRequest(
-               TEST_GALLERY_ITEM_FILE,
-                testGalleryItem.getItemId(),
-                testGalleryItem.getItemName(),
-                testGalleryItem.getItemDescription());
-
-        GalleryItemDto response = galleryItemService.update(request);
-        assertNotNull(response);
-        uploadedGalleryItems.removeLast();
-        uploadedGalleryItems.add(response.itemName());
-        assertEquals(testGalleryItem.getItemName(), response.itemName());
-        assertEquals(testGalleryItem.getItemDescription(), response.itemDescription());
-        assertEquals(testGalleryItem.getItemId(), response.itemId());
-        assertEquals(testGalleryItem.getUploadedAt(), response.uploadedAt());
-        assertTrue(galleryItemRepository.existsById(response.itemId()));
-    }
-
-    @Test
-    @DisplayName("Should successfully get all gallery items when provided appropriate request")
-    public void should_SuccessfullyGetAll_When_ProvidedAppropriateRequest() {
-        createManyGalleryItems();
-
-        Page<GalleryItemDto> response = galleryItemService.getAll(1, 10);
-        assertNotNull(response);
-        assertEquals(10, response.getTotalElements());
-        assertEquals(10, galleryItemRepository.count());
     }
 }

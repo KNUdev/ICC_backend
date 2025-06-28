@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.employeemanager.mapper.*;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
@@ -35,6 +35,7 @@ import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
+import ua.knu.knudev.icccommon.mapper.FullNameMapper;
 import ua.knu.knudev.iccsecurityapi.api.EmployeeAuthServiceApi;
 import ua.knu.knudev.iccsecurityapi.dto.AuthenticatedEmployeeDto;
 import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
@@ -126,19 +127,21 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
-    public AccountReceivingResponse updateCredentials(@Valid AccountCredentialsUpdateRequest request) {
+    public AccountReceivingResponse updateCredentials(AccountCredentialsUpdateRequest request) {
         Employee employee = employeeRepository.findById(request.id())
                 .orElseThrow(() -> new EmployeeException("Employee with id " + request.id() + " not found!"));
 
         AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
+        if (!authenticatedEmployee.password().equals(request.oldPassword())) {
+            throw new EmployeeException("Passwords don't match, you cannot change credentials!");
+        }
+
         AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
                 authenticatedEmployee.id(),
                 request.email(),
-                request.oldPassword(),
                 request.newPassword(),
-                employee.getRole(),
-                false
+                employee.getRole()
         );
 
         employeeAuthServiceApi.update(updateRequest);
@@ -203,10 +206,7 @@ public class EmployeeService implements EmployeeApi {
                 authenticatedEmployee.id(),
                 request.email(),
                 authenticatedEmployee.password(),
-                request.password(),
-                request.role(),
-                true
-        );
+                request.role());
 
         employeeAuthServiceApi.update(updateRequest);
         Employee savedEmployee = employeeRepository.save(employee);
@@ -312,18 +312,14 @@ public class EmployeeService implements EmployeeApi {
     private AuthenticatedEmployeeUpdateRequest buildAuthenticatedEmployeeUpdateRequest(
             UUID authenticatedEmployeeId,
             String email,
-            String oldPassword,
-            String newPassword,
-            EmployeeAdministrativeRole role,
-            boolean isAdminUsage
+            String password,
+            EmployeeAdministrativeRole role
     ) {
         return AuthenticatedEmployeeUpdateRequest.builder()
                 .employeeId(authenticatedEmployeeId)
                 .email(email)
-                .oldPassword(oldPassword)
-                .newPassword(newPassword)
+                .password(password)
                 .role(role)
-                .isAdminUsage(isAdminUsage)
                 .build();
     }
 

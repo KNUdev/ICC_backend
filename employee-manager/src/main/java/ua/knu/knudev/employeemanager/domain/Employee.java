@@ -3,7 +3,7 @@ package ua.knu.knudev.employeemanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 
