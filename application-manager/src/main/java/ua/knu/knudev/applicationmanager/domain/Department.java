@@ -28,7 +28,7 @@ public class Department {
     })
     @Embedded
     @Column (nullable = false)
-    private MultiLanguageField Name;
+    private MultiLanguageField name;
 
     @Column (nullable = false)
     private LocalDateTime createdAt;

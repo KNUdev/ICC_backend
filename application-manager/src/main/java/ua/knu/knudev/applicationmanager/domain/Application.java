@@ -1,7 +1,7 @@
 package ua.knu.knudev.applicationmanager.domain;
 
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.applicationmanager.domain.embedded.ApplicationStatus;
+import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,13 +31,11 @@ public class Application {
 
     @Column (nullable = false)
     private LocalDateTime receivedAt;
-    @Column (nullable = false)
     private LocalDateTime completedAt;
 
     @Column(nullable = false)
     private String problemDescription;
 
-    @Column(nullable = false)
     private String problemPhoto;
 
     @Column(nullable = false)
@@ -46,7 +44,7 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "department_id", referencedColumnName = "id")
-    private Department Department;
+    private Department department;
 
     @ElementCollection
     @CollectionTable(
