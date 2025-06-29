@@ -15,8 +15,8 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportRowDto> fetchReportData() {
         return List.of(
-                new ReportRowDto(1, "Іван Іванович", LocalDate.now().minusDays(1), BigDecimal.valueOf(123.45)),
-                new ReportRowDto(2, "Петро Петренко", LocalDate.now(), BigDecimal.valueOf(543.21))
+                new ReportRowDto(1L, "Іван Іванович", LocalDate.now().minusDays(1), BigDecimal.valueOf(123.45)),
+                new ReportRowDto(2L, "Петро Петренко", LocalDate.now(), BigDecimal.valueOf(543.21))
         );
     }
 }

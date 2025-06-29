@@ -23,9 +23,9 @@ public class WordReportGenerator implements ReportGenerator {
             for (var rowDto : data) {
                 var row = table.createRow();
                 row.getCell(0).setText(rowDto.id().toString());
-                row.getCell(1).setText(rowDto.name());
+                row.getCell(1).setText(rowDto.fullName());
                 row.getCell(2).setText(rowDto.date().toString());
-                row.getCell(3).setText(rowDto.value().toString());
+                row.getCell(3).setText(rowDto.points().toString());
             }
             document.write(outputStream);
         } catch (IOException e) {
