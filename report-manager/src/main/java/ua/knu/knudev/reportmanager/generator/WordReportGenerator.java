@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-@Component("wordReportGenerator")
+@Component
 public class WordReportGenerator implements ReportGenerator {
     @Override
     public void generate(List<ReportRowDto> data, OutputStream outputStream) {

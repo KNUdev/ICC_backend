@@ -9,7 +9,7 @@ import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
 import java.io.OutputStream;
 import java.util.List;
 
-@Component("pdfReportGenerator")
+@Component
 public class PdfReportGenerator implements ReportGenerator {
     @Override
     public void generate(List<ReportRowDto> data, OutputStream out) {
@@ -23,11 +23,11 @@ public class PdfReportGenerator implements ReportGenerator {
             table.addCell("Name");
             table.addCell("Date");
             table.addCell("Value");
-            for (var r : data) {
-                table.addCell(r.id().toString());
-                table.addCell(r.name());
-                table.addCell(r.date().toString());
-                table.addCell(r.value().toString());
+            for (var row : data) {
+                table.addCell(row.id().toString());
+                table.addCell(row.fullName());
+                table.addCell(row.date().toString());
+                table.addCell(row.points().toString());
             }
             doc.add(table);
             doc.close();
