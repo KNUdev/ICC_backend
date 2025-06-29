@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record ReportRowDto(
-        Integer id,
-        String name,
+        Long id,
+        String fullName,
         LocalDate date,
-        BigDecimal value
+        BigDecimal points
 ) {}
