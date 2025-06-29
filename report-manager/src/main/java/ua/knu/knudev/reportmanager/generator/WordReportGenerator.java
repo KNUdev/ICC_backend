@@ -16,10 +16,10 @@ public class WordReportGenerator implements ReportGenerator {
         try (XWPFDocument document = new XWPFDocument()) {
             XWPFTable table = document.createTable();
             var headerRow = table.getRow(0);
-            headerRow.getCell(0).setText("Id");
-            headerRow.addNewTableCell().setText("Name");
-            headerRow.addNewTableCell().setText("Date");
-            headerRow.addNewTableCell().setText("Value");
+            headerRow.getCell(0).setText("Ід");
+            headerRow.addNewTableCell().setText("ПІБ");
+            headerRow.addNewTableCell().setText("Дата");
+            headerRow.addNewTableCell().setText("Значення");
             for (var rowDto : data) {
                 var row = table.createRow();
                 row.getCell(0).setText(rowDto.id().toString());

@@ -19,10 +19,10 @@ public class PdfReportGenerator implements ReportGenerator {
             doc.open();
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
-            table.addCell("Id");
-            table.addCell("Name");
-            table.addCell("Date");
-            table.addCell("Value");
+            table.addCell("Ід");
+            table.addCell("ПІБ");
+            table.addCell("Дата");
+            table.addCell("Значення");
             for (var row : data) {
                 table.addCell(row.id().toString());
                 table.addCell(row.fullName());
