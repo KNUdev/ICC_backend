@@ -1,6 +1,7 @@
 package ua.knu.knudev.reportmanager.generator;
 
-import org.apache.poi.xwpf.usermodel.*;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Component("wordReportGenerator")
 public class WordReportGenerator implements ReportGenerator {
     @Override
-    public void generate(List<ReportRowDto> data, OutputStream out){
+    public void generate(List<ReportRowDto> data, OutputStream out) {
         try (XWPFDocument doc = new XWPFDocument()) {
             XWPFTable table = doc.createTable();
             var h = table.getRow(0);

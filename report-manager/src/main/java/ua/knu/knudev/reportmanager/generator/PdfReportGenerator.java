@@ -12,7 +12,7 @@ import java.util.List;
 @Component("pdfReportGenerator")
 public class PdfReportGenerator implements ReportGenerator {
     @Override
-    public void generate(List<ReportRowDto> data, OutputStream out){
+    public void generate(List<ReportRowDto> data, OutputStream out) {
         Document doc = new Document();
         try {
             PdfWriter.getInstance(doc, out);
@@ -31,11 +31,9 @@ public class PdfReportGenerator implements ReportGenerator {
             }
             doc.add(table);
             doc.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("PDF generation failed", e);
-        }
-        finally {
+        } finally {
             if (doc.isOpen()) {
                 doc.close();
             }
