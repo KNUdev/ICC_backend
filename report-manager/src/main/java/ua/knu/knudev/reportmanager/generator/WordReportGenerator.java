@@ -12,22 +12,22 @@ import java.util.List;
 @Component("wordReportGenerator")
 public class WordReportGenerator implements ReportGenerator {
     @Override
-    public void generate(List<ReportRowDto> data, OutputStream out) {
-        try (XWPFDocument doc = new XWPFDocument()) {
-            XWPFTable table = doc.createTable();
-            var h = table.getRow(0);
-            h.getCell(0).setText("Id");
-            h.addNewTableCell().setText("Name");
-            h.addNewTableCell().setText("Date");
-            h.addNewTableCell().setText("Value");
-            for (var r : data) {
+    public void generate(List<ReportRowDto> data, OutputStream outputStream) {
+        try (XWPFDocument document = new XWPFDocument()) {
+            XWPFTable table = document.createTable();
+            var headerRow = table.getRow(0);
+            headerRow.getCell(0).setText("Id");
+            headerRow.addNewTableCell().setText("Name");
+            headerRow.addNewTableCell().setText("Date");
+            headerRow.addNewTableCell().setText("Value");
+            for (var rowDto : data) {
                 var row = table.createRow();
-                row.getCell(0).setText(r.id().toString());
-                row.getCell(1).setText(r.name());
-                row.getCell(2).setText(r.date().toString());
-                row.getCell(3).setText(r.value().toString());
+                row.getCell(0).setText(rowDto.id().toString());
+                row.getCell(1).setText(rowDto.name());
+                row.getCell(2).setText(rowDto.date().toString());
+                row.getCell(3).setText(rowDto.value().toString());
             }
-            doc.write(out);
+            document.write(outputStream);
         } catch (IOException e) {
             throw new RuntimeException("Word generation failed", e);
         }
