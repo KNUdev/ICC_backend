@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.applicationmanager.domain.Application;
 import ua.knu.knudev.applicationmanager.domain.Department;
 import ua.knu.knudev.applicationmanager.mapper.DepartmentMapper;
 import ua.knu.knudev.applicationmanager.repository.DepartmentRepository;
 import ua.knu.knudev.applicationmanagerapi.api.DepartmentApi;
 import ua.knu.knudev.applicationmanagerapi.dto.DepartmentDto;
+import ua.knu.knudev.applicationmanagerapi.exception.DepartmentException;
 import ua.knu.knudev.applicationmanagerapi.request.DepartmentGetAllRequest;
 import ua.knu.knudev.applicationmanagerapi.request.DepartmentUpdateRequest;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
@@ -48,7 +48,7 @@ public class DepartmentService implements DepartmentApi {
     @Transactional
     public DepartmentDto update(DepartmentUpdateRequest request) {
         Department department = departmentRepository.findById(request.id())
-                .orElseThrow(() -> new IllegalArgumentException("Department with ID: " + request.id() + " not found!"));
+                .orElseThrow(() -> new DepartmentException("Department with ID: " + request.id() + " not found!"));
 
         department.setName(getOrDefault(request.name(), department.getName(), multiLanguageFieldMapper::toDomain));
 
@@ -62,7 +62,7 @@ public class DepartmentService implements DepartmentApi {
     @Transactional
     public DepartmentDto getById(UUID departmentId) {
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Department with ID: " + departmentId + " not found!"));
+                .orElseThrow(() -> new DepartmentException("Department with ID: " + departmentId + " not found!"));
         return departmentMapper.toDto(department);
     }
 
@@ -81,7 +81,7 @@ public class DepartmentService implements DepartmentApi {
     @Transactional
     public void delete(UUID departmentId) {
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Department with ID: " + departmentId + " not found!"));
+                .orElseThrow(() -> new DepartmentException("Department with ID: " + departmentId + " not found!"));
 
         departmentRepository.delete(department);
     }

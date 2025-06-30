@@ -5,23 +5,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.applicationmanager.domain.Application;
 import ua.knu.knudev.applicationmanager.domain.Department;
-import ua.knu.knudev.applicationmanager.mapper.ApplicationMapper;
-import ua.knu.knudev.applicationmanager.mapper.DepartmentMapper;
 import ua.knu.knudev.applicationmanager.repository.ApplicationRepository;
 import ua.knu.knudev.applicationmanager.repository.DepartmentRepository;
 import ua.knu.knudev.applicationmanager.service.ApplicationService;
-import ua.knu.knudev.applicationmanager.service.DepartmentService;
+import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
+import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
+import ua.knu.knudev.applicationmanagerapi.request.*;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
-import ua.knu.knudev.employeemanager.mapper.SectorMapper;
-import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
@@ -31,9 +30,10 @@ import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
+import ua.knu.knudev.icccommon.dto.FullNameDto;
+import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 import ua.knu.knudev.icccommon.mapper.FullNameMapper;
-import ua.knu.knudev.icccommon.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
 import java.sql.Time;
@@ -42,10 +42,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest(classes = IntegrationTestsConfig.class)
@@ -80,7 +79,7 @@ public class ApplicationServiceIntegrationTest {
     public static final LocalDateTime TEST_APPLICATION_RECEIVED_AT = LocalDateTime.of(2019, 1, 1, 0, 0, 0);
     public static final LocalDateTime TEST_APPLICATION_COMPLETED_AT = LocalDateTime.of(2020, 1, 1, 0, 0);
     public static final String TEST_APPLICATION_PROBLEM_DESCRIPTION = "test-application-problem";
-    public static final String TEST_APPLICATION_PROBLEM_PHOTO_NAME = "test-application-problem-photo";
+    public static final String TEST_APPLICATION_PROBLEM_PHOTO_NAME = "test-application-problem-photo.jpg";
     public static final MultipartFile TEST_APPLICATION_PHOTO_FILE = new MockMultipartFile("problem-photo.jpg", "problem-photo.jpeg", "image/jpeg", "image".getBytes());
     public static final ApplicationStatus TEST_APPLICATION_STATUS = ApplicationStatus.IN_WORK;
 
@@ -93,16 +92,6 @@ public class ApplicationServiceIntegrationTest {
     @Autowired
     private FullNameMapper fullNameMapper;
     @Autowired
-    private MultiLanguageFieldMapper multiLanguageFieldMapper;
-    @Autowired
-    private ApplicationMapper applicationMapper;
-    @Autowired
-    private DepartmentMapper departmentMapper;
-    @Autowired
-    private SpecialtyMapper specialtyMapper;
-    @Autowired
-    private SectorMapper sectorMapper;
-    @Autowired
     private ApplicationRepository applicationRepository;
     @Autowired
     private DepartmentRepository departmentRepository;
@@ -114,8 +103,6 @@ public class ApplicationServiceIntegrationTest {
     private SpecialtyRepository specialtyRepository;
     @Autowired
     private ApplicationService applicationService;
-    @Autowired
-    private DepartmentService departmentService;
     @Autowired
     private ImageServiceApi imageServiceApi;
 
@@ -130,8 +117,8 @@ public class ApplicationServiceIntegrationTest {
         testSector = createTestSector();
         testSpecialty = createTestSpecialty(testSector);
         testEmployee = createTestEmployee();
-        testApplication = createTestApplication();
         testDepartment = createTestDepartment();
+        testApplication = createTestApplication();
     }
 
     @AfterEach
@@ -140,11 +127,11 @@ public class ApplicationServiceIntegrationTest {
             imageServiceApi.removeByFilename(uploadedAvatarFile, ImageSubfolder.EMPLOYEE_AVATARS);
         });
         uploadedAvatarFiles.clear();
-        uploadedProblemPhotoFiles.forEach(uploadedProblemPhotoFile ->
-                imageServiceApi.removeByFilename(uploadedProblemPhotoFile, ImageSubfolder.APPLICATION));
+        applicationRepository.deleteAll();
         employeeRepository.deleteAll();
         sectorRepository.deleteAll();
         specialtyRepository.deleteAll();
+        departmentRepository.deleteAll();
     }
 
     private Sector createTestSector() {
@@ -211,7 +198,7 @@ public class ApplicationServiceIntegrationTest {
         Application application = new Application();
         FullName fullName = new FullName(TEST_APPLICANT_FIRST_NAME, TEST_APPLICANT_MIDDLE_NAME, TEST_APPLICANT_LAST_NAME);
 
-        String problemPhotoName = imageServiceApi.uploadFile(TEST_APPLICATION_PHOTO_FILE, TEST_APPLICATION_PROBLEM_PHOTO_NAME, ImageSubfolder.APPLICATION);
+        String problemPhotoName = imageServiceApi.uploadFile(TEST_APPLICATION_PHOTO_FILE, TEST_APPLICATION_PROBLEM_PHOTO_NAME, ImageSubfolder.APPLICATIONS);
 
         application.setApplicantEmail(TEST_APPLICANT_EMAIL);
         application.setApplicantName(fullName);
@@ -220,10 +207,42 @@ public class ApplicationServiceIntegrationTest {
         application.setProblemPhoto(problemPhotoName);
         uploadedProblemPhotoFiles.add(problemPhotoName);
         application.setReceivedAt(TEST_APPLICATION_RECEIVED_AT);
+        application.setCompletedAt(TEST_APPLICATION_COMPLETED_AT);
         application.setStatus(TEST_APPLICATION_STATUS);
+        application.setAssignedEmployeeIds(new HashSet<>());
 
         Application newApplication = applicationRepository.save(application);
+        testDepartment.getApplications().add(newApplication);
+        departmentRepository.save(testDepartment);
         return newApplication;
+    }
+
+    private ApplicationCreateRequest createApplicationCreateRequest() {
+        ApplicationCreateRequest request = ApplicationCreateRequest.builder()
+                .applicantName(new FullNameDto(TEST_APPLICANT_FIRST_NAME, TEST_APPLICANT_MIDDLE_NAME, TEST_APPLICANT_LAST_NAME))
+                .applicantEmail(TEST_APPLICANT_EMAIL)
+                .status(TEST_APPLICATION_STATUS)
+                .problemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION)
+                .problemPhotoName(TEST_APPLICATION_PROBLEM_PHOTO_NAME)
+                .problemPhoto(TEST_APPLICATION_PHOTO_FILE)
+                .departmentId(testDepartment.getId())
+                .build();
+
+        return request;
+    }
+
+    private ApplicationCreateRequest createWrongApplicationCreateRequest() {
+        ApplicationCreateRequest request = ApplicationCreateRequest.builder()
+                .applicantName(new FullNameDto(TEST_APPLICANT_FIRST_NAME, TEST_APPLICANT_MIDDLE_NAME, TEST_APPLICANT_LAST_NAME))
+                .applicantEmail(TEST_APPLICANT_EMAIL)
+                .status(TEST_APPLICATION_STATUS)
+                .problemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION)
+                .problemPhotoName(TEST_APPLICATION_PROBLEM_PHOTO_NAME)
+                .problemPhoto(TEST_APPLICATION_PHOTO_FILE)
+                .departmentId(UUID.randomUUID())
+                .build();
+
+        return request;
     }
 
     @Nested
@@ -233,16 +252,231 @@ public class ApplicationServiceIntegrationTest {
         @DisplayName("Should successfully get application when provided valid id")
         @Transactional
         public void should_SuccessfullyGet_When_ProvidedValidId() {
-            Application response = applicationMapper.toDomain(applicationService.getById(testApplication.getId()));
+            ApplicationDto response = applicationService.getById(testApplication.getId());
 
             assertNotNull(response);
-            assertEquals(testApplication.getApplicantEmail(), response.getApplicantEmail());
-            assertEquals(testApplication.getApplicantName(), response.getApplicantName());
-            assertEquals(testApplication.getDepartment().getName(), response.getDepartment().getName());
-            assertEquals(testApplication.getStatus(), response.getStatus());
-            assertEquals(testApplication.getProblemDescription(), response.getProblemDescription());
-            assertEquals(testApplication.getProblemPhoto(), response.getProblemPhoto());
-            assertEquals(testApplication.getReceivedAt(), response.getReceivedAt());
+            assertEquals(testApplication.getApplicantEmail(), response.applicantEmail());
+            assertEquals(testApplication.getApplicantName(), response.applicantName());
+            assertEquals(testApplication.getDepartmentId(), response.departmentId());
+            assertEquals(testApplication.getStatus(), response.status());
+            assertEquals(testApplication.getProblemDescription(), response.problemDescription());
+            assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());
+            assertEquals(testApplication.getReceivedAt(), response.receivedAt());
+        }
+
+        @Test
+        @DisplayName("Should throw ApplicationException when provided invalid id")
+        @Transactional
+        public void should_ThrowApplicationException_When_ProvidedInvalidId() {
+            assertThrows(ApplicationException.class, () -> applicationService.getById(UUID.randomUUID()));
+        }
+    }
+
+    @Nested
+    @DisplayName("Create Application scenarios")
+    class CreateApplicationScenarios {
+        @Test
+        @Transactional
+        @DisplayName("Should successfully create application when provided valid data in request")
+        public void should_SuccessfullyCreateApplication_When_ProvidedValidDataInRequest() {
+            ApplicationCreateRequest request = createApplicationCreateRequest();
+            ApplicationDto response = applicationService.create(request);
+
+            assertNotNull(response);
+            uploadedProblemPhotoFiles.add(response.problemPhoto());
+            assertEquals(testApplication.getApplicantEmail(), response.applicantEmail());
+            assertEquals(testApplication.getApplicantName(), response.applicantName());
+            assertEquals(testApplication.getDepartmentId(), response.departmentId());
+            assertEquals(testApplication.getStatus(), response.status());
+            assertEquals(testApplication.getProblemDescription(), response.problemDescription());
+            assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());
+            assertTrue(applicationRepository.existsById(response.id()));
+        }
+
+        @Transactional
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when provided non-existent department")
+        public void should_ThrowIllegalArgumentException_When_ProvidedNonExistentDepartment() {
+            ApplicationCreateRequest request = createWrongApplicationCreateRequest();
+
+            assertThrows(IllegalArgumentException.class, () -> applicationService.create(request));
+        }
+    }
+
+    @Nested
+    @DisplayName("Update application scenarios")
+    class UpdateApplicationScenarios {
+        @Test
+        @Transactional
+        @DisplayName("Should successfully update application when provided valid data in request")
+        public void should_SuccessfullyUpdateApplication_When_ProvidedValidDataInRequest() {
+            ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+                    testApplication.getId(),
+                    fullNameMapper.toDto(testApplication.getApplicantName()),
+                    testApplication.getApplicantEmail(),
+                    TEST_APPLICATION_COMPLETED_AT,
+                    testApplication.getProblemDescription(),
+                    TEST_APPLICATION_PROBLEM_PHOTO_NAME,
+                    TEST_APPLICATION_PHOTO_FILE,
+                    ApplicationStatus.DONE,
+                    testApplication.getDepartment().getId());
+
+            ApplicationDto response = applicationService.update(request);
+            assertNotNull(response);
+            assertEquals(testApplication.getStatus(), response.status());
+            assertEquals(testApplication.getCompletedAt(), response.completedAt());
+            assertTrue(applicationRepository.existsById(response.id()));
+        }
+
+        @Test
+        @Transactional
+        @DisplayName("Should throw IllegalArgumentException when provided invalid data")
+        public void should_ThrowIllegalArgumentException_When_ProvidedInvalidData() {
+            ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+                    testApplication.getId(),
+                    fullNameMapper.toDto(testApplication.getApplicantName()),
+                    testApplication.getApplicantEmail(),
+                    TEST_APPLICATION_COMPLETED_AT,
+                    testApplication.getProblemDescription(),
+                    TEST_APPLICATION_PROBLEM_PHOTO_NAME,
+                    TEST_APPLICATION_PHOTO_FILE,
+                    ApplicationStatus.DONE,
+                    UUID.randomUUID());
+
+            assertThrows(IllegalArgumentException.class, () -> applicationService.update(request));
+        }
+    }
+
+    @Nested
+    @DisplayName("Get all scenarios")
+    class GetAllScenarios {
+        @Test
+        @Transactional
+        @DisplayName("Should successfully get all applications when provided appropriate request")
+        public void should_SuccessfullyGetAllApplications_When_ProvidedAppropriateRequest() {
+            for (int i = 0; i < 9; i++) {
+                createTestApplication();
+            }
+
+            ApplicationGetAllRequest request = new ApplicationGetAllRequest(
+                    TEST_APPLICANT_FIRST_NAME,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new MultiLanguageFieldDto(TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN),
+                    null,
+                    1,
+                    10);
+
+            Page<ApplicationDto> response = applicationService.getAll(request);
+
+            assertNotNull(response);
+            assertEquals(10, applicationRepository.count());
+            assertEquals(10, response.getTotalElements());
+        }
+
+        @Test
+        @Transactional
+        @DisplayName("Should get zero applications when provided not existing search query")
+        public void should_ThrowApplicationException_When_ProvidedNotExistingSearchQuery() {
+            for (int i = 0; i < 9; i++) {
+                createTestApplication();
+            }
+
+            ApplicationGetAllRequest request = new ApplicationGetAllRequest(
+                    "Something-wrong",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new MultiLanguageFieldDto(TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN),
+                    null,
+                    1,
+                    10);
+
+            Page<ApplicationDto> response = applicationService.getAll(request);
+
+            assertNotNull(response);
+            assertEquals(10, applicationRepository.count());
+            assertEquals(0, response.getTotalElements());
+        }
+    }
+
+    @Nested
+    @DisplayName("Add assigned employee scenarios")
+    class AddAssignedEmployeeScenarios {
+        @Test
+        @Transactional
+        @DisplayName("Should successfully add assigned employee to application")
+        public void should_SuccessfullyAddAssignedEmployeeToApplication() {
+            ApplicationAddAssignedEmployeeRequest request = new ApplicationAddAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    testEmployee.getId());
+            ApplicationDto response = applicationService.addAssignedEmployee(request);
+
+            assertNotNull(response);
+            assertEquals(1, testApplication.getAssignedEmployeeIds().size());
+            assertTrue(testApplication.getAssignedEmployeeIds().contains(testEmployee.getId()));
+        }
+
+        @Test
+        @Transactional
+        @DisplayName("Should not to add assigned employee when provided not existing employee id")
+        public void should_ThrowIllegalArgumentException_When_ProvidedNotExistingEmployeeId() {
+            ApplicationAddAssignedEmployeeRequest request = new ApplicationAddAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    UUID.randomUUID());
+
+            assertThrows(ApplicationException.class, () -> applicationService.addAssignedEmployee(request));
+        }
+    }
+
+    @Nested
+    @DisplayName("Remove assigned employee scenarios")
+    class RemoveAssignedEmployeeScenarios {
+        @Test
+        @Transactional
+        @DisplayName("Should successfully remove assigned employee from application")
+        public void should_SuccessfullyRemoveAssignedEmployeeFromApplication() {
+            ApplicationAddAssignedEmployeeRequest addRequest = new ApplicationAddAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    testEmployee.getId());
+            applicationService.addAssignedEmployee(addRequest);
+
+            ApplicationRemoveAssignedEmployeeRequest removeRequest = new ApplicationRemoveAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    testEmployee.getId());
+            ApplicationDto response = applicationService.removeAssignedEmployee(removeRequest);
+
+            assertNotNull(response);
+            assertEquals(0, testApplication.getAssignedEmployeeIds().size());
+            assertFalse(testApplication.getAssignedEmployeeIds().contains(testEmployee.getId()));
+        }
+
+        @Test
+        @Transactional
+        @DisplayName("Should not remove assigned employee from application when provided non existing employee id")
+        public void should_ThrowIllegalArgumentException_When_ProvidedNonExistingEmployeeId() {
+            ApplicationAddAssignedEmployeeRequest addRequest = new ApplicationAddAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    testEmployee.getId());
+            applicationService.addAssignedEmployee(addRequest);
+
+            ApplicationRemoveAssignedEmployeeRequest removeRequest = new ApplicationRemoveAssignedEmployeeRequest(
+                    testApplication.getId(),
+                    UUID.randomUUID());
+            assertThrows(ApplicationException.class, () -> applicationService.removeAssignedEmployee(removeRequest));
         }
     }
 }

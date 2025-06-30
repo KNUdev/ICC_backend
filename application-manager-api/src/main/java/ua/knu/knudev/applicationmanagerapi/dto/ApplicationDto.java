@@ -20,7 +20,7 @@ public record ApplicationDto(
         FullName applicantName,
 
         @Schema(description = "Email address of the applicant", example = "john.doe@knu.ua")
-        String email,
+        String applicantEmail,
 
         @Schema(description = "Timestamp when the application was received", example = "2024-06-01T15:30:00")
         LocalDateTime receivedAt,
@@ -31,7 +31,7 @@ public record ApplicationDto(
         @Schema(description = "Description of the problem reported by the applicant", example = "Water leakage in the basement")
         String problemDescription,
 
-        @Schema(description = "URL or path to a photo showing the problem", example = "https://example.com/photos/problem123.jpg")
+        @Schema(description = "URL or path to a photo showing the problem")
         String problemPhoto,
 
         @Schema(description = "Current status of the application", example = "IN_PROGRESS")

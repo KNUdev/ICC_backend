@@ -17,6 +17,7 @@ import ua.knu.knudev.applicationmanagerapi.api.ApplicationApi;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
 import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
 import ua.knu.knudev.applicationmanagerapi.request.*;
+import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.domain.embeddable.FullName;
@@ -35,6 +36,7 @@ public class ApplicationService implements ApplicationApi {
     private final ApplicationMapper applicationMapper;
     private final ApplicationRepository applicationRepository;
     private final DepartmentRepository departmentRepository;
+    private final EmployeeApi employeeApi;
     private final ImageServiceApi imageServiceApi;
     private final FullNameMapper fullNameMapper;
 
@@ -43,7 +45,7 @@ public class ApplicationService implements ApplicationApi {
         Department department = departmentRepository.findById(request.departmentId())
                 .orElseThrow(() -> new IllegalArgumentException("Department not found"));
 
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATION);
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
 
@@ -82,7 +84,7 @@ public class ApplicationService implements ApplicationApi {
         application.setStatus(getOrDefault(request.status(), application.getStatus()));
 
         if (request.problemPhoto() != null) {
-            String newProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATION);
+            String newProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
             application.setProblemPhoto(newProblemPhoto);
         }
 
@@ -101,12 +103,12 @@ public class ApplicationService implements ApplicationApi {
     @Override
     @Transactional
     public Page<ApplicationDto> getAll(ApplicationGetAllRequest request) {
-       int pageNumber = getOrDefault(request.pageNumber(), 0);
-       int pageSize = getOrDefault(request.pageSize(), 10);
-       Pageable paging = PageRequest.of(pageNumber, pageSize);
-       Page<Application> applications = applicationRepository.findAllBySearchQuery(paging, request);
+        int pageNumber = getOrDefault(request.pageNumber(), 0);
+        int pageSize = getOrDefault(request.pageSize(), 10);
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        Page<Application> applications = applicationRepository.findAllBySearchQuery(paging, request);
 
-       return applications.map(applicationMapper::toDto);
+        return applications.map(applicationMapper::toDto);
     }
 
     @Override
@@ -124,6 +126,10 @@ public class ApplicationService implements ApplicationApi {
                 .orElseThrow(() -> new ApplicationException("Application with ID: " +
                         request.applicationId() + " not found!"));
 
+        if (!employeeApi.existsById(request.employeeId())) {
+            throw new ApplicationException("Employee with ID: " + request.employeeId() + " not found!");
+        }
+
         application.getAssignedEmployeeIds().add(request.employeeId());
         application = applicationRepository.save(application);
         return applicationMapper.toDto(application);
@@ -134,6 +140,10 @@ public class ApplicationService implements ApplicationApi {
         Application application = applicationRepository.findById(request.applicationId())
                 .orElseThrow(() -> new ApplicationException("Application with ID: " +
                         request.applicationId() + " not found!"));
+
+        if (!employeeApi.existsById(request.employeeId())) {
+            throw new ApplicationException("Employee with ID: " + request.employeeId() + " not found!");
+        }
 
         application.getAssignedEmployeeIds().remove(request.employeeId());
         application = applicationRepository.save(application);

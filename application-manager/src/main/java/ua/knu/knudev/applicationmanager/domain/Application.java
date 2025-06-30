@@ -34,6 +34,7 @@ public class Application {
 
     @Column(nullable = false)
     private LocalDateTime receivedAt;
+
     private LocalDateTime completedAt;
 
     @Column(nullable = false)

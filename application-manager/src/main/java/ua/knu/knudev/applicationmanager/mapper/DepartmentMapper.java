@@ -8,4 +8,3 @@ import ua.knu.knudev.icccommon.mapper.BaseMapper;
 @Mapper(componentModel = "spring")
 public interface DepartmentMapper extends BaseMapper<Department, DepartmentDto> {
 }
-
