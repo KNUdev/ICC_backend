@@ -52,10 +52,16 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
                 .orElseThrow(() -> new AccountAuthException("Employee with id " + request.employeeId() + " does not exist"));
 
         String encodedPassword = passwordEncoder.encode(request.password());
+        String newEmail = request.email();
 
-        if (request.email().matches("^[\\w.-]+@knu\\.ua$")) {
-            updateField(request.email(), employee::setEmail);
+        checkIfIsAdminUsage(request, newEmail);
+        updatePassword(request, employee);
+
+        if (newEmail.matches("^[\\w.-]+@knu\\.ua$") &&
+                !authenticatedEmployeeRepository.existsByEmail(newEmail)) {
+            updateField(newEmail, employee::setEmail);
         }
+
         updateField(request.role(), employee::setRole);
         if (request.password().matches("^(?=.*[a-zA-Z])(?=.*\\d).*$")) {
             updateField(encodedPassword, employee::setPassword);
@@ -76,6 +82,29 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
     public void deleteByEmail(String email) {
         getDomainByEmail(email).ifPresent(authenticatedEmployee ->
                 authenticatedEmployeeRepository.deleteById(authenticatedEmployee.getId()));
+    }
+
+    private void updatePassword(AuthenticatedEmployeeUpdateRequest request, AuthenticatedEmployee employee) {
+        if (request.newPassword() != null) {
+            String encodedNewPassword = passwordEncoder.encode(request.newPassword());
+            if (request.newPassword().matches("^(?=.*[a-zA-Z])(?=.*\\d).*$")) {
+                updateField(encodedNewPassword, employee::setPassword);
+            }
+        }
+    }
+
+    private void checkIfIsAdminUsage(AuthenticatedEmployeeUpdateRequest request, String newEmail) {
+        if (!request.isAdminUsage()) {
+            boolean isAuthenticated = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            newEmail,
+                            request.oldPassword())
+            ).isAuthenticated();
+
+            if (!isAuthenticated) {
+                throw new AccountAuthException("Credentials is mismatch!");
+            }
+        }
     }
 
     public Optional<AuthenticatedEmployee> getDomainByEmail(String email) {
