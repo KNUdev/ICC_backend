@@ -5,6 +5,5 @@ import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 @Mapper(componentModel = "spring")
-public interface MultiLanguageFieldMapper extends BaseMapper<MultiLanguageField, MultiLanguageFieldDto>{
-
+public interface MultiLanguageFieldMapper extends BaseMapper<MultiLanguageField, MultiLanguageFieldDto> {
 }

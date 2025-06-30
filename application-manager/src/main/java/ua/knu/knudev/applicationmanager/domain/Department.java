@@ -32,7 +32,7 @@ public class Department {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-    @Column(nullable = false)
+
     private LocalDateTime updatedAt;
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

@@ -11,9 +11,9 @@ databaseChangeLog:
                   name: id
                   type: uuid
                   constraints:
-                    primaryKey: true
                     nullable: false
                     unique: true
+                    primaryKey: true
               - column:
                   name: en_name
                   type: varchar(255)
@@ -26,12 +26,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: created_at
-                  type: timestamp
+                  type: datetime
                   constraints:
                     nullable: false
               - column:
                   name: updated_at
-                  type: timestamp
+                  type: datetime
                   constraints:
                     nullable: true
 
@@ -47,9 +47,9 @@ databaseChangeLog:
                   name: id
                   type: uuid
                   constraints:
-                    primaryKey: true
                     nullable: false
                     unique: true
+                    primaryKey: true
               - column:
                   name: first_name
                   type: varchar(255)
@@ -72,12 +72,14 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: received_at
-                  type: timestamp
+                  type: datetime
                   constraints:
                     nullable: false
               - column:
                   name: completed_at
-                  type: timestamp
+                  type: datetime
+                  constraints:
+                    nullable: true
               - column:
                   name: problem_description
                   type: varchar(255)
@@ -86,6 +88,8 @@ databaseChangeLog:
               - column:
                   name: problem_photo
                   type: varchar(255)
+                  constraints:
+                    nullable: true
               - column:
                   name: status
                   type: varchar(50)
@@ -108,8 +112,8 @@ databaseChangeLog:
       author: MariaDemydovych
       changes:
         - createTable:
-            schemaName: application_manager
             tableName: application_assigned_employee_ids
+            schemaName: application_manager
             columns:
               - column:
                   name: application_id
@@ -122,18 +126,18 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addPrimaryKey:
-            schemaName: application_manager
             tableName: application_assigned_employee_ids
+            schemaName: application_manager
             columnNames: application_id, assigned_employee_id
-            constraintName: pk_application_assigned_employee_ids
+            constraintName: pk_application_assigned_employee_id
         - addForeignKeyConstraint:
             baseTableSchemaName: application_manager
             baseTableName: application_assigned_employee_ids
             baseColumnNames: application_id
-            referencedTableSchemaName: application_manager
-            referencedTableName: application
-            referencedColumnNames: id
             constraintName: fk_application_assigned_employee_ids
+            referencedTableName: application
+            referencedTableSchemaName: application_manager
+            referencedColumnNames: id
             onDelete: CASCADE
 
   - changeSet:

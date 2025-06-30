@@ -3,6 +3,7 @@ package ua.knu.knudev.applicationmanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+
 import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 
@@ -33,6 +34,7 @@ public class Application {
 
     @Column(nullable = false)
     private LocalDateTime receivedAt;
+
     private LocalDateTime completedAt;
 
     @Column(nullable = false)
@@ -56,4 +58,9 @@ public class Application {
     )
     @Column(name = "assigned_employee_id")
     private Set<UUID> assignedEmployeeIds;
+
+    public UUID getDepartmentId() {
+        return department != null ? department.getId() : null;
+    }
+
 }
