@@ -1,8 +1,6 @@
 package ua.knu.knudev.iccsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.iccsecurity.domain.AuthenticatedEmployee;
@@ -24,7 +22,6 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
 
     private final AuthenticatedEmployeeRepository authenticatedEmployeeRepository;
     private final AuthenticatedEmployeeMapper authenticatedEmployeeMapper;
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -54,6 +51,7 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
         AuthenticatedEmployee employee = authenticatedEmployeeRepository.findById(request.employeeId())
                 .orElseThrow(() -> new AccountAuthException("Employee with id " + request.employeeId() + " does not exist"));
 
+        String encodedPassword = passwordEncoder.encode(request.password());
         String newEmail = request.email();
 
         checkIfIsAdminUsage(request, newEmail);
@@ -65,6 +63,9 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
         }
 
         updateField(request.role(), employee::setRole);
+        if (request.password().matches("^(?=.*[a-zA-Z])(?=.*\\d).*$")) {
+            updateField(encodedPassword, employee::setPassword);
+        }
 
         authenticatedEmployeeRepository.save(employee);
     }
