@@ -37,6 +37,11 @@ public record EmployeeUpdateRequest(
         String email,
 
         @Schema(
+                description = "Employee password"
+        )
+        String password,
+
+        @Schema(
                 description = "Employee phone number"
         )
         String phoneNumber,
