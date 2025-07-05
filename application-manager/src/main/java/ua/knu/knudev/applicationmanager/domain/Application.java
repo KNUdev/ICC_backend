@@ -58,9 +58,4 @@ public class Application {
     )
     @Column(name = "assigned_employee_id")
     private Set<UUID> assignedEmployeeIds;
-
-    public UUID getDepartmentId() {
-        return department != null ? department.getId() : null;
-    }
-
 }

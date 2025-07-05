@@ -26,6 +26,7 @@ import java.util.UUID;
 public class AdminApplicationController {
     private final ApplicationApi applicationApi;
 
+
     @Operation(summary = "Create a new application",
             description = "Creates a new application using the provided request data")
     @ApiResponses(value = {

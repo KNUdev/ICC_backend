@@ -114,10 +114,10 @@ public class ApplicationService implements ApplicationApi {
     @Override
     @Transactional
     public void delete(UUID applicationId) {
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ApplicationException("Application with ID: " + applicationId + " not found!"));
-
-        applicationRepository.delete(application);
+        if (!applicationRepository.existsById(applicationId)) {
+            throw new ApplicationException("Application with ID: " + applicationId + " not found!");
+        }
+        applicationRepository.deleteById(applicationId);
     }
 
     @Override

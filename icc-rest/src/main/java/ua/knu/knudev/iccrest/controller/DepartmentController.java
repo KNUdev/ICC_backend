@@ -26,6 +26,7 @@ import java.util.UUID;
 public class DepartmentController {
     private final DepartmentApi departmentApi;
 
+
     @Operation(summary = "Get department by ID",
             description = "Fetches detailed information about a department based on the provided department ID")
     @ApiResponses({

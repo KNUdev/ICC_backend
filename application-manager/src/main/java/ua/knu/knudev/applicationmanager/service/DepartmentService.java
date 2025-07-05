@@ -80,10 +80,10 @@ public class DepartmentService implements DepartmentApi {
     @Override
     @Transactional
     public void delete(UUID departmentId) {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new DepartmentException("Department with ID: " + departmentId + " not found!"));
-
-        departmentRepository.delete(department);
+    if (!departmentRepository.existsById(departmentId)) {
+        throw new DepartmentException("Department with ID: " + departmentId + " not found!");
+    }
+        departmentRepository.deleteById(departmentId);
     }
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {

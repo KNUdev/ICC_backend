@@ -28,6 +28,7 @@ import java.util.UUID;
 public class AdminDepartmentController {
     private final DepartmentApi departmentApi;
 
+
     @Operation(summary = "Create a new department",
             description = "Creates a department")
     @ApiResponses({

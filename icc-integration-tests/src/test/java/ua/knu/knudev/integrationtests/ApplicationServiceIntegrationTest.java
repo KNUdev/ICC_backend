@@ -257,7 +257,7 @@ public class ApplicationServiceIntegrationTest {
             assertNotNull(response);
             assertEquals(testApplication.getApplicantEmail(), response.applicantEmail());
             assertEquals(testApplication.getApplicantName(), response.applicantName());
-            assertEquals(testApplication.getDepartmentId(), response.departmentId());
+            assertEquals(testApplication.getDepartment().getId(), response.departmentId());
             assertEquals(testApplication.getStatus(), response.status());
             assertEquals(testApplication.getProblemDescription(), response.problemDescription());
             assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());
@@ -286,7 +286,7 @@ public class ApplicationServiceIntegrationTest {
             uploadedProblemPhotoFiles.add(response.problemPhoto());
             assertEquals(testApplication.getApplicantEmail(), response.applicantEmail());
             assertEquals(testApplication.getApplicantName(), response.applicantName());
-            assertEquals(testApplication.getDepartmentId(), response.departmentId());
+            assertEquals(testApplication.getDepartment().getId(), response.departmentId());
             assertEquals(testApplication.getStatus(), response.status());
             assertEquals(testApplication.getProblemDescription(), response.problemDescription());
             assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());

@@ -25,6 +25,7 @@ import java.util.UUID;
 public class ApplicationController {
     private final ApplicationApi applicationApi;
 
+
     @Operation(summary = "Get application by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
