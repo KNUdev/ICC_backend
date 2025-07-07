@@ -11,81 +11,128 @@ import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
+import ua.knu.knudev.reportmanager.enums.ReportFields;
+import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Set;
-
 
 @Service
 @RequiredArgsConstructor
-public class ReportService {
+public class ReportService implements ReportServiceApi {
 
-private final EmployeeApi employeeApi;
+    private final EmployeeApi employeeApi;
     Workbook excelWorkbook = new XSSFWorkbook();
     private static Sheet excelSheet;
 
-    public void extractReportToExcel(String reportName) {
+    public File extractReportToExcel(String reportName) {
         excelSheet = excelWorkbook.createSheet(reportName);
 
         createExcelTable(reportName);
         fillExcelTable();
 
         try {
-            createExcelFile(reportName);
+            return createExcelFile(reportName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void extractReportToCSV(String reportName) {
+    public File extractReportToCSV(String reportName) {
         try {
-            createCSVFile(reportName);
+            return createCSVFile(reportName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void createCSVFile(String fileName) throws IOException {
-        String[] headers = {"ІД", "Ім'я та прізвище", "Номер телефону", "Пошта", "Посада", "Зарплата", "Дата закінчення контракту"};
+    public File createReportOfFormat(String formatType, String reportName) {
+        try {
+            switch (formatType) {
+                case "csv" -> { return extractReportToCSV(reportName); }
+                case "excel" -> { return extractReportToExcel(reportName); }
+                default -> {
+                    throw new RuntimeException("Unsupported format");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setHeader(headers)
-                .build();
+    private File createCSVFile(String fileName) throws IOException {
+        String correctedFileName = formatFileNameForFileCreation(fileName);
+
+        Set<GetEmployeeResponse> employees = employeeApi.getAll();
+        File csvFile = new File(correctedFileName);
+
+        CSVFormat csvFormat = getCSVFormat();
 
         try (
-                FileWriter out = new FileWriter(fileName + ".csv");
-                CSVPrinter csvPrinter = new CSVPrinter(out, csvFormat)
+                FileWriter out = new FileWriter(csvFile);
+                CSVPrinter csvPrinter = new CSVPrinter(out, csvFormat);
         ) {
-            Set<GetEmployeeResponse> employees = employeeApi.getAll();
-
-            for(GetEmployeeResponse employee : employees) {
+            employees.forEach(employee -> {
                 FullNameDto name = employee.name();
-                String fullName = name.getLastName() + " " + name.getFirstName() + " " + name.getMiddleName();
 
-                SpecialtyDto specialty = employee.specialty();
-                String specialtyNameEn = specialty.name().getEn();
+                String fullName = String.join(" ",
+                        name.getLastName(),
+                        name.getFirstName(),
+                        name.getMiddleName());
 
-                csvPrinter.printRecord(
-                        employee.id(),
-                        fullName,
-                        employee.phoneNumber(),
-                        employee.email(),
-                        specialtyNameEn,
-                        employee.salaryInUAH(),
-                        employee.contractEndDate());
-            }
+                String specialtyNameEn = employee.specialty().name().getEn();
+
+                try {
+                    csvPrinter.printRecord(
+                            employee.id(),
+                            fullName,
+                            employee.phoneNumber(),
+                            employee.email(),
+                            specialtyNameEn,
+                            employee.salaryInUAH(),
+                            employee.contractEndDate());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            csvPrinter.flush();
         }
+        catch (IOException e){
+            throw new RuntimeException(e);
+        }
+        return csvFile;
+    }
+
+    private CSVFormat getCSVFormat(){
+        String[] headers = {ReportFields.ID.getLabel(),
+                ReportFields.NameSurname.getLabel(),
+                ReportFields.PhoneNumber.getLabel(),
+                ReportFields.Email.getLabel(),
+                ReportFields.Position.getLabel(),
+                ReportFields.Salary.getLabel(),
+                ReportFields.ContractValidTo.getLabel()};
+
+        return CSVFormat.DEFAULT.builder()
+                .setHeader(headers)
+                .get();
     }
 
     private void createExcelTable(String reportName) {
-        excelSheet.setColumnWidth(0, 1500);
-        excelSheet.setColumnWidth(1, 12000);
-        excelSheet.setColumnWidth(2, 8000);
-        excelSheet.setColumnWidth(3, 3000);
-        excelSheet.setColumnWidth(4, 4000);
+        final int amountOfColumns = ReportFields.values().length;
+
+        int tempIndex = 0;
+        for (ReportFields field : ReportFields.values()) {
+            excelSheet.setColumnWidth(tempIndex, field.getWidth());
+
+            tempIndex++;
+        }
 
         Row header = excelSheet.createRow(0);
 
@@ -99,33 +146,16 @@ private final EmployeeApi employeeApi;
         font.setBold(true);
         headerStyle.setFont(font);
 
-        Cell headerCell = header.createCell(0);
-        headerCell.setCellValue("ІД");
-        headerCell.setCellStyle(headerStyle);
+        Cell headerCell;
 
-        headerCell = header.createCell(1);
-        headerCell.setCellValue("Ім'я та прізвище");
-        headerCell.setCellStyle(headerStyle);
+        tempIndex = 0;
+        for (ReportFields field : ReportFields.values()) {
+            headerCell = header.createCell(tempIndex);
+            headerCell.setCellValue(field.getLabel());
+            headerCell.setCellStyle(headerStyle);
 
-        headerCell = header.createCell(2);
-        headerCell.setCellValue("Номер телефону");
-        headerCell.setCellStyle(headerStyle);
-
-        headerCell = header.createCell(3);
-        headerCell.setCellValue("Пошта");
-        headerCell.setCellStyle(headerStyle);
-
-        headerCell = header.createCell(4);
-        headerCell.setCellValue("Посада");
-        headerCell.setCellStyle(headerStyle);
-
-        headerCell = header.createCell(5);
-        headerCell.setCellValue("Зарплата");
-        headerCell.setCellStyle(headerStyle);
-
-        headerCell = header.createCell(6);
-        headerCell.setCellValue("Дата закінчення контракту");
-        headerCell.setCellStyle(headerStyle);
+            tempIndex++;
+        }
     }
 
     private void fillExcelTable() {
@@ -136,48 +166,43 @@ private final EmployeeApi employeeApi;
 
         Cell cell;
         int rowIndex = 1;
-        for(GetEmployeeResponse employee : employees) {
+        for (GetEmployeeResponse employee : employees) {
             Row row = excelSheet.createRow(rowIndex);
 
-            cell = row.createCell(0);
-            cell.setCellValue(String.valueOf(employee.id()));
-            cell.setCellStyle(style);
-
             FullNameDto name = employee.name();
-            String fullName = name.getLastName() + " " + name.getFirstName() + " " + name.getMiddleName();
-
-            cell = row.createCell(1);
-            cell.setCellValue(fullName);
-            cell.setCellStyle(style);
-
-            cell = row.createCell(2);
-            cell.setCellValue(employee.phoneNumber());
-            cell.setCellStyle(style);
-
-            cell = row.createCell(3);
-            cell.setCellValue(employee.email());
-            cell.setCellStyle(style);
+            String fullName = String.join(" ",
+                    name.getLastName(),
+                    name.getFirstName(),
+                    name.getMiddleName()
+            );
 
             SpecialtyDto specialty = employee.specialty();
             String specialtyNameEn = specialty.name().getEn();
 
-            cell = row.createCell(4);
-            cell.setCellValue(specialtyNameEn);
-            cell.setCellStyle(style);
-
-            cell = row.createCell(5);
-            cell.setCellValue(employee.salaryInUAH());
-            cell.setCellStyle(style);
-
-            cell = row.createCell(6);
-            cell.setCellValue(employee.contractEndDate());
-            cell.setCellStyle(style);
-
+            createExcelStyledCell(row, 0, employee.id(), style);
+            createExcelStyledCell(row, 1, fullName, style);
+            createExcelStyledCell(row, 2, employee.phoneNumber(), style);
+            createExcelStyledCell(row, 3, employee.email(), style);
+            createExcelStyledCell(row, 4, specialtyNameEn, style);
+            createExcelStyledCell(row, 5, employee.salaryInUAH(), style);
+            createExcelStyledCell(row, 6, employee.contractEndDate(), style);
             rowIndex++;
         }
     }
 
-    private CellStyle getCellStyle(){
+    private void createExcelStyledCell(Row row,int cellIndex, Object value, CellStyle style ) {
+        Cell cell = row.createCell(cellIndex);
+
+        switch (value) {
+            case Number number -> cell.setCellValue(number.doubleValue());
+            case String s -> cell.setCellValue(s);
+            case LocalDate localDate -> cell.setCellValue(localDate);
+            case null, default -> cell.setCellValue(value != null ? value.toString() : "");
+        }
+        cell.setCellStyle(style);
+    }
+
+    private CellStyle getCellStyle() {
         CellStyle style = excelWorkbook.createCellStyle();
 
         XSSFFont font = (XSSFFont) excelWorkbook.createFont();
@@ -187,13 +212,25 @@ private final EmployeeApi employeeApi;
         return style;
     }
 
-    private void createExcelFile(String fileName) throws IOException {
-        File currentDir = new File(".");
-        String path = currentDir.getAbsolutePath();
-        String fileLocation = path.substring(0, path.length() - 1) + fileName + ".xlsx";
+    private File createExcelFile(String fileName) throws IOException {
+        String correctedFileName = formatFileNameForFileCreation(fileName);
 
-        FileOutputStream outputStream = new FileOutputStream(fileLocation);
+        File currentDir = new File(".");
+        Path filePath = Paths.get(currentDir.getAbsolutePath(), correctedFileName);
+        File excelFile = filePath.toFile();
+
+        FileOutputStream outputStream = new FileOutputStream(excelFile);
         excelWorkbook.write(outputStream);
         excelWorkbook.close();
+
+        return excelFile;
+    }
+
+    private String formatFileNameForFileCreation(String fileName){
+        if (!fileName.endsWith(".csv")) {
+            fileName += ".csv";
+        }
+
+        return fileName;
     }
 }
