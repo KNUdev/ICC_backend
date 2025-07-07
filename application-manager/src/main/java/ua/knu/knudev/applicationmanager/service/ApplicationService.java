@@ -83,9 +83,10 @@ public class ApplicationService implements ApplicationApi {
         application.setProblemDescription(getOrDefault(request.problemDescription(), application.getProblemDescription()));
         application.setStatus(getOrDefault(request.status(), application.getStatus()));
 
-        if (request.problemPhoto() != null) {
-            String newProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
-            application.setProblemPhoto(newProblemPhoto);
+        if (request.departmentId() != null) {
+            Department department = departmentRepository.findById(request.departmentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+            application.setDepartment(department);
         }
 
         application = applicationRepository.save(application);

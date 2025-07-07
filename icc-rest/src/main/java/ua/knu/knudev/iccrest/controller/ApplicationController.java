@@ -1,6 +1,8 @@
 package ua.knu.knudev.iccrest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -23,8 +25,8 @@ import java.util.UUID;
 @RequestMapping("/application")
 @RequiredArgsConstructor
 public class ApplicationController {
-    private final ApplicationApi applicationApi;
 
+    private final ApplicationApi applicationApi;
 
     @Operation(summary = "Get application by ID")
     @ApiResponses(value = {
@@ -60,7 +62,13 @@ public class ApplicationController {
     })
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Page<ApplicationDto> getAll(@RequestBody @Valid ApplicationGetAllRequest request) {
+    public Page<ApplicationDto> getAll(@RequestBody @Valid @Parameter(
+            name = "Application receiving request",
+            description = "Application filtering fields",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = ApplicationGetAllRequest.class)
+    ) ApplicationGetAllRequest request) {
         return applicationApi.getAll(request);
     }
 }

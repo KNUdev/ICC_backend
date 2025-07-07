@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.applicationmanagerapi.api.DepartmentApi;
 import ua.knu.knudev.applicationmanagerapi.dto.DepartmentDto;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
 import ua.knu.knudev.applicationmanagerapi.request.DepartmentGetAllRequest;
 import ua.knu.knudev.applicationmanagerapi.request.DepartmentUpdateRequest;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
@@ -26,8 +27,8 @@ import java.util.UUID;
 @RequestMapping("/admin/department")
 @RequiredArgsConstructor
 public class AdminDepartmentController {
-    private final DepartmentApi departmentApi;
 
+    private final DepartmentApi departmentApi;
 
     @Operation(summary = "Create a new department",
             description = "Creates a department")
@@ -63,7 +64,12 @@ public class AdminDepartmentController {
     })
     @PatchMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public DepartmentDto update(@RequestBody @Valid DepartmentUpdateRequest request) {
+    public DepartmentDto update(@RequestBody @Valid @Parameter(
+            name = "Department update request",
+            description = "Request for updating department",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = DepartmentUpdateRequest.class)) DepartmentUpdateRequest request) {
         return departmentApi.update(request);
     }
 
@@ -108,7 +114,12 @@ public class AdminDepartmentController {
     })
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Page<DepartmentDto> getAll(@RequestBody @Valid DepartmentGetAllRequest request) {
+    public Page<DepartmentDto> getAll(@RequestBody @Valid @Parameter(
+            name = "Department receiving request",
+            description = "Department filtering fields",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = DepartmentGetAllRequest.class)) DepartmentGetAllRequest request) {
         return departmentApi.getAll(request);
     }
 

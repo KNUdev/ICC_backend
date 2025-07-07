@@ -24,8 +24,8 @@ import java.util.UUID;
 @RequestMapping("/department")
 @RequiredArgsConstructor
 public class DepartmentController {
-    private final DepartmentApi departmentApi;
 
+    private final DepartmentApi departmentApi;
 
     @Operation(summary = "Get department by ID",
             description = "Fetches detailed information about a department based on the provided department ID")
@@ -68,7 +68,12 @@ public class DepartmentController {
     })
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Page<DepartmentDto> getAll(@RequestBody @Valid DepartmentGetAllRequest request) {
+    public Page<DepartmentDto> getAll(@RequestBody @Valid @Parameter(
+            name = "Department receiving request",
+            description = "Department filtering fields",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = DepartmentGetAllRequest.class)) DepartmentGetAllRequest request) {
         return departmentApi.getAll(request);
     }
 }

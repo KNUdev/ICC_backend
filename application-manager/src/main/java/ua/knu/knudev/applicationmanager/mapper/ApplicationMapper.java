@@ -8,7 +8,6 @@ import ua.knu.knudev.icccommon.mapper.BaseMapper;
 
 @Mapper(componentModel = "spring")
 public interface ApplicationMapper extends BaseMapper<Application, ApplicationDto> {
-    @Override
     @Mapping(source = "department.id", target = "departmentId")
     ApplicationDto toDto(Application application);
 }

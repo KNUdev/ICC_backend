@@ -2,6 +2,7 @@ package ua.knu.knudev.iccrest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -24,8 +25,8 @@ import java.util.UUID;
 @RequestMapping("/admin/application")
 @RequiredArgsConstructor
 public class AdminApplicationController {
-    private final ApplicationApi applicationApi;
 
+    private final ApplicationApi applicationApi;
 
     @Operation(summary = "Create a new application",
             description = "Creates a new application using the provided request data")
@@ -45,7 +46,8 @@ public class AdminApplicationController {
     public ApplicationDto create(
             @Parameter(description = "Application creation request body",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = ApplicationCreateRequest.class)))
+                    in = ParameterIn.DEFAULT,
+                    schema = @Schema(implementation = ApplicationCreateRequest.class))
             @RequestBody @Valid ApplicationCreateRequest request) {
         return applicationApi.create(request);
     }
@@ -70,7 +72,8 @@ public class AdminApplicationController {
     public ApplicationDto update(
             @Parameter(description = "Application update request body",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = ApplicationUpdateRequest.class)))
+                    in = ParameterIn.DEFAULT,
+                    schema = @Schema(implementation = ApplicationUpdateRequest.class))
             @RequestBody @Valid ApplicationUpdateRequest request) {
         return applicationApi.update(request);
     }
@@ -109,7 +112,13 @@ public class AdminApplicationController {
     })
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Page<ApplicationDto> getAll(@RequestBody @Valid ApplicationGetAllRequest request) {
+    public Page<ApplicationDto> getAll(@RequestBody @Valid @Parameter(
+            name = "Application receiving request",
+            description = "Application filtering fields",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = ApplicationGetAllRequest.class)
+    ) ApplicationGetAllRequest request) {
         return applicationApi.getAll(request);
     }
 
@@ -146,7 +155,13 @@ public class AdminApplicationController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/assign-employee")
-    public ApplicationDto addAssignedEmployee(@RequestBody @Valid ApplicationAddAssignedEmployeeRequest request) {
+    public ApplicationDto addAssignedEmployee(@RequestBody @Valid @Parameter(
+            name = "Add assigned employee request",
+            description = "Adding employee to application",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = ApplicationAddAssignedEmployeeRequest.class))
+                                              ApplicationAddAssignedEmployeeRequest request) {
         return applicationApi.addAssignedEmployee(request);
     }
 
@@ -164,7 +179,13 @@ public class AdminApplicationController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/remove-employee")
-    public ApplicationDto removeAssignedEmployee(@RequestBody @Valid ApplicationRemoveAssignedEmployeeRequest request) {
+    public ApplicationDto removeAssignedEmployee(@RequestBody @Valid @Parameter(
+            name = "Remove assigned employee request",
+            description = "Removing employee from application",
+            in = ParameterIn.DEFAULT,
+            required = true,
+            schema = @Schema(implementation = ApplicationRemoveAssignedEmployeeRequest.class))
+                                                     ApplicationRemoveAssignedEmployeeRequest request) {
         return applicationApi.removeAssignedEmployee(request);
     }
 }
