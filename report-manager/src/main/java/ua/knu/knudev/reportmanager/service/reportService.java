@@ -12,7 +12,8 @@ import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.reportmanager.enums.ReportFields;
-import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
+import ua.knu.knudev.reportmanager.exception.ReportGenerationException;
+import ua.knu.knudev.reportmanagerapi.api.reportServiceApi;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,12 +26,14 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class ReportService implements ReportServiceApi {
+public class reportService implements reportServiceApi {
 
     private final EmployeeApi employeeApi;
     Workbook excelWorkbook = new XSSFWorkbook();
+
     private static Sheet excelSheet;
 
+    @Override
     public File extractReportToExcel(String reportName) {
         excelSheet = excelWorkbook.createSheet(reportName);
 
@@ -40,10 +43,11 @@ public class ReportService implements ReportServiceApi {
         try {
             return createExcelFile(reportName);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ReportGenerationException("Failed to create excel file", e);
         }
     }
 
+    @Override
     public File extractReportToCSV(String reportName) {
         try {
             return createCSVFile(reportName);
@@ -52,6 +56,7 @@ public class ReportService implements ReportServiceApi {
         }
     }
 
+    @Override
     public File createReportOfFormat(String formatType, String reportName) {
         try {
             switch (formatType) {
@@ -112,12 +117,12 @@ public class ReportService implements ReportServiceApi {
 
     private CSVFormat getCSVFormat(){
         String[] headers = {ReportFields.ID.getLabel(),
-                ReportFields.NameSurname.getLabel(),
-                ReportFields.PhoneNumber.getLabel(),
-                ReportFields.Email.getLabel(),
-                ReportFields.Position.getLabel(),
-                ReportFields.Salary.getLabel(),
-                ReportFields.ContractValidTo.getLabel()};
+                ReportFields.NAME_SURNAME.getLabel(),
+                ReportFields.PHONE_NUMBER.getLabel(),
+                ReportFields.EMAIL.getLabel(),
+                ReportFields.POSITION.getLabel(),
+                ReportFields.SALARY.getLabel(),
+                ReportFields.CONTRACT_VALID_TO.getLabel()};
 
         return CSVFormat.DEFAULT.builder()
                 .setHeader(headers)

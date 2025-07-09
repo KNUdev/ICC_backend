@@ -2,12 +2,12 @@ package ua.knu.knudev.reportmanager.enums;
 
 public enum ReportFields {
     ID("ІД", 1500),
-    NameSurname("Ім'я та прізвище", 12000),
-    PhoneNumber("Номер телефону", 8000),
-    Email("Пошта", 8000),
-    Position("Посада", 4000),
-    Salary("Зарплата", 4000),
-    ContractValidTo("Дата закінчення контракту", 4000);
+    NAME_SURNAME("Ім'я та прізвище", 12000),
+    PHONE_NUMBER("Номер телефону", 8000),
+    EMAIL("Пошта", 8000),
+    POSITION("Посада", 4000),
+    SALARY("Заробітня плата", 4000),
+    CONTRACT_VALID_TO("Дата закінчення контракту", 4000);
 
     private final String value;
     private final int width;
