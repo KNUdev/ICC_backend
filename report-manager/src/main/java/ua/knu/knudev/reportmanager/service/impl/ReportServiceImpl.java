@@ -1,6 +1,5 @@
 package ua.knu.knudev.reportmanager.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
 import ua.knu.knudev.reportmanagerapi.service.ReportService;
@@ -10,7 +9,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportRowDto> fetchReportData() {
