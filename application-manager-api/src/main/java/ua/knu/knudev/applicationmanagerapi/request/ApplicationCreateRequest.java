@@ -1,11 +1,11 @@
 package ua.knu.knudev.applicationmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 
@@ -29,8 +29,10 @@ public record ApplicationCreateRequest(
 
         @Schema(description = "Description of the reported problem",
                 example = "Air conditioning not working in office",
-                requiredMode = Schema.RequiredMode.REQUIRED)
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                maxLength = 3000)
         @NotBlank(message = "This field cannot be null")
+        @Max(3000)
         String problemDescription,
 
         @Schema(description = "Photo of the reported problem (URL or file path)",

@@ -82,7 +82,7 @@ databaseChangeLog:
                     nullable: true
               - column:
                   name: problem_description
-                  type: varchar(255)
+                  type: varchar(3000)
                   constraints:
                     nullable: false
               - column:

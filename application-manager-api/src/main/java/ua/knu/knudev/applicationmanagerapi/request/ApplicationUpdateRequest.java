@@ -1,11 +1,11 @@
 package ua.knu.knudev.applicationmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
 
@@ -35,7 +35,9 @@ public record ApplicationUpdateRequest(
         LocalDateTime completedAt,
 
         @Schema(description = "Description of the problem",
-                example = "Internet connectivity issue in room 302")
+                example = "Internet connectivity issue in room 302",
+                maxLength = 3000)
+        @Max(3000)
         String problemDescription,
 
         @Schema(description = "Photo of the reported problem (URL or file path)",

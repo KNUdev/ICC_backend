@@ -16,6 +16,7 @@ import ua.knu.knudev.applicationmanager.repository.DepartmentRepository;
 import ua.knu.knudev.applicationmanagerapi.api.ApplicationApi;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
 import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
+import ua.knu.knudev.applicationmanagerapi.exception.DepartmentException;
 import ua.knu.knudev.applicationmanagerapi.request.*;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
@@ -42,8 +43,7 @@ public class ApplicationService implements ApplicationApi {
 
     @Override
     public ApplicationDto create(ApplicationCreateRequest request) {
-        Department department = departmentRepository.findById(request.departmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+        Department department = getDepartmentById(request.departmentId());
 
         String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
 
@@ -67,13 +67,10 @@ public class ApplicationService implements ApplicationApi {
 
     @Override
     public ApplicationDto update(ApplicationUpdateRequest request) {
-        Application application = applicationRepository.findById(request.id()).orElseThrow(
-                () -> new ApplicationException("Application with ID: " + request.id() + " not found!")
-        );
+        Application application = getApplicationById(request.id());
 
         if (request.departmentId() != null) {
-            Department department = departmentRepository.findById(request.departmentId())
-                    .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+            Department department = getDepartmentById(request.departmentId());
             application.setDepartment(department);
         }
 
@@ -83,11 +80,6 @@ public class ApplicationService implements ApplicationApi {
         application.setProblemDescription(getOrDefault(request.problemDescription(), application.getProblemDescription()));
         application.setStatus(getOrDefault(request.status(), application.getStatus()));
 
-        if (request.departmentId() != null) {
-            Department department = departmentRepository.findById(request.departmentId())
-                    .orElseThrow(() -> new IllegalArgumentException("Department not found"));
-            application.setDepartment(department);
-        }
 
         application = applicationRepository.save(application);
         return applicationMapper.toDto(application);
@@ -96,8 +88,7 @@ public class ApplicationService implements ApplicationApi {
     @Override
     @Transactional
     public ApplicationDto getById(UUID applicationId) {
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ApplicationException("Application with ID: " + applicationId + " not found!"));
+        Application application = getApplicationById(applicationId);
         return applicationMapper.toDto(application);
     }
 
@@ -123,24 +114,20 @@ public class ApplicationService implements ApplicationApi {
 
     @Override
     public ApplicationDto addAssignedEmployee(ApplicationAddAssignedEmployeeRequest request) {
-        Application application = applicationRepository.findById(request.applicationId())
-                .orElseThrow(() -> new ApplicationException("Application with ID: " +
-                        request.applicationId() + " not found!"));
+        Application application = getApplicationById(request.applicationId());
 
         if (!employeeApi.existsById(request.employeeId())) {
             throw new ApplicationException("Employee with ID: " + request.employeeId() + " not found!");
         }
 
-        application.getAssignedEmployeeIds().add(request.employeeId());
+        application.addAssignedEmployee(request.employeeId());
         application = applicationRepository.save(application);
         return applicationMapper.toDto(application);
     }
 
     @Override
     public ApplicationDto removeAssignedEmployee(ApplicationRemoveAssignedEmployeeRequest request) {
-        Application application = applicationRepository.findById(request.applicationId())
-                .orElseThrow(() -> new ApplicationException("Application with ID: " +
-                        request.applicationId() + " not found!"));
+        Application application = getApplicationById(request.applicationId());
 
         if (!employeeApi.existsById(request.employeeId())) {
             throw new ApplicationException("Employee with ID: " + request.employeeId() + " not found!");
@@ -156,6 +143,18 @@ public class ApplicationService implements ApplicationApi {
             return null;
         }
         return imageServiceApi.uploadFile(problemPhoto, imageName, subfolder);
+    }
+
+    private Application getApplicationById(UUID applicationId) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ApplicationException("Application with ID: " + applicationId + " not found!"));
+        return application;
+    }
+
+    private Department getDepartmentById(UUID departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentException("Department with ID: " + departmentId + " not found!"));
+        return department;
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {

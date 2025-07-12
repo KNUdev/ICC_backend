@@ -16,6 +16,7 @@ import ua.knu.knudev.applicationmanager.repository.DepartmentRepository;
 import ua.knu.knudev.applicationmanager.service.ApplicationService;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
 import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
+import ua.knu.knudev.applicationmanagerapi.exception.DepartmentException;
 import ua.knu.knudev.applicationmanagerapi.request.*;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
@@ -295,11 +296,11 @@ public class ApplicationServiceIntegrationTest {
 
         @Transactional
         @Test
-        @DisplayName("Should throw IllegalArgumentException when provided non-existent department")
-        public void should_ThrowIllegalArgumentException_When_ProvidedNonExistentDepartment() {
+        @DisplayName("Should throw DepartmentException when provided non-existent department")
+        public void should_ThrowDepartmentException_When_ProvidedNonExistentDepartment() {
             ApplicationCreateRequest request = createWrongApplicationCreateRequest();
 
-            assertThrows(IllegalArgumentException.class, () -> applicationService.create(request));
+            assertThrows(DepartmentException.class, () -> applicationService.create(request));
         }
     }
 
@@ -330,8 +331,8 @@ public class ApplicationServiceIntegrationTest {
 
         @Test
         @Transactional
-        @DisplayName("Should throw IllegalArgumentException when provided invalid data")
-        public void should_ThrowIllegalArgumentException_When_ProvidedInvalidData() {
+        @DisplayName("Should throw DepartmentException when provided invalid data")
+        public void should_ThrowDepartmentException_When_ProvidedInvalidData() {
             ApplicationUpdateRequest request = new ApplicationUpdateRequest(
                     testApplication.getId(),
                     fullNameMapper.toDto(testApplication.getApplicantName()),
@@ -343,7 +344,7 @@ public class ApplicationServiceIntegrationTest {
                     ApplicationStatus.DONE,
                     UUID.randomUUID());
 
-            assertThrows(IllegalArgumentException.class, () -> applicationService.update(request));
+            assertThrows(DepartmentException.class, () -> applicationService.update(request));
         }
     }
 
