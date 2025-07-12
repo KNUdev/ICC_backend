@@ -12,8 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
-import ua.knu.knudev.employeemanager.domain.embeddable.MultiLanguageField;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
@@ -29,6 +28,7 @@ import ua.knu.knudev.fileserviceapi.request.GalleryItemUploadRequest;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
+import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.integrationtests.config.IntegrationTestsConfig;
 
 import java.sql.Time;
