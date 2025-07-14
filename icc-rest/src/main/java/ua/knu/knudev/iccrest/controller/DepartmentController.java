@@ -66,7 +66,7 @@ public class DepartmentController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
     })
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<DepartmentDto> getAll(@RequestBody @Valid @Parameter(
             name = "Department receiving request",
