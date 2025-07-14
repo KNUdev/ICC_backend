@@ -4,6 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
+import ua.knu.knudev.applicationmanagerapi.exception.DepartmentException;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
 import ua.knu.knudev.employeemanagerapi.exception.SectorException;
 import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
@@ -39,7 +41,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEmployeeException(EmployeeException exception) {
         return createErrorResponse("EMPLOYEE_EXCEPTION", exception.getMessage(), 400);
     }
-    
+
     @ExceptionHandler(SectorException.class)
     public ResponseEntity<ErrorResponse> handleSectorException(SectorException exception) {
         return createErrorResponse("SECTOR_EXCEPTION", exception.getMessage(), 400);
@@ -68,6 +70,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<ErrorResponse> handleTokenException(TokenException exception) {
         return createErrorResponse("TOKEN_EXCEPTION", exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ErrorResponse> handleApplicationException(ApplicationException exception) {
+        return createErrorResponse("APPLICATION_EXCEPTION", exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(DepartmentException.class)
+    public ResponseEntity<ErrorResponse> handleDepartmentException(DepartmentException exception) {
+        return createErrorResponse("DEPARTMENT_EXCEPTION", exception.getMessage(), 400);
     }
 
 }
