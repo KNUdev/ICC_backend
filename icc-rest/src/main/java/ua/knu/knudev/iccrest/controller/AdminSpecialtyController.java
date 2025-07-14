@@ -172,7 +172,7 @@ public class AdminSpecialtyController {
             @Parameter(name = "pageNumber", description = "Page number", example = "0"),
             @Parameter(name = "pageSize", description = "Number of sectors per page", example = "10")
     })
-    @GetMapping("/getAll")
+    @PostMapping("/getAll")
     public Page<SpecialtyDto> getSpecialtiesByFilter
             (@RequestBody @Valid SpecialtyReceivingRequest specialtyReceivingRequest) {
         return specialtyApi.getAll(specialtyReceivingRequest);

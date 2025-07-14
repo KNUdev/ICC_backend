@@ -89,7 +89,7 @@ public class AdminApplicationController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<ApplicationDto> getAll(@RequestBody @Valid @Parameter(
             name = "Application receiving request",
