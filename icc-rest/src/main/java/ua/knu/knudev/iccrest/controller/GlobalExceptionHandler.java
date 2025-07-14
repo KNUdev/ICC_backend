@@ -1,7 +1,10 @@
 package ua.knu.knudev.iccrest.controller;
 
+import ch.qos.logback.core.LogbackException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
@@ -14,6 +17,8 @@ import ua.knu.knudev.icccommon.exception.FileException;
 import ua.knu.knudev.iccrest.utils.ErrorResponse;
 import ua.knu.knudev.iccsecurity.exception.AccountAuthException;
 import ua.knu.knudev.iccsecurity.exception.TokenException;
+
+import javax.security.auth.login.LoginException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -82,4 +87,23 @@ public class GlobalExceptionHandler {
         return createErrorResponse("DEPARTMENT_EXCEPTION", exception.getMessage(), 400);
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(SecurityException exception) {
+        return createErrorResponse("SECURITY_EXCEPTION", exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(LoginException.class)
+    public ResponseEntity<ErrorResponse> handleLoginException(LoginException exception) {
+        return createErrorResponse("LOGIN_EXCEPTION", exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDisabledException(DisabledException exception) {
+        return createErrorResponse("DISABLED_EXCEPTION", exception.getMessage(), 400);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ErrorResponse> handleLockedException(LockedException exception) {
+        return createErrorResponse("LOCKED_EXCEPTION", exception.getMessage(), 400);
+    }
 }
