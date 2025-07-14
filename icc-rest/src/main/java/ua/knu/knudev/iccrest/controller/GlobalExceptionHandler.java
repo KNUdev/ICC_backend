@@ -1,6 +1,5 @@
 package ua.knu.knudev.iccrest.controller;
 
-import ch.qos.logback.core.LogbackException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
