@@ -3,6 +3,7 @@ package ua.knu.knudev.applicationmanagerapi.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +19,7 @@ public record ApplicationCreateRequest(
         @Schema(description = "Name of the applicant",
                 example = "Jane Smith",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "This field cannot be null")
+        @NotNull(message = "This field cannot be null")
         FullNameDto applicantName,
 
         @Schema(description = "Email of the applicant",
