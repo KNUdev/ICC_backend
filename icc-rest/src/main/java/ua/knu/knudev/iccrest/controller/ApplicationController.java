@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.applicationmanagerapi.api.ApplicationApi;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationCreateRequest;
 import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
 import ua.knu.knudev.iccsecurityapi.response.ErrorResponse;
 
@@ -27,6 +28,30 @@ import java.util.UUID;
 public class ApplicationController {
 
     private final ApplicationApi applicationApi;
+
+    @Operation(summary = "Create a new application",
+            description = "Creates a new application using the provided request data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Application successfully created",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApplicationDto.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid request data",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/create")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApplicationDto create(
+            @Parameter(description = "Application creation request body",
+                    required = true,
+                    in = ParameterIn.DEFAULT,
+                    schema = @Schema(implementation = ApplicationCreateRequest.class))
+            @RequestBody @Valid ApplicationCreateRequest request) {
+        return applicationApi.create(request);
+    }
 
     @Operation(summary = "Get application by ID")
     @ApiResponses(value = {

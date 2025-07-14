@@ -16,7 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.applicationmanagerapi.api.ApplicationApi;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
-import ua.knu.knudev.applicationmanagerapi.request.*;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationAddAssignedEmployeeRequest;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationRemoveAssignedEmployeeRequest;
+import ua.knu.knudev.applicationmanagerapi.request.ApplicationUpdateRequest;
 import ua.knu.knudev.iccsecurityapi.response.ErrorResponse;
 
 import java.util.UUID;
@@ -27,30 +30,6 @@ import java.util.UUID;
 public class AdminApplicationController {
 
     private final ApplicationApi applicationApi;
-
-    @Operation(summary = "Create a new application",
-            description = "Creates a new application using the provided request data")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
-                    description = "Application successfully created",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApplicationDto.class))),
-            @ApiResponse(responseCode = "400",
-                    description = "Invalid request data",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @PostMapping("/create")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApplicationDto create(
-            @Parameter(description = "Application creation request body",
-                    required = true,
-                    in = ParameterIn.DEFAULT,
-                    schema = @Schema(implementation = ApplicationCreateRequest.class))
-            @RequestBody @Valid ApplicationCreateRequest request) {
-        return applicationApi.create(request);
-    }
 
     @Operation(summary = "Update an existing application",
             description = "Updates an existing application with the provided data")
@@ -185,7 +164,7 @@ public class AdminApplicationController {
             in = ParameterIn.DEFAULT,
             required = true,
             schema = @Schema(implementation = ApplicationRemoveAssignedEmployeeRequest.class))
-                                                     ApplicationRemoveAssignedEmployeeRequest request) {
+                                                 ApplicationRemoveAssignedEmployeeRequest request) {
         return applicationApi.removeAssignedEmployee(request);
     }
 }
