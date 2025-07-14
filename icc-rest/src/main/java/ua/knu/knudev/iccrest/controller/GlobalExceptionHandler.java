@@ -1,9 +1,12 @@
 package ua.knu.knudev.iccrest.controller;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ua.knu.knudev.applicationmanagerapi.exception.ApplicationException;
@@ -14,25 +17,58 @@ import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.fileserviceapi.exception.GalleryItemException;
 import ua.knu.knudev.icccommon.exception.FileException;
 import ua.knu.knudev.iccrest.utils.ErrorResponse;
+import ua.knu.knudev.iccrest.utils.ValidationErrorResponse;
 import ua.knu.knudev.iccsecurity.exception.AccountAuthException;
 import ua.knu.knudev.iccsecurity.exception.TokenException;
 
 import javax.security.auth.login.LoginException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private ResponseEntity<ErrorResponse> createErrorResponse(
-            String errorCode,
-            String message,
-            int status
-    ) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                errorCode,
-                message,
-                status
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
+            MethodArgumentNotValidException exception) {
+
+        Map<String, String> errors = new HashMap<>();
+        exception.getBindingResult().getFieldErrors().forEach((error) -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        ValidationErrorResponse errorResponse = ValidationErrorResponse.of(
+                "VALIDATION_ERROR",
+                "Validation failed",
+                HttpStatus.BAD_REQUEST.value(),
+                errors
         );
-        return ResponseEntity.status(HttpStatus.valueOf(status)).body(errorResponse);
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException exception) {
+
+        Map<String, String> errors = exception.getConstraintViolations()
+                .stream()
+                .collect(Collectors.toMap(
+                        this::getPropertyPath,
+                        ConstraintViolation::getMessage
+                ));
+
+        ValidationErrorResponse errorResponse = ValidationErrorResponse.of(
+                "VALIDATION_ERROR",
+                "Validation failed",
+                HttpStatus.BAD_REQUEST.value(),
+                errors
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -105,4 +141,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleLockedException(LockedException exception) {
         return createErrorResponse("LOCKED_EXCEPTION", exception.getMessage(), 400);
     }
+
+    private ResponseEntity<ErrorResponse> createErrorResponse(
+            String errorCode,
+            String message,
+            int status
+    ) {
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode,
+                message,
+                status
+        );
+        return ResponseEntity.status(HttpStatus.valueOf(status)).body(errorResponse);
+    }
+
+    private String getPropertyPath(ConstraintViolation<?> violation) {
+        String propertyPath = violation.getPropertyPath().toString();
+        int lastDotIndex = propertyPath.lastIndexOf('.');
+        return lastDotIndex >= 0 ? propertyPath.substring(lastDotIndex + 1) : propertyPath;
+    }
+
 }
