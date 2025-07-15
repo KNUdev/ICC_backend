@@ -38,8 +38,10 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         addIfNotNull(predicate, qApplication.applicantEmail, request.applicantEmail());
         addIfNotNull(predicate, qApplication.problemDescription, request.problemDescription());
         addIfNotNull(predicate, qApplication.problemPhoto, request.problemPhoto());
-        addIfNotNull(predicate, qApplication.department.name.en, request.departmentName().getEn());
-        addIfNotNull(predicate, qApplication.department.name.uk, request.departmentName().getUk());
+        if (request.departmentName() != null) {
+            addIfNotNull(predicate, qApplication.department.name.en, request.departmentName().getEn());
+            addIfNotNull(predicate, qApplication.department.name.uk, request.departmentName().getUk());
+        }
         addIfNotNull(predicate, qApplication.status, request.status());
         if (request.assignedEmployeeIds() != null && !request.assignedEmployeeIds().isEmpty()) {
             predicate.and(qApplication.assignedEmployeeIds.any().in(request.assignedEmployeeIds()));
