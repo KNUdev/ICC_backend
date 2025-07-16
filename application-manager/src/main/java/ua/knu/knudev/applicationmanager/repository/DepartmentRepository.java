@@ -24,6 +24,9 @@ import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
 
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
+    boolean existsByName_En(String nameEn);
+    boolean existsByName_Uk(String nameUk);
+
     QDepartment qDepartment = QDepartment.department;
     QApplication qApplication = QApplication.application;
 

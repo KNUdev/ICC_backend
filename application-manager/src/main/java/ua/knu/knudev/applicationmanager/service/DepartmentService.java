@@ -34,6 +34,11 @@ public class DepartmentService implements DepartmentApi {
     @Override
     @Transactional
     public DepartmentDto create(MultiLanguageFieldDto departmentName) {
+        if (departmentRepository.existsByName_En(departmentName.getEn())
+                || departmentRepository.existsByName_Uk(departmentName.getUk())) {
+            throw new DepartmentException("Department already exists");
+        }
+
         Department department = Department.builder()
                 .createdAt(LocalDateTime.now())
                 .name(multiLanguageFieldMapper.toDomain(departmentName))

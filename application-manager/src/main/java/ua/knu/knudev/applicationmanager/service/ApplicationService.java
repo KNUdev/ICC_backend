@@ -42,6 +42,7 @@ public class ApplicationService implements ApplicationApi {
     private final FullNameMapper fullNameMapper;
 
     @Override
+    @Transactional
     public ApplicationDto create(ApplicationCreateRequest request) {
         Department department = getDepartmentById(request.departmentId());
 
@@ -60,6 +61,9 @@ public class ApplicationService implements ApplicationApi {
                 .assignedEmployeeIds(new HashSet<>())
                 .build();
 
+        department.setApplication(application);
+
+        departmentRepository.save(department);
         application = applicationRepository.save(application);
 
         return applicationMapper.toDto(application);
@@ -79,7 +83,6 @@ public class ApplicationService implements ApplicationApi {
         application.setCompletedAt(getOrDefault(request.completedAt(), application.getCompletedAt()));
         application.setProblemDescription(getOrDefault(request.problemDescription(), application.getProblemDescription()));
         application.setStatus(getOrDefault(request.status(), application.getStatus()));
-
 
         application = applicationRepository.save(application);
         return applicationMapper.toDto(application);

@@ -43,4 +43,8 @@ public class Department {
             inverseJoinColumns = @JoinColumn(name = "application_id")
     )
     private Set<Application> applications;
+
+    public void setApplication(Application application) {
+        this.applications.add(application);
+    }
 }
