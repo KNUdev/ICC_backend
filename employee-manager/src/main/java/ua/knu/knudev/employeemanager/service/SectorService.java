@@ -46,11 +46,14 @@ public class SectorService implements SectorApi {
     @Override
     @Transactional
     public SectorDto create(@Valid SectorCreationRequest request) {
-        Set<UUID> ids = request.specialties().stream()
-                .map(SpecialtyDto::id)
-                .collect(Collectors.toSet());
+        Set<Specialty> existingSpecialties = new HashSet<>();
 
-        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+        if(!request.specialties().isEmpty()) {
+            Set<UUID> ids = request.specialties().stream()
+                    .map(SpecialtyDto::id)
+                    .collect(Collectors.toSet());
+            existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+        }
 
         Sector sector = Sector.builder()
                 .createdAt(LocalDateTime.now())
