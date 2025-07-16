@@ -20,7 +20,6 @@ public record SectorCreationRequest(
         )
         MultiLanguageFieldDto name,
 
-        @NotNull(message = "Specialties can not be null")
         @Schema(
                 description = "A set of sector specialties",
                 requiredMode = Schema.RequiredMode.REQUIRED,
