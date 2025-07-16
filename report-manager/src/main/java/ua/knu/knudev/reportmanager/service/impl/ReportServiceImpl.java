@@ -10,6 +10,7 @@ import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+
     @Override
     public List<ReportRowDto> fetchReportData() {
         return List.of(
