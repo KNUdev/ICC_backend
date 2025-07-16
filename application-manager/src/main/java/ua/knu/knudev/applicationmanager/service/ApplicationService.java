@@ -26,6 +26,7 @@ import ua.knu.knudev.icccommon.mapper.FullNameMapper;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
@@ -52,11 +53,34 @@ public class ApplicationService implements ApplicationApi {
         Application application = Application.builder()
                 .applicantName(applicantName)
                 .applicantEmail(request.applicantEmail())
+                .isPrivate(false)
                 .receivedAt(LocalDateTime.now())
                 .problemDescription(request.problemDescription())
                 .problemPhoto(uploadedProblemPhoto)
                 .status(request.status())
                 .department(department)
+                .assignedEmployeeIds(new HashSet<>())
+                .build();
+
+        application = applicationRepository.save(application);
+
+        return applicationMapper.toDto(application);
+    }
+
+    @Override
+    public ApplicationDto createPrivateApplication(PrivateApplicationCreateRequest request) {
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
+
+        FullName applicantName = fullNameMapper.toDomain(request.applicantName());
+
+        Application application = Application.builder()
+                .applicantName(applicantName)
+                .applicantEmail(request.applicantEmail())
+                .isPrivate(true)
+                .receivedAt(LocalDateTime.now())
+                .problemDescription(request.problemDescription())
+                .problemPhoto(uploadedProblemPhoto)
+                .status(request.status())
                 .assignedEmployeeIds(new HashSet<>())
                 .build();
 
@@ -90,6 +114,13 @@ public class ApplicationService implements ApplicationApi {
     public ApplicationDto getById(UUID applicationId) {
         Application application = getApplicationById(applicationId);
         return applicationMapper.toDto(application);
+    }
+
+    @Override
+    public List<ApplicationDto> getByAssignedEmployeeId(UUID employeeId) {
+        List<Application> applications = applicationRepository.findApplicationsByAssignedEmployeeIds(employeeId);
+
+        return applicationMapper.toDtos(applications);
     }
 
     @Override
