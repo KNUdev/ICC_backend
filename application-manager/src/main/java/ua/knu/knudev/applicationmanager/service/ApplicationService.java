@@ -118,7 +118,8 @@ public class ApplicationService implements ApplicationApi {
 
     @Override
     public List<ApplicationDto> getByAssignedEmployeeId(UUID employeeId) {
-        List<Application> applications = applicationRepository.findApplicationsByAssignedEmployeeIds(employeeId);
+        List<Application> applications = applicationRepository.findApplicationsByAssignedEmployeeIds(employeeId)
+                .orElseThrow(() -> new ApplicationException("Applications assigned to employee with id " + employeeId + " not found"));
 
         return applicationMapper.toDtos(applications);
     }

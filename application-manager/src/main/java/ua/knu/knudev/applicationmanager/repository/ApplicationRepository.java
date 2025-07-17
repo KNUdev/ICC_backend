@@ -16,6 +16,7 @@ import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
@@ -79,5 +80,5 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
         }
     }
 
-    List<Application> findApplicationsByAssignedEmployeeIds(UUID assignedEmployeeId);
+    Optional<List<Application>> findApplicationsByAssignedEmployeeIds(UUID assignedEmployeeId);
 }
