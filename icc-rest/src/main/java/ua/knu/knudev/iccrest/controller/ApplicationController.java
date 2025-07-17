@@ -18,8 +18,10 @@ import ua.knu.knudev.applicationmanagerapi.api.ApplicationApi;
 import ua.knu.knudev.applicationmanagerapi.dto.ApplicationDto;
 import ua.knu.knudev.applicationmanagerapi.request.ApplicationCreateRequest;
 import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
+import ua.knu.knudev.applicationmanagerapi.request.PrivateApplicationCreateRequest;
 import ua.knu.knudev.iccsecurityapi.response.ErrorResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -53,6 +55,30 @@ public class ApplicationController {
         return applicationApi.create(request);
     }
 
+    @Operation(summary = "Create a new private application",
+            description = "Creates a new private application using the provided request data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Private application successfully created",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApplicationDto.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid request data",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/private/create")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApplicationDto createPrivate(
+            @Parameter(description = "Private application creation request body",
+                    required = true,
+                    in = ParameterIn.DEFAULT,
+                    schema = @Schema(implementation = ApplicationCreateRequest.class))
+            @RequestBody @Valid PrivateApplicationCreateRequest request) {
+        return applicationApi.createPrivateApplication(request);
+    }
+
     @Operation(summary = "Get application by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -70,6 +96,20 @@ public class ApplicationController {
     @ResponseStatus(HttpStatus.OK)
     public ApplicationDto getById(@PathVariable @Valid UUID applicationId) {
         return applicationApi.getById(applicationId);
+    }
+
+    @Operation(summary = "Get applications by assigned employee id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Application found",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApplicationDto.class))),
+    })
+    @GetMapping("/assigned-employee/{employeeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ApplicationDto> getByAssignedEmployeeId(@PathVariable @Valid UUID employeeId) {
+        return applicationApi.getByAssignedEmployeeId(employeeId);
     }
 
     @Operation(summary = "Get all applications")

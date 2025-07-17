@@ -15,6 +15,8 @@ import ua.knu.knudev.applicationmanager.domain.QDepartment;
 import ua.knu.knudev.applicationmanagerapi.request.ApplicationGetAllRequest;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static ua.knu.knudev.icccommon.config.QEntityManagerUtil.getQueryFactory;
@@ -43,6 +45,7 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
             addIfNotNull(predicate, qApplication.department.name.uk, request.departmentName().getUk());
         }
         addIfNotNull(predicate, qApplication.status, request.status());
+        addIfNotNull(predicate, qApplication.isPrivate, request.isPrivate());
         if (request.assignedEmployeeIds() != null && !request.assignedEmployeeIds().isEmpty()) {
             predicate.and(qApplication.assignedEmployeeIds.any().in(request.assignedEmployeeIds()));
         }
@@ -76,4 +79,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
             predicate.and(field.eq(value));
         }
     }
+
+    Optional<List<Application>> findApplicationsByAssignedEmployeeIds(UUID assignedEmployeeId);
 }

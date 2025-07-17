@@ -203,6 +203,7 @@ public class ApplicationServiceIntegrationTest {
 
         application.setApplicantEmail(TEST_APPLICANT_EMAIL);
         application.setApplicantName(fullName);
+        application.setIsPrivate(false);
         application.setDepartment(testDepartment);
         application.setProblemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION);
         application.setProblemPhoto(problemPhotoName);
@@ -373,7 +374,8 @@ public class ApplicationServiceIntegrationTest {
                     new MultiLanguageFieldDto(TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN),
                     null,
                     1,
-                    10);
+                    10,
+                    false);
 
             Page<ApplicationDto> response = applicationService.getAll(request);
 
@@ -404,7 +406,8 @@ public class ApplicationServiceIntegrationTest {
                     new MultiLanguageFieldDto(TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN),
                     null,
                     1,
-                    10);
+                    10,
+                    false);
 
             Page<ApplicationDto> response = applicationService.getAll(request);
 
