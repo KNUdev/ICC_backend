@@ -199,6 +199,7 @@ public class DepartmentServiceIntegrationTest {
 
         application.setApplicantEmail(TEST_APPLICANT_EMAIL);
         application.setApplicantName(fullName);
+        application.setIsPrivate(false);
         application.setDepartment(testDepartment);
         application.setProblemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION);
         application.setProblemPhoto(problemPhotoName);

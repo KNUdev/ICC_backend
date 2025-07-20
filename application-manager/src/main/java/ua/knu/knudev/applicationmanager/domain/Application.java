@@ -32,6 +32,9 @@ public class Application {
     private String applicantEmail;
 
     @Column(nullable = false)
+    private Boolean isPrivate;
+
+    @Column(nullable = false)
     private LocalDateTime receivedAt;
 
     private LocalDateTime completedAt;

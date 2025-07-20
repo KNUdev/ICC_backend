@@ -2,7 +2,6 @@ package ua.knu.knudev.applicationmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.icccommon.enums.ApplicationStatus;
@@ -54,5 +53,9 @@ public record ApplicationGetAllRequest(
         Integer pageNumber,
 
         @Schema(description = "Page size", example = "10", implementation = Integer.class)
-        Integer pageSize
-) {}
+        Integer pageSize,
+
+        @Schema(description = "Filters private or non-private applications")
+        Boolean isPrivate
+) {
+}

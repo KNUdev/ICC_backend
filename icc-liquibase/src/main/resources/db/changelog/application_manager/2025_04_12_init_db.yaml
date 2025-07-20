@@ -71,6 +71,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: is_private
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
                   name: received_at
                   type: datetime
                   constraints:
