@@ -13,7 +13,7 @@ import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.reportmanager.enums.ReportFields;
 import ua.knu.knudev.reportmanager.exception.ReportGenerationException;
-import ua.knu.knudev.reportmanagerapi.api.reportServiceApi;
+import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +26,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class reportService implements reportServiceApi {
+public class ReportService implements ReportServiceApi {
 
     private final EmployeeApi employeeApi;
     Workbook excelWorkbook = new XSSFWorkbook();
@@ -43,7 +43,7 @@ public class reportService implements reportServiceApi {
         try {
             return createExcelFile(reportName);
         } catch (IOException e) {
-            throw new ReportGenerationException("Failed to create excel file", e);
+            throw new ReportGenerationException("Failed to create excel file");
         }
     }
 
@@ -116,13 +116,13 @@ public class reportService implements reportServiceApi {
     }
 
     private CSVFormat getCSVFormat(){
-        String[] headers = {ReportFields.ID.getLabel(),
-                ReportFields.NAME_SURNAME.getLabel(),
-                ReportFields.PHONE_NUMBER.getLabel(),
-                ReportFields.EMAIL.getLabel(),
-                ReportFields.POSITION.getLabel(),
-                ReportFields.SALARY.getLabel(),
-                ReportFields.CONTRACT_VALID_TO.getLabel()};
+        String[] headers = {ReportFields.ID.getValue(),
+                ReportFields.NAME_SURNAME.getValue(),
+                ReportFields.PHONE_NUMBER.getValue(),
+                ReportFields.EMAIL.getValue(),
+                ReportFields.POSITION.getValue(),
+                ReportFields.SALARY.getValue(),
+                ReportFields.CONTRACT_VALID_TO.getValue()};
 
         return CSVFormat.DEFAULT.builder()
                 .setHeader(headers)
@@ -156,7 +156,7 @@ public class reportService implements reportServiceApi {
         tempIndex = 0;
         for (ReportFields field : ReportFields.values()) {
             headerCell = header.createCell(tempIndex);
-            headerCell.setCellValue(field.getLabel());
+            headerCell.setCellValue(field.getValue());
             headerCell.setCellStyle(headerStyle);
 
             tempIndex++;

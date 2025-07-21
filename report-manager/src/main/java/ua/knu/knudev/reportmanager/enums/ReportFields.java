@@ -1,5 +1,9 @@
 package ua.knu.knudev.reportmanager.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
 public enum ReportFields {
     ID("ІД", 1500),
     NAME_SURNAME("Ім'я та прізвище", 12000),
@@ -9,19 +13,8 @@ public enum ReportFields {
     SALARY("Заробітня плата", 4000),
     CONTRACT_VALID_TO("Дата закінчення контракту", 4000);
 
+    @Getter
     private final String value;
+    @Getter
     private final int width;
-
-    ReportFields(String value, int width) {
-        this.value = value;
-        this.width = width;
-    }
-
-    public String getLabel() {
-        return value;
-    }
-
-    public int getWidth() {
-        return width;
-    }
 }
