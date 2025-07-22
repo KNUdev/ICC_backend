@@ -8,6 +8,7 @@ import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 
+import java.util.Set;
 import java.util.UUID;
 
 public non-sealed interface EmployeeApi extends AccountManagementApi, AvatarManagementApi {
@@ -23,5 +24,6 @@ public non-sealed interface EmployeeApi extends AccountManagementApi, AvatarMana
     boolean existsById(UUID id);
 
     EmployeeDto update(@Valid EmployeeUpdateRequest request);
-    
+
+    Set<GetEmployeeResponse> getAll();
 }
