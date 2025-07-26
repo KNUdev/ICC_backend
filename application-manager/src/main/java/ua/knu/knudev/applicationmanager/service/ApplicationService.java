@@ -47,7 +47,8 @@ public class ApplicationService implements ApplicationApi {
     public ApplicationDto create(ApplicationCreateRequest request) {
         Department department = getDepartmentById(request.departmentId());
 
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhoto().getName(),
+                ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
 
@@ -68,7 +69,8 @@ public class ApplicationService implements ApplicationApi {
         departmentRepository.save(department);
         application = applicationRepository.save(application);
 
-        return applicationMapper.toDto(application);
+        String imagePath = imageServiceApi.getPathByFilename(application.getProblemPhoto(), ImageSubfolder.APPLICATIONS);
+        return buildApplicationDto(application, imagePath);
     }
 
     @Override
