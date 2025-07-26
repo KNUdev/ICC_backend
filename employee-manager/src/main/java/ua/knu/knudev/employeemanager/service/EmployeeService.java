@@ -44,8 +44,10 @@ import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -251,6 +253,13 @@ public class EmployeeService implements EmployeeApi {
         imageServiceApi.removeByFilename(avatarFilename, ImageSubfolder.EMPLOYEE_AVATARS);
         employee.setAvatar(null);
         employeeRepository.save(employee);
+    }
+
+    @Override
+    public Set<GetEmployeeResponse> getAll() {
+        return employeeRepository.findAll().stream()
+                .map(this::mapEmployeeToResponse)
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -37,7 +37,8 @@ public record ApplicationDto(
         @Schema(description = "Current status of the application", example = "IN_PROGRESS")
         ApplicationStatus status,
 
-        @Schema(description = "Identifier of the department handling the application", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+        @Schema(description = "Identifier of the department handling the application." +
+                "For private applications this field is null", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
         UUID departmentId,
 
         @Schema(description = "Set of employee IDs assigned to the application", example = "[\"b15d6f2e-5bc8-4c8f-bf4d-3c0e2a0d3e98\", \"a36d6f2e-1234-5678-bf4d-123456789abc\"]")
