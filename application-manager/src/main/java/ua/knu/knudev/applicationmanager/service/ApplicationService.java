@@ -68,8 +68,7 @@ public class ApplicationService implements ApplicationApi {
         departmentRepository.save(department);
         application = applicationRepository.save(application);
 
-        String imagePath = imageServiceApi.getPathByFilename(application.getProblemPhoto(), ImageSubfolder.APPLICATIONS);
-        return buildApplicationDto(application, imagePath);
+        return applicationMapper.toDto(application);
     }
 
     @Override
