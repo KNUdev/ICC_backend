@@ -66,7 +66,8 @@ public class ApplicationService implements ApplicationApi {
         departmentRepository.save(department);
         application = applicationRepository.save(application);
 
-        return applicationMapper.toDto(application);
+        String imagePath = imageServiceApi.getPathByFilename(application.getProblemPhoto(), ImageSubfolder.APPLICATIONS);
+        return buildApplicationDto(application, imagePath);
     }
 
     @Override
@@ -139,6 +140,21 @@ public class ApplicationService implements ApplicationApi {
         application.getAssignedEmployeeIds().remove(request.employeeId());
         application = applicationRepository.save(application);
         return applicationMapper.toDto(application);
+    }
+
+    private ApplicationDto buildApplicationDto(Application application, String problemPhotoPath) {
+        return ApplicationDto.builder()
+                .id(application.getId())
+                .applicantName(application.getApplicantName())
+                .applicantEmail(application.getApplicantEmail())
+                .receivedAt(application.getReceivedAt())
+                .completedAt(application.getCompletedAt())
+                .problemDescription(application.getProblemDescription())
+                .problemPhoto(problemPhotoPath)
+                .status(application.getStatus())
+                .departmentId(application.getDepartment().getId())
+                .assignedEmployeeIds(application.getAssignedEmployeeIds())
+                .build();
     }
 
     private String uploadProblemPhoto(MultipartFile problemPhoto, String imageName, ImageSubfolder subfolder) {
