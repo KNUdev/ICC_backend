@@ -225,7 +225,6 @@ public class ApplicationServiceIntegrationTest {
                 .applicantEmail(TEST_APPLICANT_EMAIL)
                 .status(TEST_APPLICATION_STATUS)
                 .problemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION)
-                .problemPhotoName(TEST_APPLICATION_PROBLEM_PHOTO_NAME)
                 .problemPhoto(TEST_APPLICATION_PHOTO_FILE)
                 .departmentId(testDepartment.getId())
                 .build();
@@ -239,7 +238,6 @@ public class ApplicationServiceIntegrationTest {
                 .applicantEmail(TEST_APPLICANT_EMAIL)
                 .status(TEST_APPLICATION_STATUS)
                 .problemDescription(TEST_APPLICATION_PROBLEM_DESCRIPTION)
-                .problemPhotoName(TEST_APPLICATION_PROBLEM_PHOTO_NAME)
                 .problemPhoto(TEST_APPLICATION_PHOTO_FILE)
                 .departmentId(UUID.randomUUID())
                 .build();
@@ -262,7 +260,6 @@ public class ApplicationServiceIntegrationTest {
             assertEquals(testApplication.getDepartment().getId(), response.departmentId());
             assertEquals(testApplication.getStatus(), response.status());
             assertEquals(testApplication.getProblemDescription(), response.problemDescription());
-            assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());
             assertEquals(testApplication.getReceivedAt(), response.receivedAt());
         }
 
@@ -291,7 +288,6 @@ public class ApplicationServiceIntegrationTest {
             assertEquals(testApplication.getDepartment().getId(), response.departmentId());
             assertEquals(testApplication.getStatus(), response.status());
             assertEquals(testApplication.getProblemDescription(), response.problemDescription());
-            assertEquals(testApplication.getProblemPhoto(), response.problemPhoto());
             assertTrue(applicationRepository.existsById(response.id()));
         }
 
@@ -318,7 +314,6 @@ public class ApplicationServiceIntegrationTest {
                     testApplication.getApplicantEmail(),
                     TEST_APPLICATION_COMPLETED_AT,
                     testApplication.getProblemDescription(),
-                    TEST_APPLICATION_PROBLEM_PHOTO_NAME,
                     TEST_APPLICATION_PHOTO_FILE,
                     ApplicationStatus.DONE,
                     testApplication.getDepartment().getId());
@@ -340,7 +335,6 @@ public class ApplicationServiceIntegrationTest {
                     testApplication.getApplicantEmail(),
                     TEST_APPLICATION_COMPLETED_AT,
                     testApplication.getProblemDescription(),
-                    TEST_APPLICATION_PROBLEM_PHOTO_NAME,
                     TEST_APPLICATION_PHOTO_FILE,
                     ApplicationStatus.DONE,
                     UUID.randomUUID());

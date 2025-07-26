@@ -25,11 +25,9 @@ import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.mapper.FullNameMapper;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,8 +45,8 @@ public class ApplicationService implements ApplicationApi {
     public ApplicationDto create(ApplicationCreateRequest request) {
         Department department = getDepartmentById(request.departmentId());
 
-        String filenamePath = request.problemPhoto().getOriginalFilename();
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filenamePath,
+        String filename = request.problemPhoto().getOriginalFilename();
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filename,
                 ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
@@ -70,13 +68,13 @@ public class ApplicationService implements ApplicationApi {
         departmentRepository.save(department);
         application = applicationRepository.save(application);
 
-        String imagePath = imageServiceApi.getPathByFilename(application.getProblemPhoto(), ImageSubfolder.APPLICATIONS);
-        return buildApplicationDto(application, imagePath);
+        return buildApplicationDto(application);
     }
 
     @Override
     public ApplicationDto createPrivateApplication(PrivateApplicationCreateRequest request) {
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhotoName(), ImageSubfolder.APPLICATIONS);
+        String filename = request.problemPhoto().getOriginalFilename();
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filename, ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
 
@@ -93,7 +91,7 @@ public class ApplicationService implements ApplicationApi {
 
         application = applicationRepository.save(application);
 
-        return applicationMapper.toDto(application);
+        return buildApplicationDto(application);
     }
 
     @Override
@@ -112,14 +110,15 @@ public class ApplicationService implements ApplicationApi {
         application.setStatus(getOrDefault(request.status(), application.getStatus()));
 
         application = applicationRepository.save(application);
-        return applicationMapper.toDto(application);
+        return buildApplicationDto(application);
     }
 
     @Override
     @Transactional
     public ApplicationDto getById(UUID applicationId) {
         Application application = getApplicationById(applicationId);
-        return applicationMapper.toDto(application);
+
+        return buildApplicationDto(application);
     }
 
     @Override
@@ -127,7 +126,8 @@ public class ApplicationService implements ApplicationApi {
         List<Application> applications = applicationRepository.findApplicationsByAssignedEmployeeIds(employeeId)
                 .orElseThrow(() -> new ApplicationException("Applications assigned to employee with id " + employeeId + " not found"));
 
-        return applicationMapper.toDtos(applications);
+        return applications.stream().map(this::buildApplicationDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -138,7 +138,7 @@ public class ApplicationService implements ApplicationApi {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Page<Application> applications = applicationRepository.findAllBySearchQuery(paging, request);
 
-        return applications.map(applicationMapper::toDto);
+        return applications.map(this::buildApplicationDto);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ApplicationService implements ApplicationApi {
 
         application.addAssignedEmployee(request.employeeId());
         application = applicationRepository.save(application);
-        return applicationMapper.toDto(application);
+        return buildApplicationDto(application);
     }
 
     @Override
@@ -173,10 +173,12 @@ public class ApplicationService implements ApplicationApi {
 
         application.getAssignedEmployeeIds().remove(request.employeeId());
         application = applicationRepository.save(application);
-        return applicationMapper.toDto(application);
+        return buildApplicationDto(application);
     }
 
-    private ApplicationDto buildApplicationDto(Application application, String problemPhotoPath) {
+    private ApplicationDto buildApplicationDto(Application application) {
+        String imagePath = imageServiceApi.getPathByFilename(application.getProblemPhoto(), ImageSubfolder.APPLICATIONS);
+
         return ApplicationDto.builder()
                 .id(application.getId())
                 .applicantName(application.getApplicantName())
@@ -184,7 +186,7 @@ public class ApplicationService implements ApplicationApi {
                 .receivedAt(application.getReceivedAt())
                 .completedAt(application.getCompletedAt())
                 .problemDescription(application.getProblemDescription())
-                .problemPhoto(problemPhotoPath)
+                .problemPhoto(imagePath)
                 .status(application.getStatus())
                 .departmentId(application.getDepartment().getId())
                 .assignedEmployeeIds(application.getAssignedEmployeeIds())
@@ -199,15 +201,13 @@ public class ApplicationService implements ApplicationApi {
     }
 
     private Application getApplicationById(UUID applicationId) {
-        Application application = applicationRepository.findById(applicationId)
+        return applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ApplicationException("Application with ID: " + applicationId + " not found!"));
-        return application;
     }
 
     private Department getDepartmentById(UUID departmentId) {
-        Department department = departmentRepository.findById(departmentId)
+        return departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentException("Department with ID: " + departmentId + " not found!"));
-        return department;
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {

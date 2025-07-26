@@ -35,12 +35,6 @@ public record ApplicationCreateRequest(
         @Size(max = 3000)
         String problemDescription,
 
-        @Schema(description = "Photo of the reported problem (URL or file path)",
-                example = "http://example.com/images/ac-issue.jpg",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "This field cannot be null")
-        String problemPhotoName,
-
         @Schema(description = "Photo which was uploaded to describe the problem",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "This field cannot be null")
