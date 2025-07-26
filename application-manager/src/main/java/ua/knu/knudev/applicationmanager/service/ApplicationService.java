@@ -47,7 +47,8 @@ public class ApplicationService implements ApplicationApi {
     public ApplicationDto create(ApplicationCreateRequest request) {
         Department department = getDepartmentById(request.departmentId());
 
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), request.problemPhoto().getName(),
+        String filenamePath = request.problemPhoto().getOriginalFilename();
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filenamePath,
                 ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
