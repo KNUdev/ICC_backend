@@ -65,7 +65,6 @@ public class ApplicationService implements ApplicationApi {
 
         department.setApplication(application);
 
-        departmentRepository.save(department);
         application = applicationRepository.save(application);
 
         return buildApplicationDto(application);
