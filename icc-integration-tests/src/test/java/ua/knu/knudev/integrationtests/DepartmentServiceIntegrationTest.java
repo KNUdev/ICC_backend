@@ -84,6 +84,8 @@ public class DepartmentServiceIntegrationTest {
 
     public static final String TEST_DEPARTMENT_NAME_IN_ENGLISH = "test-department-name";
     public static final String TEST_DEPARTMENT_NAME_IN_UKRAINIAN = "тестове-ім'я-факультету";
+    public static final String NEW_TEST_DEPARTMENT_NAME_IN_ENGLISH = "test-department-name2";
+    public static final String NEW_TEST_DEPARTMENT_NAME_IN_UKRAINIAN = "тестове-ім'я-факультету2";
 
     private final List<String> uploadedAvatarFiles = new ArrayList<>();
     private final List<String> uploadedProblemPhotoFiles = new ArrayList<>();
@@ -245,11 +247,11 @@ public class DepartmentServiceIntegrationTest {
     @DisplayName("Should successfully create department when provided valid data")
     public void should_SuccessfullyCreateDepartment_When_ProvidedValidData() {
         DepartmentDto response = departmentService.create(new MultiLanguageFieldDto(
-                TEST_DEPARTMENT_NAME_IN_ENGLISH, TEST_DEPARTMENT_NAME_IN_UKRAINIAN));
+                NEW_TEST_DEPARTMENT_NAME_IN_ENGLISH, NEW_TEST_DEPARTMENT_NAME_IN_UKRAINIAN));
 
         assertNotNull(response);
-        assertEquals(testDepartment.getName().getEn(), response.name().getEn());
-        assertEquals(testDepartment.getName().getUk(), response.name().getUk());
+        assertEquals(NEW_TEST_DEPARTMENT_NAME_IN_ENGLISH, response.name().getEn());
+        assertEquals(NEW_TEST_DEPARTMENT_NAME_IN_UKRAINIAN, response.name().getUk());
     }
 
     @Test

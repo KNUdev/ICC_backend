@@ -184,3 +184,4 @@ databaseChangeLog:
             referencedTableName: application
             referencedColumnNames: id
             constraintName: fk_department_applications_application
+            onDelete: CASCADE
