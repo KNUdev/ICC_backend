@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_authenticated_employee_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: authenticated_employee
+            schemaName: security_manager
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  autoIncrement: false
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: pk_authenticated_employee
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: administrative_role
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_enabled
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_non_locked
+                  type: boolean
+                  constraints:
+                    nullable: false

@@ -75,7 +75,7 @@ public class EmployeeController {
                             schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<GetEmployeeResponse> getAll(
             @RequestBody @Parameter(

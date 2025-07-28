@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.domain.embeddable.FullName;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.employeemanager.mapper.*;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
@@ -24,21 +24,30 @@ import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.EmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
+import ua.knu.knudev.employeemanagerapi.dto.ShortEmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeCreationRequest;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeReceivingRequest;
-import ua.knu.knudev.employeemanagerapi.request.EmployeeUpdateRequest;
+import ua.knu.knudev.employeemanagerapi.request.*;
+import ua.knu.knudev.employeemanagerapi.response.AccountReceivingResponse;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
+import ua.knu.knudev.icccommon.mapper.FullNameMapper;
+import ua.knu.knudev.iccsecurityapi.api.EmployeeAuthServiceApi;
+import ua.knu.knudev.iccsecurityapi.dto.AuthenticatedEmployeeDto;
+import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
+import ua.knu.knudev.iccsecurityapi.request.EmployeeRegistrationRequest;
+import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,11 +62,12 @@ public class EmployeeService implements EmployeeApi {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final ImageServiceApi imageServiceApi;
+    private final EmployeeAuthServiceApi employeeAuthServiceApi;
     private final SectorRepository sectorRepository;
     private final SpecialtyRepository specialtyRepository;
 
     @Override
-    public EmployeeDto create(EmployeeCreationRequest request) {
+    public EmployeeDto create(@Valid EmployeeCreationRequest request) {
         FullName fullName = fullNameMapper.toDomain(request.fullName());
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
         Specialty specialty = specialtyMapper.toDomain(request.specialty());
@@ -90,6 +100,69 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
+    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) {
+        if (!employeeRepository.existsByEmail(request.email())) {
+            return AccountReceivingResponse.builder()
+                    .shortEmployeeDto(null)
+                    .responseMessage("Account was not registered!")
+                    .build();
+        }
+
+        Employee employee = employeeRepository.findByEmail(request.email())
+                .orElseThrow(() -> new EmployeeException("Employee with email " + request.email() + " not found!"));
+
+        EmployeeRegistrationRequest registrationRequest = EmployeeRegistrationRequest.builder()
+                .email(request.email())
+                .password(request.password())
+                .role(employee.getRole())
+                .build();
+
+        EmployeeRegistrationResponse registrationResponse = employeeAuthServiceApi.create(registrationRequest);
+
+        return AccountReceivingResponse.builder()
+                .shortEmployeeDto(mapEmployeeToShortDto(
+                        employee,
+                        registrationResponse.email()))
+                .responseMessage("The account was successfully registered!")
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public AccountReceivingResponse updateCredentials(@Valid AccountCredentialsUpdateRequest request) {
+        Employee employee = employeeRepository.findById(request.id())
+                .orElseThrow(() -> new EmployeeException("Employee with id " + request.id() + " not found!"));
+
+        AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
+
+        AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
+                authenticatedEmployee.id(),
+                request.email(),
+                request.oldPassword(),
+                request.newPassword(),
+                employee.getRole(),
+                false
+        );
+
+        employeeAuthServiceApi.update(updateRequest);
+
+        if (!employee.getEmail().equals(request.email()) &&
+                request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+            employee.setEmail(request.email());
+            employee = employeeRepository.save(employee);
+        }
+
+        return AccountReceivingResponse.builder()
+                .shortEmployeeDto(mapEmployeeToShortDto(
+                        employee,
+                        employee.getEmail()
+                ))
+                .responseMessage("The account credentials was successfully updated!")
+                .build();
+    }
+
+    @Override
+    @Transactional
     public Page<GetEmployeeResponse> getAll(EmployeeReceivingRequest request) {
         int pageNumber = getOrDefault(request.pageNumber(), 0);
         int pageSize = getOrDefault(request.pageSize(), 10);
@@ -101,36 +174,46 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
-    public EmployeeDto update(EmployeeUpdateRequest request) {
+    public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
-
-        validateUpdate(request);
+        AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
         employee.setUpdatedAt(LocalDateTime.now());
-        employee.setName(getOrDefault(request.fullName(), employee.getName(),
-                fullNameMapper::toDomain
-        ));
-        employee.setEmail(getOrDefault(request.email(), employee.getEmail()));
-        employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
+        employee.setName(getOrDefault(request.fullName(), employee.getName(), fullNameMapper::toDomain));
         employee.setSalaryInUAH(getOrDefault(request.salaryInUAH(), employee.getSalaryInUAH()));
         employee.setIsStudent(getOrDefault(request.isStudent(), employee.getIsStudent()));
         employee.setContractEndDate(getOrDefault(request.contractEndDate(), employee.getContractEndDate()));
-        employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(),
-                workHoursMapper::toDomain
-        ));
+        employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(), workHoursMapper::toDomain));
         employee.setRole(getOrDefault(request.role(), employee.getRole()));
-        employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(),
-                specialtyMapper::toDomain
-        ));
-        employee.setSector(getOrDefault(request.sector(), employee.getSector(),
-                sectorMapper::toDomain
-        ));
 
+        if (request.phoneNumber().matches("^\\d{10,15}$")) {
+            employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
+        }
+        if (specialtyRepository.existsById(request.specialty().id())) {
+            employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(), specialtyMapper::toDomain));
+        }
+        if (sectorRepository.existsById(request.sector().id())) {
+            employee.setSector(getOrDefault(request.sector(), employee.getSector(), sectorMapper::toDomain));
+        }
         if (request.avatarFile() != null) {
             updateAvatar(request.id(), request.avatarFile());
         }
+        if (!employee.getEmail().equals(request.email()) && request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+            employee.setEmail(request.email());
+        }
 
+        AuthenticatedEmployeeUpdateRequest updateRequest = buildAuthenticatedEmployeeUpdateRequest(
+                authenticatedEmployee.id(),
+                request.email(),
+                authenticatedEmployee.password(),
+                request.password(),
+                request.role(),
+                true
+        );
+
+        employeeAuthServiceApi.update(updateRequest);
         Employee savedEmployee = employeeRepository.save(employee);
+
         return employeeMapper.toDto(savedEmployee);
     }
 
@@ -173,7 +256,17 @@ public class EmployeeService implements EmployeeApi {
     }
 
     @Override
+    public Set<GetEmployeeResponse> getAll() {
+        return employeeRepository.findAll().stream()
+                .map(this::mapEmployeeToResponse)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Transactional
     public void deleteById(UUID id) {
+        employeeRepository.findById(id).ifPresent(employee ->
+                employeeAuthServiceApi.deleteByEmail(employee.getEmail()));
         employeeRepository.deleteById(id);
     }
 
@@ -209,6 +302,41 @@ public class EmployeeService implements EmployeeApi {
         );
     }
 
+    private ShortEmployeeDto mapEmployeeToShortDto(
+            Employee employee,
+            String updatedEmail
+    ) {
+        return ShortEmployeeDto.builder()
+                .fullNameDto(
+                        FullNameDto.builder()
+                                .firstName(employee.getName().getFirstName())
+                                .middleName(employee.getName().getMiddleName())
+                                .lastName(employee.getName().getLastName())
+                                .build()
+                )
+                .updatedAt(LocalDateTime.now())
+                .email(updatedEmail)
+                .build();
+    }
+
+    private AuthenticatedEmployeeUpdateRequest buildAuthenticatedEmployeeUpdateRequest(
+            UUID authenticatedEmployeeId,
+            String email,
+            String oldPassword,
+            String newPassword,
+            EmployeeAdministrativeRole role,
+            boolean isAdminUsage
+    ) {
+        return AuthenticatedEmployeeUpdateRequest.builder()
+                .employeeId(authenticatedEmployeeId)
+                .email(email)
+                .oldPassword(oldPassword)
+                .newPassword(newPassword)
+                .role(role)
+                .isAdminUsage(isAdminUsage)
+                .build();
+    }
+
     private Employee getEmployeeById(UUID id) {
         return employeeRepository.findById(id).orElseThrow(
                 () -> new EmployeeException("Employee with id " + id + " not found"));
@@ -227,29 +355,6 @@ public class EmployeeService implements EmployeeApi {
 
     private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
-    }
-
-    private void checkIfEmailIsValid(String email) {
-        if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
-            throw new EmployeeException("Invalid email address:" + email);
-        }
-    }
-
-    private void validateUpdate(EmployeeUpdateRequest request) {
-        checkIfEmailIsValid(request.email());
-        validatePhoneNumber(request.phoneNumber());
-        if (request.sector() != null) {
-            validateSectorNonExistence(request.sector());
-        }
-        if (request.specialty() != null) {
-            validateSpecialtyNonExistence(request.specialty());
-        }
-    }
-
-    private void validatePhoneNumber(String phoneNumber) {
-        if (phoneNumber != null && !phoneNumber.matches("^\\d{10,15}$")) {
-            throw new EmployeeException("Invalid phone number:" + phoneNumber);
-        }
     }
 
     private void validateSectorNonExistence(SectorDto sector) {

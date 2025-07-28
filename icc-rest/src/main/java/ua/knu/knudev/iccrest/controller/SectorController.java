@@ -74,7 +74,7 @@ public class SectorController {
                             schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<SectorDto> getAll(
             @RequestBody @Parameter(

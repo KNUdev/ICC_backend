@@ -39,6 +39,13 @@ spring:
           batch_size: 50
         order_updates: true
         order_inserts: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID:-}
+            client-secret: ${CLIENT_SECRET:-}
 
 logging:
   level:
@@ -70,7 +77,13 @@ application:
         allowed-extensions:
           - pdf
         maximum-size-in-kilobytes: 5120
+  jwt:
+    signing-secret: ${JWT_SIGNING_SECRET:your-secure-secret}
+    issuer: KNUdev
+    expiration: 600000 #10 minutes
+    refresh-token:
+      expiration: 1440000 #24 hours
+
 springdoc:
   swagger-ui:
     path: /api/documentation
-

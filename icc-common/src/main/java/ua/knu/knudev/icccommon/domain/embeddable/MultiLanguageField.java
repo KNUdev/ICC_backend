@@ -1,4 +1,4 @@
-package ua.knu.knudev.employeemanager.domain.embeddable;
+package ua.knu.knudev.icccommon.domain.embeddable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -11,13 +11,10 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class FullName {
+public class MultiLanguageField {
     @Column(nullable = false)
-    private String firstName;
+    private String en;
 
     @Column(nullable = false)
-    private String middleName;
-
-    @Column(nullable = false)
-    private String lastName;
+    private String uk;
 }

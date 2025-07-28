@@ -88,7 +88,7 @@ public class AdminEmployeeController {
                     )
             )
     })
-    @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/update")
     @ResponseStatus(HttpStatus.OK)
     public EmployeeDto update(
             @Valid @RequestBody @Parameter(
@@ -150,7 +150,7 @@ public class AdminEmployeeController {
                             schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    @GetMapping("/all")
+    @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<GetEmployeeResponse> getAll(
             @RequestBody @Parameter(

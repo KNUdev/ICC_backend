@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.employeemanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.employeemanager.mapper.SectorMapper;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
@@ -24,6 +23,7 @@ import ua.knu.knudev.employeemanagerapi.request.SectorCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
 import ua.knu.knudev.employeemanagerapi.request.SectorUpdateRequest;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
+import ua.knu.knudev.icccommon.mapper.MultiLanguageFieldMapper;
 
 
 import java.time.LocalDateTime;
@@ -46,11 +46,14 @@ public class SectorService implements SectorApi {
     @Override
     @Transactional
     public SectorDto create(@Valid SectorCreationRequest request) {
-        Set<UUID> ids = request.specialties().stream()
-                .map(SpecialtyDto::id)
-                .collect(Collectors.toSet());
+        Set<Specialty> existingSpecialties = new HashSet<>();
 
-        Set<Specialty> existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+        if(!request.specialties().isEmpty()) {
+            Set<UUID> ids = request.specialties().stream()
+                    .map(SpecialtyDto::id)
+                    .collect(Collectors.toSet());
+            existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+        }
 
         Sector sector = Sector.builder()
                 .createdAt(LocalDateTime.now())

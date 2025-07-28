@@ -3,7 +3,9 @@ spring:
     url: '
       jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=
       CREATE SCHEMA IF NOT EXISTS APPLICATION_MANAGER\; 
-      CREATE SCHEMA IF NOT EXISTS EMPLOYEE_MANAGER
+      CREATE SCHEMA IF NOT EXISTS EMPLOYEE_MANAGER\;
+      CREATE SCHEMA IF NOT EXISTS GALLERY_MANAGER\;
+      CREATE SCHEMA IF NOT EXISTS SECURITY_MANAGER\;
     '
     driver-class-name: org.h2.Driver
     username: sa
@@ -16,6 +18,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 application:
   minio:
@@ -37,3 +40,9 @@ application:
         allowed-extensions:
           - pdf
         maximum-size-in-kilobytes: 2048
+  jwt:
+    signing-secret: ${JWT_SIGNING_SECRET:your-secure-secret}
+    issuer: KNUdev
+    expiration: 600000 #10 minutes
+    refresh-token:
+      expiration: 1440000 #24 hours

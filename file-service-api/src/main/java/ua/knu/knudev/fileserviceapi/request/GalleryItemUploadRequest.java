@@ -18,10 +18,10 @@ public record GalleryItemUploadRequest(
         UUID creatorId,
         @NotNull(message = "Item cannot be empty")
         @Schema(
-                description = "Image which was uploaded",
+                description = "Item which was uploaded",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        MultipartFile image,
+        MultipartFile item,
         @NotNull(message = "Item name cannot be empty")
         @Schema(
                 description = "Image which was uploaded",
