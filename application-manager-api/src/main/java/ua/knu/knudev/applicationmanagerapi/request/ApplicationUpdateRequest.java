@@ -39,11 +39,6 @@ public record ApplicationUpdateRequest(
         @Size(max = 3000)
         String problemDescription,
 
-        @Schema(description = "Photo which was uploaded to describe the problem",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "This field cannot be null")
-        MultipartFile problemPhoto,
-
         @Schema(description = "Current status of the application",
                 example = "IN_PROGRESS")
         ApplicationStatus status,
