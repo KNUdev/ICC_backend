@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtValidityFilter, SecurityContextHolderFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//                .addFilterBefore(corsFilter, JWTValidityFilter.class)
+                .addFilterBefore(corsFilter, JWTValidityFilter.class)
                 .formLogin(Customizer.withDefaults())
                 .exceptionHandling(handler ->
                         handler.authenticationEntryPoint(auth403EntryPoint))
