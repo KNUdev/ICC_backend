@@ -1,6 +1,7 @@
 package ua.knu.knudev.iccsecurity.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.iccsecurity.domain.AuthenticatedEmployee;
 
 import java.util.Optional;
@@ -14,4 +15,5 @@ public interface AuthenticatedEmployeeRepository extends JpaRepository<Authentic
 
     Optional<AuthenticatedEmployee> findByEmail(String email);
 
+    boolean existsByRole(EmployeeAdministrativeRole role);
 }
