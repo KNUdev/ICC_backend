@@ -50,7 +50,7 @@ public class AuthenticatedEmployee implements Serializable, AuthenticatedEmploye
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Stream.of(role)
                 .filter(Objects::nonNull)
-                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
     }
 

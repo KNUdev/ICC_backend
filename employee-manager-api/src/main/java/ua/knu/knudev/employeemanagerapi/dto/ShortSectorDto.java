@@ -9,6 +9,7 @@ public record ShortSectorDto(
         UUID id,
         MultiLanguageFieldDto name,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Boolean isPublic
 ) {
 }

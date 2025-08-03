@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.iccsecurity.domain.AuthenticatedEmployee;
 import ua.knu.knudev.iccsecurity.exception.TokenException;
 import ua.knu.knudev.iccsecurityapi.api.AuthenticationServiceApi;
@@ -32,24 +31,10 @@ public class AuthenticationService implements AuthenticationServiceApi {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    private static final String DEFAULT_ADMIN_USERNAME = System.getenv("ADMIN_USERNAME");
-    private static final String DEFAULT_ADMIN_PASSWORD = System.getenv("ADMIN_PASSWORD");
-
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authReq) throws LoginException {
         Optional<AuthenticatedEmployee> account = employeeAuthService.getDomainByEmail(authReq.email());
-
-        try {
-            checkAccountValidity(account);
-        } catch (LoginException e) {
-            if (!authReq.email().equals(DEFAULT_ADMIN_USERNAME)
-                    || !authReq.password().equals(DEFAULT_ADMIN_PASSWORD)
-                    || employeeAuthService.existsByRole(EmployeeAdministrativeRole.HEAD_MANAGER)) {
-                throw new LoginException();
-            }
-
-            return authenticateAdmin();
-        }
+        checkAccountValidity(account);
 
         try {
             authenticationManager.authenticate(
@@ -129,21 +114,6 @@ public class AuthenticationService implements AuthenticationServiceApi {
                     "Your account is locked. Please please contact support."
             );
         }
-    }
-
-    private AuthenticationResponse authenticateAdmin() {
-        AuthenticatedEmployee admin = new AuthenticatedEmployee();
-        String adminName = System.getenv("ADMIN_USERNAME");
-        String adminPassword = System.getenv("ADMIN_PASSWORD");
-        admin.setEmail(adminName);
-        admin.setPassword(adminPassword);
-        admin.setRole(EmployeeAdministrativeRole.HEAD_MANAGER);
-
-        Tokens tokens = jwtService.generateTokens(admin);
-        return AuthenticationResponse.builder()
-                .accessToken(tokens.accessToken())
-                .refreshToken(tokens.refreshToken())
-                .build();
     }
 
 }

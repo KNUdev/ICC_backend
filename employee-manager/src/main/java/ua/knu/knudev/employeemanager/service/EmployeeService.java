@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
+import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 import ua.knu.knudev.icccommon.mapper.FullNameMapper;
@@ -42,7 +45,10 @@ import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
 import ua.knu.knudev.iccsecurityapi.request.EmployeeRegistrationRequest;
 import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
+import java.sql.Time;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -65,6 +71,29 @@ public class EmployeeService implements EmployeeApi {
     private final EmployeeAuthServiceApi employeeAuthServiceApi;
     private final SectorRepository sectorRepository;
     private final SpecialtyRepository specialtyRepository;
+
+    private static final String DEFAULT_ADMIN_USERNAME = System.getenv("ADMIN_USERNAME");
+    private static final String DEFAULT_ADMIN_PASSWORD = System.getenv("ADMIN_PASSWORD");
+
+    @Transactional
+    @EventListener(ApplicationReadyEvent.class)
+    public void createAdminIfNotExist() {
+        if (employeeAuthServiceApi.existsByRole(EmployeeAdministrativeRole.HEAD_MANAGER)) {
+            return;
+        }
+
+        Sector sector = createAdminSector();
+        Specialty specialty = createAdminSpecialty(sector);
+        createAdminEmployee(sector, specialty);
+
+        EmployeeRegistrationRequest employeeRegistrationRequest = EmployeeRegistrationRequest.builder()
+                .email(DEFAULT_ADMIN_USERNAME)
+                .password(DEFAULT_ADMIN_PASSWORD)
+                .role(EmployeeAdministrativeRole.HEAD_MANAGER)
+                .build();
+        employeeAuthServiceApi.create(employeeRegistrationRequest);
+    }
+
 
     @Override
     public EmployeeDto create(@Valid EmployeeCreationRequest request) {
@@ -367,5 +396,58 @@ public class EmployeeService implements EmployeeApi {
         specialtyRepository.findById(specialty.id()).orElseThrow(
                 () -> new EmployeeException("Specialty (passed to employee) with id " + specialty.id() + " does not exist")
         );
+    }
+
+    private Sector createAdminSector() {
+        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin", "Адмін");
+
+        Sector sector = Sector.builder()
+                .name(multiLanguageField)
+                .specialties(new HashSet<>())
+                .createdAt(LocalDateTime.now())
+                .isPublic(false)
+                .build();
+
+        Sector response = sectorRepository.save(sector);
+        return response;
+    }
+
+    private Specialty createAdminSpecialty(Sector sector) {
+        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin", "Адмін");
+
+        Specialty specialty = Specialty.builder()
+                .name(multiLanguageField)
+                .sectors(new HashSet<>())
+                .createdAt(LocalDateTime.now())
+                .isPublic(false)
+                .build();
+
+        specialty.addSector(sector);
+
+        Specialty response = specialtyRepository.save(specialty);
+        return response;
+    }
+
+    private Employee createAdminEmployee(Sector sector, Specialty specialty) {
+        FullName fullname = new FullName(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_USERNAME);
+        WorkHours workHours = new WorkHours(Time.valueOf("00:00:00"), Time.valueOf("00:00:00"));
+
+        Employee employee = Employee.builder()
+                .email(DEFAULT_ADMIN_USERNAME)
+                .role(EmployeeAdministrativeRole.HEAD_MANAGER)
+                .name(fullname)
+                .isStudent(false)
+                .contractEndDate(LocalDate.of(2030, 1,1))
+                .phoneNumber("000000000")
+                .salaryInUAH(0d)
+                .workHours(workHours)
+                .sector(sector)
+                .specialty(specialty)
+                .createdAt(LocalDateTime.now())
+                .isPublic(false)
+                .build();
+
+        Employee response = employeeRepository.save(employee);
+        return response;
     }
 }
