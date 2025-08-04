@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.knu.knudev.icccommon.enums.ReportFormat;
 import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.io.File;
@@ -21,8 +22,8 @@ public class ReportController {
     private final ReportServiceApi reportService;
 
     @PostMapping("/create")
-    public ResponseEntity<Resource> create(@RequestParam(value = "formatType", required = true) String formatType,
-                                           @RequestParam(value = "reportName", required = true) String reportName) {
+    public ResponseEntity<Resource> create(@RequestParam(value = "formatType") ReportFormat formatType,
+                                           @RequestParam(value = "reportName") String reportName) {
         File file = reportService.createReportOfFormat(formatType, reportName);
         Resource resource = new FileSystemResource(file);
 
