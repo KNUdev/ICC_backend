@@ -44,6 +44,7 @@ import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
 import ua.knu.knudev.iccsecurityapi.request.EmployeeRegistrationRequest;
 import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
+import javax.security.auth.login.AccountException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
@@ -111,12 +112,9 @@ public class EmployeeService implements EmployeeApi {
 
     @Override
     @Transactional
-    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) {
+    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) throws AccountException {
         if (!employeeRepository.existsByEmail(request.email())) {
-            return AccountReceivingResponse.builder()
-                    .shortEmployeeDto(null)
-                    .responseMessage("Account was not registered!")
-                    .build();
+            throw new AccountException("Employee with email:" + request.email() + " not found!");
         }
 
         Employee employee = employeeRepository.findByEmail(request.email())

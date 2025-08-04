@@ -24,6 +24,7 @@ import ua.knu.knudev.iccsecurityapi.api.AuthenticationServiceApi;
 import ua.knu.knudev.iccsecurityapi.request.AuthenticationRequest;
 import ua.knu.knudev.iccsecurityapi.response.AuthenticationResponse;
 
+import javax.security.auth.login.AccountException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 
@@ -66,7 +67,7 @@ public class AccountController {
                     in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = AccountReceivingRequest.class)
-            ) AccountReceivingRequest registrationRequest) {
+            ) AccountReceivingRequest registrationRequest) throws AccountException {
         return employeeApi.register(registrationRequest);
     }
 
