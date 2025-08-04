@@ -39,6 +39,10 @@
             <groupId>ua.knu</groupId>
             <artifactId>icc-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>report-manager-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -314,7 +314,6 @@ public class ApplicationServiceIntegrationTest {
                     testApplication.getApplicantEmail(),
                     TEST_APPLICATION_COMPLETED_AT,
                     testApplication.getProblemDescription(),
-                    TEST_APPLICATION_PHOTO_FILE,
                     ApplicationStatus.DONE,
                     testApplication.getDepartment().getId());
 
@@ -335,7 +334,6 @@ public class ApplicationServiceIntegrationTest {
                     testApplication.getApplicantEmail(),
                     TEST_APPLICATION_COMPLETED_AT,
                     testApplication.getProblemDescription(),
-                    TEST_APPLICATION_PHOTO_FILE,
                     ApplicationStatus.DONE,
                     UUID.randomUUID());
 

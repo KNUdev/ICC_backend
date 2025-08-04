@@ -36,13 +36,19 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         addIfNotNull(predicate, qEmployee.salaryInUAH, request.salaryInUAH());
         addIfNotNull(predicate, qEmployee.isStudent, request.isStudent());
         addIfNotNull(predicate, qEmployee.avatar, request.avatar());
-        addIfNotNull(predicate, qEmployee.workHours.startTime, request.workHours().getStartTime());
-        addIfNotNull(predicate, qEmployee.workHours.endTime, request.workHours().getEndTime());
+        if (request.workHours() != null) {
+            addIfNotNull(predicate, qEmployee.workHours.startTime, request.workHours().getStartTime());
+            addIfNotNull(predicate, qEmployee.workHours.endTime, request.workHours().getEndTime());
+        }
         addIfNotNull(predicate, qEmployee.role, request.role());
-        addIfNotNull(predicate, qEmployee.specialty.name.en, request.specialtyName().getEn());
-        addIfNotNull(predicate, qEmployee.specialty.name.uk, request.specialtyName().getUk());
-        addIfNotNull(predicate, qEmployee.sector.name.en, request.sectorName().getEn());
-        addIfNotNull(predicate, qEmployee.sector.name.uk, request.sectorName().getUk());
+        if (request.specialtyName() != null) {
+            addIfNotNull(predicate, qEmployee.specialty.name.en, request.specialtyName().getEn());
+            addIfNotNull(predicate, qEmployee.specialty.name.uk, request.specialtyName().getUk());
+        }
+        if (request.sectorName() != null) {
+            addIfNotNull(predicate, qEmployee.sector.name.en, request.sectorName().getEn());
+            addIfNotNull(predicate, qEmployee.sector.name.uk, request.sectorName().getUk());
+        }
 
         if (request.contractEndDateBefore() != null) {
             predicate.and(qEmployee.contractEndDate.before(request.contractEndDateBefore()));

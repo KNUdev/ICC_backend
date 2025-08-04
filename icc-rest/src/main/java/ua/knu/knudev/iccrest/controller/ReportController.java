@@ -1,8 +1,5 @@
 package ua.knu.knudev.reportmanager.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.GetMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -15,6 +12,7 @@ import ua.knu.knudev.reportmanager.generator.ReportGenerator;
 import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
 import ua.knu.knudev.reportmanagerapi.service.ReportService;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.util.List;

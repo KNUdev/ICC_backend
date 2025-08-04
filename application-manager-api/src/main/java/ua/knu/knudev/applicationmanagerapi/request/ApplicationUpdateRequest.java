@@ -1,9 +1,8 @@
 package ua.knu.knudev.applicationmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
@@ -19,7 +18,7 @@ public record ApplicationUpdateRequest(
         @Schema(description = "Updatable application ID",
                 example = "550e8400-e29b-41d4-a716-446655440000",
                 requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotBlank(message = "ID cannot be null")
+        @NotNull(message = "ID cannot be null")
         UUID id,
 
         @Schema(description = "Name of the applicant",
@@ -37,13 +36,8 @@ public record ApplicationUpdateRequest(
         @Schema(description = "Description of the problem",
                 example = "Internet connectivity issue in room 302",
                 maxLength = 3000)
-        @Max(3000)
+        @Size(max = 3000)
         String problemDescription,
-
-        @Schema(description = "Photo which was uploaded to describe the problem",
-                requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "This field cannot be null")
-        MultipartFile problemPhoto,
 
         @Schema(description = "Current status of the application",
                 example = "IN_PROGRESS")
