@@ -16,7 +16,7 @@ import java.io.File;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/reports")
+@RequestMapping("/report")
 public class ReportController {
 
     private final ReportServiceApi reportService;
