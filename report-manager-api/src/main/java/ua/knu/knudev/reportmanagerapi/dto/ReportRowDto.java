@@ -1,14 +1,18 @@
 package ua.knu.knudev.reportmanagerapi.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import lombok.Builder;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Builder
 public record ReportRowDto(
-        Long id,
-        String nameSurname,
+        UUID id,
+        String name,
         String phoneNumber,
         String email,
         String position,
-        BigDecimal salary,
+        Double salary,
         LocalDate contractValidTo
-) {}
+) {
+}

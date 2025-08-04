@@ -11,6 +11,3 @@ databaseChangeLog:
   - includeAll:
       path: changelog/security_manager/
       relativeToChangelogFile: true
-  - include:
-      path: db/changelog/report_manager/
-      relativeToChangelogFile: true
