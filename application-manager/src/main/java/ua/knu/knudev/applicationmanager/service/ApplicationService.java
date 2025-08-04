@@ -45,9 +45,7 @@ public class ApplicationService implements ApplicationApi {
     public ApplicationDto create(ApplicationCreateRequest request) {
         Department department = getDepartmentById(request.departmentId());
 
-        String filename = request.problemPhoto().getOriginalFilename();
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filename,
-                ImageSubfolder.APPLICATIONS);
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
 
@@ -72,8 +70,7 @@ public class ApplicationService implements ApplicationApi {
 
     @Override
     public ApplicationDto createPrivateApplication(PrivateApplicationCreateRequest request) {
-        String filename = request.problemPhoto().getOriginalFilename();
-        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), filename, ImageSubfolder.APPLICATIONS);
+        String uploadedProblemPhoto = uploadProblemPhoto(request.problemPhoto(), ImageSubfolder.APPLICATIONS);
 
         FullName applicantName = fullNameMapper.toDomain(request.applicantName());
 
@@ -192,11 +189,11 @@ public class ApplicationService implements ApplicationApi {
                 .build();
     }
 
-    private String uploadProblemPhoto(MultipartFile problemPhoto, String imageName, ImageSubfolder subfolder) {
+    private String uploadProblemPhoto(MultipartFile problemPhoto, ImageSubfolder subfolder) {
         if (ObjectUtils.isEmpty(problemPhoto)) {
             return null;
         }
-        return imageServiceApi.uploadFile(problemPhoto, imageName, subfolder);
+        return imageServiceApi.uploadFile(problemPhoto, subfolder);
     }
 
     private Application getApplicationById(UUID applicationId) {

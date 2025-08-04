@@ -78,7 +78,7 @@ public class EmployeeController {
     @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Page<GetEmployeeResponse> getAll(
-            @RequestBody @Parameter(
+            @ModelAttribute @Parameter(
                     name = "Employee receiving request",
                     description = "Sector filtering fields",
                     in = ParameterIn.QUERY,

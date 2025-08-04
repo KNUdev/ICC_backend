@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
+import ua.knu.knudev.employeemanagerapi.exception.SectorException;
+import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
 import ua.knu.knudev.employeemanager.mapper.*;
@@ -70,13 +72,20 @@ public class EmployeeService implements EmployeeApi {
     public EmployeeDto create(@Valid EmployeeCreationRequest request) {
         FullName fullName = fullNameMapper.toDomain(request.fullName());
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
-        Specialty specialty = specialtyMapper.toDomain(request.specialty());
-        Sector sector = sectorMapper.toDomain(request.sector());
+
+        Specialty specialty = specialtyRepository.findById(request.specialty().id()).orElseThrow(
+                () -> new SpecialtyException("Specialty with id: " + request.specialty().id() + " not found"));
+        Sector sector = sectorRepository.findById(request.sector().id()).orElseThrow(
+                () -> new SectorException("Sector with id: " + request.sector().id() + " not found"));
 
         validateSectorNonExistence(request.sector());
         validateSpecialtyNonExistence(request.specialty());
 
-        String uploadedAvatarFilename = uploadEmployeeImage(request.avatarFile(), ImageSubfolder.EMPLOYEE_AVATARS);
+        String uploadEmployeeImage = uploadEmployeeImage(
+                request.avatarFile(),
+                request.avatarFile().getOriginalFilename(),
+                ImageSubfolder.EMPLOYEE_AVATARS
+        );
 
         Employee employee = Employee.builder()
                 .name(fullName)
@@ -84,7 +93,7 @@ public class EmployeeService implements EmployeeApi {
                 .phoneNumber(request.phoneNumber())
                 .salaryInUAH(request.salaryInUAH())
                 .isStudent(request.isStudent())
-                .avatar(uploadedAvatarFilename)
+                .avatar(uploadEmployeeImage)
                 .contractEndDate(request.contractEndDate())
                 .workHours(workHours)
                 .role(request.role())
@@ -94,8 +103,10 @@ public class EmployeeService implements EmployeeApi {
                 .build();
 
         Employee savedEmployee = employeeRepository.save(employee);
+        String avatarPath = imageServiceApi.getPathByFilename(savedEmployee.getAvatar(), ImageSubfolder.EMPLOYEE_AVATARS);
+
         log.info("Created Employee: {}", savedEmployee);
-        return employeeMapper.toDto(savedEmployee);
+        return mapEmployeeToDto(savedEmployee, avatarPath);
     }
 
     @Override
@@ -302,6 +313,33 @@ public class EmployeeService implements EmployeeApi {
         );
     }
 
+    private EmployeeDto mapEmployeeToDto(Employee employee, String avatarPath) {
+        WorkHoursDto workHours = workHoursMapper.toDto(employee.getWorkHours());
+        SectorDto sector = sectorMapper.toDto(employee.getSector());
+        SpecialtyDto specialty = specialtyMapper.toDto(employee.getSpecialty());
+
+        return EmployeeDto.builder()
+                .id(employee.getId())
+                .name(FullNameDto.builder()
+                        .firstName(employee.getName().getFirstName())
+                        .lastName(employee.getName().getLastName())
+                        .middleName(employee.getName().getMiddleName())
+                        .build())
+                .email(employee.getEmail())
+                .phoneNumber(employee.getPhoneNumber())
+                .createdAt(employee.getCreatedAt())
+                .updatedAt(employee.getUpdatedAt())
+                .salaryInUAH(employee.getSalaryInUAH())
+                .isStudent(employee.getIsStudent())
+                .avatar(avatarPath)
+                .contractEndDate(employee.getContractEndDate())
+                .role(employee.getRole())
+                .workHours(workHours)
+                .specialty(specialty)
+                .sector(sector)
+                .build();
+    }
+
     private ShortEmployeeDto mapEmployeeToShortDto(
             Employee employee,
             String updatedEmail
@@ -342,11 +380,11 @@ public class EmployeeService implements EmployeeApi {
                 () -> new EmployeeException("Employee with id " + id + " not found"));
     }
 
-    private String uploadEmployeeImage(MultipartFile avatarFile, ImageSubfolder subfolder) {
-        if (ObjectUtils.isEmpty(avatarFile)) {
+    private String uploadEmployeeImage(MultipartFile problemPhoto, String imageName, ImageSubfolder subfolder) {
+        if (ObjectUtils.isEmpty(problemPhoto)) {
             return null;
         }
-        return imageServiceApi.uploadFile(avatarFile, subfolder);
+        return imageServiceApi.uploadFile(problemPhoto, imageName, subfolder);
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {
