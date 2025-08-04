@@ -20,6 +20,8 @@ public record SectorDto(
         @Schema(description = "Datetime of sector update", example = "2025-03-23T11:50:23.223")
         LocalDateTime updatedAt,
         @Schema(description = "A set of sector`s specialties", implementation = ShortSpecialtyDto.class)
-        Set<ShortSpecialtyDto> specialties
+        Set<ShortSpecialtyDto> specialties,
+        @Schema(description = "Field determines whether the object will be publicly visible", example = "true")
+        Boolean isPublic
 ) {
 }

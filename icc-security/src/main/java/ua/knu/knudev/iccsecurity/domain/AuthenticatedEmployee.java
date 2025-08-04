@@ -1,9 +1,6 @@
 package ua.knu.knudev.iccsecurity.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,6 +37,7 @@ public class AuthenticatedEmployee implements Serializable, AuthenticatedEmploye
     private String password;
 
     @Column(nullable = false, name = "administrative_role")
+    @Enumerated(EnumType.STRING)
     private EmployeeAdministrativeRole role;
 
     @Column(name = "is_enabled", nullable = false)
@@ -52,7 +50,7 @@ public class AuthenticatedEmployee implements Serializable, AuthenticatedEmploye
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Stream.of(role)
                 .filter(Objects::nonNull)
-                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
     }
 

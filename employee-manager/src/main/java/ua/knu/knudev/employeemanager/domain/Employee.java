@@ -56,6 +56,9 @@ public class Employee {
     @Column(nullable = false)
     private EmployeeAdministrativeRole role;
 
+    @Builder.Default
+    private Boolean isPublic = true;
+
     @ManyToOne
     @JoinColumn(name = "specialty_id", referencedColumnName = "id", nullable = false)
     private Specialty specialty;

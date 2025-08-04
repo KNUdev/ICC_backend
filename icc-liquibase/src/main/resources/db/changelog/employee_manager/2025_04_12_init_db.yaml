@@ -35,6 +35,9 @@ databaseChangeLog:
               - column:
                   name: category
                   type: varchar(10)
+              - column:
+                  name: is_public
+                  type: boolean
 
   - changeSet:
       id: create_sector_table
@@ -69,6 +72,9 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: datetime
+              - column:
+                  name: is_public
+                  type: boolean
 
   - changeSet:
       id: create_sectors_specialties_table
@@ -201,6 +207,9 @@ databaseChangeLog:
                   type: time
                   constraints:
                     nullable: false
+              - column:
+                  name: is_public
+                  type: boolean
         - addForeignKeyConstraint:
             baseTableSchemaName: employee_manager
             baseTableName: employee

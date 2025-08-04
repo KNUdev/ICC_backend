@@ -39,6 +39,9 @@ public class Specialty {
     @Enumerated(EnumType.STRING)
     private SpecialtyCategory category;
 
+    @Builder.Default
+    private Boolean isPublic = true;
+
     @ManyToMany(mappedBy = "specialties")
     private Set<Sector> sectors = new HashSet<>();
 

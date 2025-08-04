@@ -23,6 +23,8 @@ public record SpecialtyDto(
         @Schema(description = "A category of specialty", implementation = SpecialtyCategory.class)
          SpecialtyCategory category,
         @Schema(description = "A set of specialty sectors", implementation = ShortSectorDto.class)
-         Set<ShortSectorDto> sectors
+         Set<ShortSectorDto> sectors,
+        @Schema(description = "Field determines whether the object will be publicly visible", example = "true")
+        Boolean isPublic
 ) {
 }

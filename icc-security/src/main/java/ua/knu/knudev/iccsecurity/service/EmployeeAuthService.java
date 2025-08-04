@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.iccsecurity.domain.AuthenticatedEmployee;
 import ua.knu.knudev.iccsecurity.exception.AccountAuthException;
 import ua.knu.knudev.iccsecurity.mapper.AuthenticatedEmployeeMapper;
@@ -47,6 +48,11 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
     @Override
     public boolean existsByEmail(String email) {
         return authenticatedEmployeeRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByRole(EmployeeAdministrativeRole role) {
+        return authenticatedEmployeeRepository.existsByRole(role);
     }
 
     @Override
