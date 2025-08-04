@@ -1,4 +1,4 @@
-package ua.knu.knudev.reportmanager.controller;
+package ua.knu.knudev.iccrest.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -8,13 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.io.File;
 
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/report")
 public class ReportController {
+
     private final ReportServiceApi reportService;
 
     @PostMapping("/create")

@@ -34,29 +34,6 @@ public class ReportService implements ReportServiceApi {
     private static Sheet excelSheet;
 
     @Override
-    public File extractReportToExcel(String reportName) {
-        excelSheet = excelWorkbook.createSheet(reportName);
-
-        createExcelTable(reportName);
-        fillExcelTable();
-
-        try {
-            return createExcelFile(reportName);
-        } catch (IOException e) {
-            throw new ReportGenerationException("Failed to create excel file");
-        }
-    }
-
-    @Override
-    public File extractReportToCSV(String reportName) {
-        try {
-            return createCSVFile(reportName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public File createReportOfFormat(String formatType, String reportName) {
         try {
             switch (formatType) {
@@ -70,6 +47,27 @@ public class ReportService implements ReportServiceApi {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private File extractReportToCSV(String reportName) {
+        try {
+            return createCSVFile(reportName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private File extractReportToExcel(String reportName) {
+        excelSheet = excelWorkbook.createSheet(reportName);
+
+        createExcelTable(reportName);
+        fillExcelTable();
+
+        try {
+            return createExcelFile(reportName);
+        } catch (IOException e) {
+            throw new ReportGenerationException("Failed to create excel file");
+        }
     }
 
     private File createCSVFile(String fileName) throws IOException {
