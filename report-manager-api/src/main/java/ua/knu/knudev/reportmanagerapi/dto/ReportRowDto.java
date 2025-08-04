@@ -5,7 +5,10 @@ import java.time.LocalDate;
 
 public record ReportRowDto(
         Long id,
-        String fullName,
-        LocalDate date,
-        BigDecimal points
+        String nameSurname,
+        String phoneNumber,
+        String email,
+        String position,
+        BigDecimal salary,
+        LocalDate contractValidTo
 ) {}

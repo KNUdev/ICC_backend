@@ -5,6 +5,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
+import ua.knu.knudev.reportmanager.enums.ReportFields;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -17,20 +18,26 @@ public class PdfReportGenerator implements ReportGenerator {
         try {
             PdfWriter.getInstance(doc, out);
             doc.open();
-            PdfPTable table = new PdfPTable(4);
+
+            ReportFields[] fields = ReportFields.values();
+            PdfPTable table = new PdfPTable(fields.length);
             table.setWidthPercentage(100);
-            table.addCell("Ід");
-            table.addCell("ПІБ");
-            table.addCell("Дата");
-            table.addCell("Значення");
-            for (var row : data) {
-                table.addCell(row.id().toString());
-                table.addCell(row.fullName());
-                table.addCell(row.date().toString());
-                table.addCell(row.points().toString());
+
+            for (ReportFields f : fields) {
+                table.addCell(f.getValue());
             }
+
+            for (ReportRowDto row : data) {
+                table.addCell(row.id().toString());
+                table.addCell(row.nameSurname());
+                table.addCell(row.phoneNumber());
+                table.addCell(row.email());
+                table.addCell(row.position());
+                table.addCell(row.salary().toString());
+                table.addCell(row.contractValidTo().toString());
+            }
+
             doc.add(table);
-            doc.close();
         } catch (Exception e) {
             throw new RuntimeException("PDF generation failed", e);
         } finally {

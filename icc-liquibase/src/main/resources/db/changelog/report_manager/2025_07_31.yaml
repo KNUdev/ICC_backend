@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-07-31-create-report-row
+      author: Yaroslav Postilniak
+      preConditions:
+        - not:
+            - tableExists:
+                tableName: report_row
+      changes:
+        - createTable:
+            tableName: report_row
+            columns:
+              - column:
+                  name: id
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: date
+              - column:
+                  name: points
+                  type: numeric
+              - column:
+                  name: position
+                  type: TEXT
+              - column:
+                  name: salary
+                  type: numeric
+              - column:
+                  name: contract_valid_to
+                  type: date

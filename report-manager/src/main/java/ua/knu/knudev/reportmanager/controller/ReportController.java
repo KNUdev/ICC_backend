@@ -24,18 +24,20 @@ import java.io.File;
 @RequestMapping("/reports")
 public class ReportController {
     private final ReportService service;
-    private final ReportGenerator pdfGen;
-    private final ReportGenerator wordGen;
+    private final @Qualifier("pdfReportGenerator") ReportGenerator pdfGen;
+    private final @Qualifier("wordReportGenerator") ReportGenerator wordGen;
     private final ReportServiceApi reportService;
 
     public ReportController(
             ReportService service,
             @Qualifier("pdfReportGenerator") ReportGenerator pdfGen,
-            @Qualifier("wordReportGenerator") ReportGenerator wordGen
+            @Qualifier("wordReportGenerator") ReportGenerator wordGen,
+            ReportServiceApi reportService
     ) {
         this.service = service;
         this.pdfGen = pdfGen;
         this.wordGen = wordGen;
+        this.reportService = reportService;
     }
 
     @PostMapping("/create")

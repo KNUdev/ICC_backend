@@ -1,21 +1,45 @@
 package ua.knu.knudev.reportmanager.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.reportmanager.domain.ReportRowEntity;
+import ua.knu.knudev.reportmanager.repository.ReportRowRepository;
 import ua.knu.knudev.reportmanagerapi.dto.ReportRowDto;
 import ua.knu.knudev.reportmanagerapi.service.ReportService;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportServiceImpl implements ReportService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReportServiceImpl.class);
+
+    private final ReportRowRepository repo;
+
+    public ReportServiceImpl(ReportRowRepository repo) {
+        this.repo = repo;
+    }
+
     @Override
     public List<ReportRowDto> fetchReportData() {
-        return List.of(
-                new ReportRowDto(1L, "Іван Іванович", LocalDate.now().minusDays(1), BigDecimal.valueOf(123.45)),
-                new ReportRowDto(2L, "Петро Петренко", LocalDate.now(), BigDecimal.valueOf(543.21))
+        var rows = repo.findAll();
+        log.info(">>> fetching {} rows …", rows.size());
+        return rows.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private ReportRowDto toDto(ReportRowEntity e) {
+        return new ReportRowDto(
+                e.getId(),
+                e.getFullName(),
+                e.getPhoneNumber(),
+                e.getEmail(),
+                e.getPosition(),
+                e.getSalary(),
+                e.getContractValidTo()
         );
     }
 }
