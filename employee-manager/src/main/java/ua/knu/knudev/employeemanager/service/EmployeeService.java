@@ -46,6 +46,7 @@ import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
 import javax.security.auth.login.AccountException;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -185,6 +186,12 @@ public class EmployeeService implements EmployeeApi {
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
+
+        if (request.workHours().getStartTime().after(request.workHours().getEndTime())
+                || request.contractEndDate().isBefore(ChronoLocalDate.from(LocalDateTime.now()))) {
+            throw new EmployeeException("Start time cannot be after end time in work hours");
+        }
+
         AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
         employee.setUpdatedAt(LocalDateTime.now());
