@@ -26,4 +26,6 @@ public non-sealed interface EmployeeApi extends AccountManagementApi, AvatarMana
     EmployeeDto update(@Valid EmployeeUpdateRequest request);
 
     Set<GetEmployeeResponse> getAll();
+
+    UUID getEmployeeIdByEmail(String email);
 }

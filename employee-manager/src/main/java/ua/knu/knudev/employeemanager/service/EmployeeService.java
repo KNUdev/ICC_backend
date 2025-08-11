@@ -318,6 +318,13 @@ public class EmployeeService implements EmployeeApi {
         );
     }
 
+    @Override
+    public UUID getEmployeeIdByEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .map(Employee::getId)
+                .orElseThrow(() -> new EmployeeException("Employee with email " + email + " not found"));
+    }
+
     private EmployeeDto mapEmployeeToDto(Employee employee, String avatarPath) {
         WorkHoursDto workHours = workHoursMapper.toDto(employee.getWorkHours());
         SectorDto sector = sectorMapper.toDto(employee.getSector());

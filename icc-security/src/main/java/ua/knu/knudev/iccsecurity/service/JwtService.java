@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.iccsecurity.domain.AuthenticatedEmployee;
 import ua.knu.knudev.iccsecurity.security.AuthenticatedEmployeeDetails;
@@ -22,17 +23,20 @@ public class JwtService {
     private final Integer accessTokenExpirationInMillis;
     private final Integer refreshTokenExpirationInMillis;
     private final String issuerName;
+    private final EmployeeApi employeeApi;
     private final JWTSigningKeyProvider jwtSigningKeyProvider;
 
     public JwtService(
             @Value("${application.jwt.expiration}") Integer accessTokenExpirationInMillis,
             @Value("${application.jwt.refresh-token.expiration}") Integer refreshTokenExpirationInMillis,
             @Value("${application.jwt.issuer}") String issuerName,
-            JWTSigningKeyProvider jwtSigningKeyProvider) {
+            JWTSigningKeyProvider jwtSigningKeyProvider,
+            EmployeeApi employeeApi) {
         this.accessTokenExpirationInMillis = accessTokenExpirationInMillis;
         this.refreshTokenExpirationInMillis = refreshTokenExpirationInMillis;
         this.issuerName = issuerName;
         this.jwtSigningKeyProvider = jwtSigningKeyProvider;
+        this.employeeApi = employeeApi;
     }
 
     public String extractEmail(String token) {
@@ -122,6 +126,11 @@ public class JwtService {
                 .collect(Collectors.toSet());
         extraClaimsMap.put("roles", employeeRoles);
         extraClaimsMap.put("userid", authenticatedEmployeeDetails.getId());
+
+        String email = authenticatedEmployeeDetails.getEmail();
+        UUID employeeId = employeeApi.getEmployeeIdByEmail(email);
+
+        extraClaimsMap.put("employeeId", employeeId);
         return extraClaimsMap;
     }
 
