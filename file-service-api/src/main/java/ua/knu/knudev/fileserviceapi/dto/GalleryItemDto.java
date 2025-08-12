@@ -13,6 +13,8 @@ public record GalleryItemDto(
         UUID creatorId,
         @Schema(description = "UUID format for item id in gallery", example = "1d87b3e3-44a7-4915-ac13-33180ed448ff")
         UUID itemId,
+        @Schema(description = "URL of gallery item")
+        String itemUrl,
         @Schema(description = "Gallery item name")
         String itemName,
         @Schema(description = "Description of gallery item")
