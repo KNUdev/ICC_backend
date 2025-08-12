@@ -238,19 +238,20 @@ public class EmployeeService implements EmployeeApi {
         employee.setWorkHours(getOrDefault(request.workHours(), employee.getWorkHours(), workHoursMapper::toDomain));
         employee.setRole(getOrDefault(request.role(), employee.getRole()));
 
-        if (request.phoneNumber().matches("^\\d{10,15}$")) {
+        if (request.phoneNumber() != null && request.phoneNumber().matches("^\\d{10,15}$")) {
             employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
         }
-        if (specialtyRepository.existsById(request.specialty().id())) {
+        if (request.specialty() != null && specialtyRepository.existsById(request.specialty().id())) {
             employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(), specialtyMapper::toDomain));
         }
-        if (sectorRepository.existsById(request.sector().id())) {
+        if (request.sector() != null && sectorRepository.existsById(request.sector().id())) {
             employee.setSector(getOrDefault(request.sector(), employee.getSector(), sectorMapper::toDomain));
         }
         if (request.avatarFile() != null) {
             updateAvatar(request.id(), request.avatarFile());
         }
-        if (!employee.getEmail().equals(request.email()) && request.email().matches("^[\\w.-]+@knu\\.ua$")) {
+        if (request.email() != null && (!employee.getEmail().equals(request.email())
+                && request.email().matches("^[\\w.-]+@knu\\.ua$"))) {
             employee.setEmail(request.email());
         }
 
