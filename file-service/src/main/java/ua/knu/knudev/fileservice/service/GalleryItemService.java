@@ -45,7 +45,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
         }
 
         MultipartFile file = request.item();
-        String savedGalleryItemUrl = uploadImage(file, request.item().getOriginalFilename(), ImageSubfolder.GALLERY);
+        String savedGalleryItemUrl = uploadImage(file, file.getName(), ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()
                 .uploadedAt(LocalDateTime.now())
