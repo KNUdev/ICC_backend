@@ -64,7 +64,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
     @Override
     @Transactional
     public Page<GalleryItemDto> getAll(int pageNumber, int pageSize) {
-        Pageable paging = PageRequest.of(0, 10, Sort.by("uploadedAt").descending());
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("uploadedAt").descending());
         Page<GalleryItem> galleryItems = galleryItemRepository.findAll(paging);
 
         return galleryItems.map(galleryItemMapper::toDto);
