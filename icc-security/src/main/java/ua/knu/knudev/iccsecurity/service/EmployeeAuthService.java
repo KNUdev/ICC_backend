@@ -65,8 +65,8 @@ public class EmployeeAuthService implements EmployeeAuthServiceApi {
         checkIfIsAdminUsage(request, newEmail);
         updatePassword(request, employee);
 
-        if (newEmail.matches("^[\\w.-]+@knu\\.ua$") &&
-                !authenticatedEmployeeRepository.existsByEmail(newEmail)) {
+        if (newEmail != null && (newEmail.matches("^[\\w.-]+@knu\\.ua$") &&
+                !authenticatedEmployeeRepository.existsByEmail(newEmail))) {
             updateField(newEmail, employee::setEmail);
         }
 
