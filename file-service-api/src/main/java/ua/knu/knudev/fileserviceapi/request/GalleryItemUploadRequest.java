@@ -28,6 +28,12 @@ public record GalleryItemUploadRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         String itemName,
+        @NotNull(message = "Public item name cannot be empty")
+        @Schema(
+                description = "Public name of the item",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        String publicItemName,
         @Schema(
                 description = "item description"
         )

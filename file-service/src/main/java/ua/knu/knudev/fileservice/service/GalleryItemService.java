@@ -51,6 +51,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
                 .uploadedAt(LocalDateTime.now())
                 .creatorId(request.creatorId())
                 .itemName(savedGalleryItemUrl)
+                .publicItemName(request.publicItemName())
                 .itemDescription(request.itemDescription())
                 .build();
 
@@ -109,6 +110,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
                 .itemUrl(imagePath)
                 .itemName(galleryItem.getItemName())
                 .itemDescription(galleryItem.getItemDescription())
+                .publicItemName(galleryItem.getPublicItemName())
                 .uploadedAt(galleryItem.getUploadedAt())
                 .updatedAt(galleryItem.getUpdatedAt())
                 .build();

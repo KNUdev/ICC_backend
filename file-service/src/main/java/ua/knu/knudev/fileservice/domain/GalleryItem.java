@@ -31,6 +31,9 @@ public class GalleryItem {
 
     private String itemDescription;
 
+    @Column(nullable = false)
+    private String publicItemName;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
 

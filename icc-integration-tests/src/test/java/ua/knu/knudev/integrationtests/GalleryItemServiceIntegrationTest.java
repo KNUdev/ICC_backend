@@ -173,6 +173,7 @@ public class GalleryItemServiceIntegrationTest {
         galleryItem.setCreatorId(testEmployee.getId());
         galleryItem.setItemName(itemName);
         uploadedGalleryItems.add(itemName);
+        galleryItem.setPublicItemName(itemName + "_" + UUID.randomUUID());
         galleryItem.setItemDescription(TEST_GALLERY_ITEM_DESCRIPTION);
         galleryItem.setUploadedAt(TEST_GALLERY_ITEM_UPLOADED_AT);
         galleryItem.setUpdatedAt(TEST_GALLERY_ITEM_UPDATED_AT);

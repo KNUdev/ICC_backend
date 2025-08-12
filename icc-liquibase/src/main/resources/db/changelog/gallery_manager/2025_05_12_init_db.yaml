@@ -31,6 +31,11 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
+                  name: public_item_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
                   name: uploaded_at
                   type: datetime
                   constraints:

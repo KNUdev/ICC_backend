@@ -17,6 +17,8 @@ public record GalleryItemDto(
         String itemUrl,
         @Schema(description = "Gallery item name")
         String itemName,
+        @Schema(description = "Public name of gallery item")
+        String publicItemName,
         @Schema(description = "Description of gallery item")
         String itemDescription,
         @Schema(description = "Date when gallery item was uploaded", example = "2025-03-23T11:50:23.223")
