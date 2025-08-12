@@ -91,7 +91,7 @@ public class AdminEmployeeController {
     @PatchMapping(value = "/update")
     @ResponseStatus(HttpStatus.OK)
     public EmployeeDto update(
-            @Valid @RequestBody @Parameter(
+            @Valid @ModelAttribute @Parameter(
                     name = "Employee update request",
                     description = "Employee update data",
                     in = ParameterIn.QUERY,
