@@ -22,12 +22,6 @@ public record GalleryItemUploadRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         MultipartFile item,
-        @NotNull(message = "Item name cannot be empty")
-        @Schema(
-                description = "Image which was uploaded",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        String itemName,
         @NotNull(message = "Public item name cannot be empty")
         @Schema(
                 description = "Public name of the item",

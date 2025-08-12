@@ -25,7 +25,7 @@ public record GalleryItemUpdateRequest(
                 description = "Gallery item name",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        String itemName,
+        String publicItemName,
         @Schema(
                 description = "Gallery item ID",
                 requiredMode = Schema.RequiredMode.REQUIRED
