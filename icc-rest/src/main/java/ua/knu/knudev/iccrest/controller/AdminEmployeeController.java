@@ -40,25 +40,25 @@ public class AdminEmployeeController {
                     responseCode = "201",
                     description = "Employee successfully created.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = EmployeeDto.class)
                     )),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input provided.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)
                     )
             )
     })
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public EmployeeDto create(
-            @Valid @RequestBody @Parameter(
+            @Valid @ModelAttribute @Parameter(
                     name = "Employee creation request",
                     description = "Employee details",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.DEFAULT,
                     required = true,
                     schema = @Schema(implementation = EmployeeCreationRequest.class)
             ) EmployeeCreationRequest request
@@ -139,24 +139,24 @@ public class AdminEmployeeController {
                     responseCode = "200",
                     description = "Employees were successfully retrieved.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = GetEmployeeResponse.class))
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Employees are not found.",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))
             )
     })
-    @PostMapping("/all")
+    @PostMapping(value = "/all", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Page<GetEmployeeResponse> getAll(
-            @RequestBody @Parameter(
+            @ModelAttribute @Parameter(
                     name = "Employee receiving request",
                     description = "Sector filtering fields",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.DEFAULT,
                     required = true,
                     schema = @Schema(implementation = EmployeeReceivingRequest.class)
             ) EmployeeReceivingRequest request

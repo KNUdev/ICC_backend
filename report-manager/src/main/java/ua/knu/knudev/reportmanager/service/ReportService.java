@@ -11,8 +11,11 @@ import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
-import ua.knu.knudev.reportmanager.enums.ReportFields;
+import ua.knu.knudev.icccommon.enums.ReportFields;
+import ua.knu.knudev.icccommon.enums.ReportFormat;
 import ua.knu.knudev.reportmanager.exception.ReportGenerationException;
+import ua.knu.knudev.reportmanager.generator.PdfReportGenerator;
+import ua.knu.knudev.reportmanager.generator.WordReportGenerator;
 import ua.knu.knudev.reportmanagerapi.api.ReportServiceApi;
 
 import java.io.File;
@@ -29,26 +32,37 @@ import java.util.Set;
 public class ReportService implements ReportServiceApi {
 
     private final EmployeeApi employeeApi;
-    Workbook excelWorkbook = new XSSFWorkbook();
-
+    private final DataFetchService dataFetchService;
+    private final PdfReportGenerator pdfReportGenerator;
+    private final WordReportGenerator wordReportGenerator;
     private static Sheet excelSheet;
 
+    Workbook excelWorkbook = new XSSFWorkbook();
+
     @Override
-    public File extractReportToExcel(String reportName) {
-        excelSheet = excelWorkbook.createSheet(reportName);
-
-        createExcelTable(reportName);
-        fillExcelTable();
-
+    public File createReportOfFormat(ReportFormat formatType, String reportName) {
         try {
-            return createExcelFile(reportName);
-        } catch (IOException e) {
-            throw new ReportGenerationException("Failed to create excel file");
+            switch (formatType) {
+                case ReportFormat.CSV -> {
+                    return extractReportToCSV(reportName);
+                }
+                case ReportFormat.EXCEL -> {
+                    return extractReportToExcel(reportName);
+                }
+                case ReportFormat.PDF -> {
+                    return pdfReportGenerator.generate(dataFetchService.getReportRowDto(), reportName);
+                }
+                case ReportFormat.WORD -> {
+                    return wordReportGenerator.generate(dataFetchService.getReportRowDto(), reportName);
+                }
+                default -> throw new RuntimeException("Unsupported format");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error during generating report");
         }
     }
 
-    @Override
-    public File extractReportToCSV(String reportName) {
+    private File extractReportToCSV(String reportName) {
         try {
             return createCSVFile(reportName);
         } catch (IOException e) {
@@ -56,20 +70,17 @@ public class ReportService implements ReportServiceApi {
         }
     }
 
-    @Override
-    public File createReportOfFormat(String formatType, String reportName) {
+    private File extractReportToExcel(String reportName) {
+        excelSheet = excelWorkbook.createSheet(reportName);
+
+        createExcelTable();
+        fillExcelTable();
+
         try {
-            switch (formatType) {
-                case "csv" -> { return extractReportToCSV(reportName); }
-                case "excel" -> { return extractReportToExcel(reportName); }
-                default -> {
-                    throw new RuntimeException("Unsupported format");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return createExcelFile(reportName);
+        } catch (IOException e) {
+            throw new ReportGenerationException("Failed to create excel file");
         }
-        return null;
     }
 
     private File createCSVFile(String fileName) throws IOException {
@@ -92,7 +103,8 @@ public class ReportService implements ReportServiceApi {
                         name.getFirstName(),
                         name.getMiddleName());
 
-                String specialtyNameEn = employee.specialty().name().getEn();
+                String specialtyNameEn = employee.specialty().name().getEn()
+                        + ", " + employee.sector().name().getEn();
 
                 try {
                     csvPrinter.printRecord(
@@ -108,30 +120,29 @@ public class ReportService implements ReportServiceApi {
                 }
             });
             csvPrinter.flush();
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return csvFile;
     }
 
-    private CSVFormat getCSVFormat(){
-        String[] headers = {ReportFields.ID.getValue(),
+    private CSVFormat getCSVFormat() {
+        String[] headers = {
+                ReportFields.ID.getValue(),
                 ReportFields.NAME_SURNAME.getValue(),
                 ReportFields.PHONE_NUMBER.getValue(),
                 ReportFields.EMAIL.getValue(),
                 ReportFields.POSITION.getValue(),
                 ReportFields.SALARY.getValue(),
-                ReportFields.CONTRACT_VALID_TO.getValue()};
+                ReportFields.CONTRACT_VALID_TO.getValue()
+        };
 
         return CSVFormat.DEFAULT.builder()
                 .setHeader(headers)
                 .get();
     }
 
-    private void createExcelTable(String reportName) {
-        final int amountOfColumns = ReportFields.values().length;
-
+    private void createExcelTable() {
         int tempIndex = 0;
         for (ReportFields field : ReportFields.values()) {
             excelSheet.setColumnWidth(tempIndex, field.getWidth());
@@ -142,12 +153,12 @@ public class ReportService implements ReportServiceApi {
         Row header = excelSheet.createRow(0);
 
         CellStyle headerStyle = excelWorkbook.createCellStyle();
-        headerStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
+        headerStyle.setFillForegroundColor(IndexedColors.GREEN.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         XSSFFont font = (XSSFFont) excelWorkbook.createFont();
         font.setFontName("Arial");
-        font.setFontHeightInPoints((short) 16);
+        font.setFontHeightInPoints((short) 14);
         font.setBold(true);
         headerStyle.setFont(font);
 
@@ -164,12 +175,10 @@ public class ReportService implements ReportServiceApi {
     }
 
     private void fillExcelTable() {
-
         CellStyle style = getCellStyle();
 
         Set<GetEmployeeResponse> employees = employeeApi.getAll();
 
-        Cell cell;
         int rowIndex = 1;
         for (GetEmployeeResponse employee : employees) {
             Row row = excelSheet.createRow(rowIndex);
@@ -182,7 +191,7 @@ public class ReportService implements ReportServiceApi {
             );
 
             SpecialtyDto specialty = employee.specialty();
-            String specialtyNameEn = specialty.name().getEn();
+            String specialtyNameEn = specialty.name().getEn() + ", " + employee.sector().name().getEn();
 
             createExcelStyledCell(row, 0, employee.id(), style);
             createExcelStyledCell(row, 1, fullName, style);
@@ -190,12 +199,12 @@ public class ReportService implements ReportServiceApi {
             createExcelStyledCell(row, 3, employee.email(), style);
             createExcelStyledCell(row, 4, specialtyNameEn, style);
             createExcelStyledCell(row, 5, employee.salaryInUAH(), style);
-            createExcelStyledCell(row, 6, employee.contractEndDate(), style);
+            createExcelStyledCell(row, 6, employee.contractEndDate().toString(), style);
             rowIndex++;
         }
     }
 
-    private void createExcelStyledCell(Row row,int cellIndex, Object value, CellStyle style ) {
+    private void createExcelStyledCell(Row row, int cellIndex, Object value, CellStyle style) {
         Cell cell = row.createCell(cellIndex);
 
         switch (value) {
@@ -231,7 +240,7 @@ public class ReportService implements ReportServiceApi {
         return excelFile;
     }
 
-    private String formatFileNameForFileCreation(String fileName){
+    private String formatFileNameForFileCreation(String fileName) {
         if (!fileName.endsWith(".csv")) {
             fileName += ".csv";
         }

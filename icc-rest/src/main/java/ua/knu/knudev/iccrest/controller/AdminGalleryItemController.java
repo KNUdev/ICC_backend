@@ -159,8 +159,9 @@ public class AdminGalleryItemController {
             )
     })
     @GetMapping
-    public Page<GalleryItemDto> getAllGalleryItems
-            (@RequestBody int pageNumber, int pageSize) {
+    public Page<GalleryItemDto> getAllGalleryItems(
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
         return galleryItemServiceApi.getAll(pageNumber, pageSize);
     }
 }

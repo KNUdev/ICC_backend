@@ -17,9 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanager.domain.Employee;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
-import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.employeemanager.domain.embeddable.WorkHours;
-import ua.knu.knudev.employeemanager.mapper.*;
+import ua.knu.knudev.employeemanager.mapper.EmployeeMapper;
+import ua.knu.knudev.employeemanager.mapper.SectorMapper;
+import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
+import ua.knu.knudev.employeemanager.mapper.WorkHoursMapper;
 import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
@@ -29,12 +31,15 @@ import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.ShortEmployeeDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
+import ua.knu.knudev.employeemanagerapi.exception.SectorException;
+import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.employeemanagerapi.request.*;
 import ua.knu.knudev.employeemanagerapi.response.AccountReceivingResponse;
 import ua.knu.knudev.employeemanagerapi.response.GetEmployeeResponse;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
+import ua.knu.knudev.icccommon.domain.embeddable.FullName;
 import ua.knu.knudev.icccommon.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
@@ -45,9 +50,11 @@ import ua.knu.knudev.iccsecurityapi.request.AuthenticatedEmployeeUpdateRequest;
 import ua.knu.knudev.iccsecurityapi.request.EmployeeRegistrationRequest;
 import ua.knu.knudev.iccsecurityapi.response.EmployeeRegistrationResponse;
 
+import javax.security.auth.login.AccountException;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -99,13 +106,24 @@ public class EmployeeService implements EmployeeApi {
     public EmployeeDto create(@Valid EmployeeCreationRequest request) {
         FullName fullName = fullNameMapper.toDomain(request.fullName());
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
-        Specialty specialty = specialtyMapper.toDomain(request.specialty());
-        Sector sector = sectorMapper.toDomain(request.sector());
+
+        if (employeeRepository.existsByEmail(request.email())) {
+            throw new EmployeeException("Employee with email: " + request.email() + " already exists");
+        }
+
+        Specialty specialty = specialtyRepository.findById(request.specialty().id()).orElseThrow(
+                () -> new SpecialtyException("Specialty with id: " + request.specialty().id() + " not found"));
+        Sector sector = sectorRepository.findById(request.sector().id()).orElseThrow(
+                () -> new SectorException("Sector with id: " + request.sector().id() + " not found"));
 
         validateSectorNonExistence(request.sector());
         validateSpecialtyNonExistence(request.specialty());
 
-        String uploadedAvatarFilename = uploadEmployeeImage(request.avatarFile(), ImageSubfolder.EMPLOYEE_AVATARS);
+        String uploadEmployeeImage = uploadEmployeeImage(
+                request.avatarFile(),
+                request.avatarFile().getOriginalFilename(),
+                ImageSubfolder.EMPLOYEE_AVATARS
+        );
 
         Employee employee = Employee.builder()
                 .name(fullName)
@@ -113,7 +131,7 @@ public class EmployeeService implements EmployeeApi {
                 .phoneNumber(request.phoneNumber())
                 .salaryInUAH(request.salaryInUAH())
                 .isStudent(request.isStudent())
-                .avatar(uploadedAvatarFilename)
+                .avatar(uploadEmployeeImage)
                 .contractEndDate(request.contractEndDate())
                 .workHours(workHours)
                 .role(request.role())
@@ -123,18 +141,17 @@ public class EmployeeService implements EmployeeApi {
                 .build();
 
         Employee savedEmployee = employeeRepository.save(employee);
+        String avatarPath = imageServiceApi.getPathByFilename(savedEmployee.getAvatar(), ImageSubfolder.EMPLOYEE_AVATARS);
+
         log.info("Created Employee: {}", savedEmployee);
-        return employeeMapper.toDto(savedEmployee);
+        return mapEmployeeToDto(savedEmployee, avatarPath);
     }
 
     @Override
     @Transactional
-    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) {
+    public AccountReceivingResponse register(@Valid AccountReceivingRequest request) throws AccountException {
         if (!employeeRepository.existsByEmail(request.email())) {
-            return AccountReceivingResponse.builder()
-                    .shortEmployeeDto(null)
-                    .responseMessage("Account was not registered!")
-                    .build();
+            throw new AccountException("Employee with email:" + request.email() + " not found!");
         }
 
         Employee employee = employeeRepository.findByEmail(request.email())
@@ -205,6 +222,12 @@ public class EmployeeService implements EmployeeApi {
     @Transactional
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
+
+        if (request.workHours().getStartTime().after(request.workHours().getEndTime())
+                || request.contractEndDate().isBefore(ChronoLocalDate.from(LocalDateTime.now()))) {
+            throw new EmployeeException("Start time cannot be after end time in work hours");
+        }
+
         AuthenticatedEmployeeDto authenticatedEmployee = employeeAuthServiceApi.getByEmail(employee.getEmail());
 
         employee.setUpdatedAt(LocalDateTime.now());
@@ -331,6 +354,40 @@ public class EmployeeService implements EmployeeApi {
         );
     }
 
+    @Override
+    public UUID getEmployeeIdByEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .map(Employee::getId)
+                .orElseThrow(() -> new EmployeeException("Employee with email " + email + " not found"));
+    }
+
+    private EmployeeDto mapEmployeeToDto(Employee employee, String avatarPath) {
+        WorkHoursDto workHours = workHoursMapper.toDto(employee.getWorkHours());
+        SectorDto sector = sectorMapper.toDto(employee.getSector());
+        SpecialtyDto specialty = specialtyMapper.toDto(employee.getSpecialty());
+
+        return EmployeeDto.builder()
+                .id(employee.getId())
+                .name(FullNameDto.builder()
+                        .firstName(employee.getName().getFirstName())
+                        .lastName(employee.getName().getLastName())
+                        .middleName(employee.getName().getMiddleName())
+                        .build())
+                .email(employee.getEmail())
+                .phoneNumber(employee.getPhoneNumber())
+                .createdAt(employee.getCreatedAt())
+                .updatedAt(employee.getUpdatedAt())
+                .salaryInUAH(employee.getSalaryInUAH())
+                .isStudent(employee.getIsStudent())
+                .avatar(avatarPath)
+                .contractEndDate(employee.getContractEndDate())
+                .role(employee.getRole())
+                .workHours(workHours)
+                .specialty(specialty)
+                .sector(sector)
+                .build();
+    }
+
     private ShortEmployeeDto mapEmployeeToShortDto(
             Employee employee,
             String updatedEmail
@@ -371,11 +428,11 @@ public class EmployeeService implements EmployeeApi {
                 () -> new EmployeeException("Employee with id " + id + " not found"));
     }
 
-    private String uploadEmployeeImage(MultipartFile avatarFile, ImageSubfolder subfolder) {
-        if (ObjectUtils.isEmpty(avatarFile)) {
+    private String uploadEmployeeImage(MultipartFile problemPhoto, String imageName, ImageSubfolder subfolder) {
+        if (ObjectUtils.isEmpty(problemPhoto)) {
             return null;
         }
-        return imageServiceApi.uploadFile(avatarFile, subfolder);
+        return imageServiceApi.uploadFile(problemPhoto, imageName, subfolder);
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {
@@ -437,7 +494,7 @@ public class EmployeeService implements EmployeeApi {
                 .role(EmployeeAdministrativeRole.HEAD_MANAGER)
                 .name(fullname)
                 .isStudent(false)
-                .contractEndDate(LocalDate.of(2030, 1,1))
+                .contractEndDate(LocalDate.of(2030, 1, 1))
                 .phoneNumber("000000000")
                 .salaryInUAH(0d)
                 .workHours(workHours)

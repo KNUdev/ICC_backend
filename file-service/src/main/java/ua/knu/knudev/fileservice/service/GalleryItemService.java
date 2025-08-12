@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.employeemanagerapi.api.EmployeeApi;
 import ua.knu.knudev.employeemanagerapi.exception.EmployeeException;
 import ua.knu.knudev.fileservice.domain.GalleryItem;
-import ua.knu.knudev.fileservice.mapper.GalleryItemMapper;
 import ua.knu.knudev.fileservice.repository.GalleryItemRepository;
 import ua.knu.knudev.fileserviceapi.api.GalleryItemServiceApi;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
@@ -34,7 +33,6 @@ import java.util.UUID;
 @Slf4j
 public class GalleryItemService implements GalleryItemServiceApi {
 
-    private final GalleryItemMapper galleryItemMapper;
     private final GalleryItemRepository galleryItemRepository;
     private final EmployeeApi employeeApi;
     private final ImageServiceApi imageServiceApi;
@@ -47,27 +45,27 @@ public class GalleryItemService implements GalleryItemServiceApi {
         }
 
         MultipartFile file = request.item();
-        String savedGalleryItemName = uploadImage(file, request.itemName(), ImageSubfolder.GALLERY);
+        String savedGalleryItemUrl = uploadImage(file, file.getName(), ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()
                 .uploadedAt(LocalDateTime.now())
                 .creatorId(request.creatorId())
-                .itemName(savedGalleryItemName)
+                .itemName(savedGalleryItemUrl)
                 .itemDescription(request.itemDescription())
                 .build();
 
         GalleryItem savedImage = galleryItemRepository.save(image);
         log.info("Saved image {}", savedImage);
-        return galleryItemMapper.toDto(savedImage);
+        return mapToDto(savedImage);
     }
 
     @Override
     @Transactional
     public Page<GalleryItemDto> getAll(int pageNumber, int pageSize) {
-        Pageable paging = PageRequest.of(1, 10, Sort.by("uploadedAt").descending());
+        Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by("uploadedAt").descending());
         Page<GalleryItem> galleryItems = galleryItemRepository.findAll(paging);
 
-        return galleryItems.map(galleryItemMapper::toDto);
+        return galleryItems.map(this::mapToDto);
     }
 
     @Override
@@ -89,7 +87,8 @@ public class GalleryItemService implements GalleryItemServiceApi {
             item.setItemName(newImage);
         }
         GalleryItem savedItem = galleryItemRepository.save(item);
-        return galleryItemMapper.toDto(savedItem);
+        log.info("Updated gallery item to: {}", savedItem);
+        return mapToDto(savedItem);
     }
 
     @Override
@@ -98,7 +97,21 @@ public class GalleryItemService implements GalleryItemServiceApi {
         GalleryItem item = galleryItemRepository.findById(id).orElseThrow(
                 () -> new GalleryItemException("GalleryItem with id " + id + " not found")
         );
-        return galleryItemMapper.toDto(item);
+        return mapToDto(item);
+    }
+
+    private GalleryItemDto mapToDto(GalleryItem galleryItem) {
+        String imagePath = imageServiceApi.getPathByFilename(galleryItem.getItemName(), ImageSubfolder.GALLERY);
+
+        return GalleryItemDto.builder()
+                .creatorId(galleryItem.getCreatorId())
+                .itemId(galleryItem.getItemId())
+                .itemUrl(imagePath)
+                .itemName(galleryItem.getItemName())
+                .itemDescription(galleryItem.getItemDescription())
+                .uploadedAt(galleryItem.getUploadedAt())
+                .updatedAt(galleryItem.getUpdatedAt())
+                .build();
     }
 
     public GalleryItem getGalleryItemById(UUID id) {

@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
@@ -25,6 +24,7 @@ import ua.knu.knudev.iccsecurityapi.api.AuthenticationServiceApi;
 import ua.knu.knudev.iccsecurityapi.request.AuthenticationRequest;
 import ua.knu.knudev.iccsecurityapi.response.AuthenticationResponse;
 
+import javax.security.auth.login.AccountException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 
@@ -60,7 +60,6 @@ public class AccountController {
                     ))
     })
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
     public AccountReceivingResponse registerAccount(
             @Valid @ModelAttribute @Parameter(
                     name = "Account creation request",
@@ -68,7 +67,7 @@ public class AccountController {
                     in = ParameterIn.QUERY,
                     required = true,
                     schema = @Schema(implementation = AccountReceivingRequest.class)
-            ) AccountReceivingRequest registrationRequest) {
+            ) AccountReceivingRequest registrationRequest) throws AccountException {
         return employeeApi.register(registrationRequest);
     }
 
