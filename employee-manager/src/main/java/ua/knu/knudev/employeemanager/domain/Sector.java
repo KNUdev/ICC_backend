@@ -35,6 +35,9 @@ public class Sector {
 
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    private Boolean isPublic = true;
+
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "sectors_specialties",

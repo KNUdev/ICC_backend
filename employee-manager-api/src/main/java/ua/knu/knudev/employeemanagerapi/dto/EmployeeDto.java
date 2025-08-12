@@ -40,6 +40,8 @@ public record EmployeeDto(
         @Schema(description = "Specialty of the employee")
         SpecialtyDto specialty,
         @Schema(description = "Sector of the employee")
-        SectorDto sector
+        SectorDto sector,
+        @Schema(description = "Field determines whether the object will be publicly visible", example = "true")
+        Boolean isPublic
 ) {
 }

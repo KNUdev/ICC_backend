@@ -11,6 +11,7 @@ public record ShortSpecialtyDto(
         MultiLanguageFieldDto name,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        SpecialtyCategory category
+        SpecialtyCategory category,
+        Boolean isPublic
         ) {
 }
