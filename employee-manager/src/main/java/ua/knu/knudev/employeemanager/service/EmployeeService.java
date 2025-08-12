@@ -456,7 +456,7 @@ public class EmployeeService implements EmployeeApi {
     }
 
     private Sector createAdminSector() {
-        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin", "Адмін");
+        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin Sector", "Адмін Сектор");
 
         Sector sector = Sector.builder()
                 .name(multiLanguageField)
@@ -465,12 +465,11 @@ public class EmployeeService implements EmployeeApi {
                 .isPublic(false)
                 .build();
 
-        Sector response = sectorRepository.save(sector);
-        return response;
+        return sectorRepository.save(sector);
     }
 
     private Specialty createAdminSpecialty(Sector sector) {
-        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin", "Адмін");
+        MultiLanguageField multiLanguageField = new MultiLanguageField("Admin Specialty", "Адмін Спеціальність");
 
         Specialty specialty = Specialty.builder()
                 .name(multiLanguageField)
@@ -481,12 +480,11 @@ public class EmployeeService implements EmployeeApi {
 
         specialty.addSector(sector);
 
-        Specialty response = specialtyRepository.save(specialty);
-        return response;
+        return specialtyRepository.save(specialty);
     }
 
-    private Employee createAdminEmployee(Sector sector, Specialty specialty) {
-        FullName fullname = new FullName(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_USERNAME);
+    private void createAdminEmployee(Sector sector, Specialty specialty) {
+        FullName fullname = new FullName("Head", "Manager", "ICC");
         WorkHours workHours = new WorkHours(Time.valueOf("00:00:00"), Time.valueOf("00:00:00"));
 
         Employee employee = Employee.builder()
@@ -494,7 +492,7 @@ public class EmployeeService implements EmployeeApi {
                 .role(EmployeeAdministrativeRole.HEAD_MANAGER)
                 .name(fullname)
                 .isStudent(false)
-                .contractEndDate(LocalDate.of(2030, 1, 1))
+                .contractEndDate(LocalDate.now().plusYears(100))
                 .phoneNumber("000000000")
                 .salaryInUAH(0d)
                 .workHours(workHours)
@@ -504,7 +502,6 @@ public class EmployeeService implements EmployeeApi {
                 .isPublic(false)
                 .build();
 
-        Employee response = employeeRepository.save(employee);
-        return response;
+        employeeRepository.save(employee);
     }
 }
