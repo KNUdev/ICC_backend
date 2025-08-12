@@ -94,7 +94,7 @@ public class AdminEmployeeController {
             @Valid @ModelAttribute @Parameter(
                     name = "Employee update request",
                     description = "Employee update data",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.DEFAULT,
                     required = true,
                     schema = @Schema(implementation = EmployeeUpdateRequest.class)
             ) EmployeeUpdateRequest request
