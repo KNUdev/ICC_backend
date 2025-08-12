@@ -75,6 +75,10 @@ public class EmployeeService implements EmployeeApi {
         FullName fullName = fullNameMapper.toDomain(request.fullName());
         WorkHours workHours = workHoursMapper.toDomain(request.workHours());
 
+        if (employeeRepository.existsByEmail(request.email())) {
+            throw new EmployeeException("Employee with email: " + request.email() + " already exists");
+        }
+
         Specialty specialty = specialtyRepository.findById(request.specialty().id()).orElseThrow(
                 () -> new SpecialtyException("Specialty with id: " + request.specialty().id() + " not found"));
         Sector sector = sectorRepository.findById(request.sector().id()).orElseThrow(
