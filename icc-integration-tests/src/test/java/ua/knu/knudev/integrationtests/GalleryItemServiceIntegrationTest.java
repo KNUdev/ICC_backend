@@ -187,7 +187,6 @@ public class GalleryItemServiceIntegrationTest {
                 .creatorId(testEmployee.getId())
                 .item(TEST_GALLERY_ITEM_FILE)
                 .itemDescription(TEST_GALLERY_ITEM_DESCRIPTION)
-                .itemName(TEST_GALLERY_ITEM_FILE.getName())
                 .build();
     }
 
