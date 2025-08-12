@@ -223,8 +223,8 @@ public class EmployeeService implements EmployeeApi {
     public EmployeeDto update(@Valid EmployeeUpdateRequest request) {
         Employee employee = getEmployeeById(request.id());
 
-        if (request.workHours().getStartTime().after(request.workHours().getEndTime())
-                || request.contractEndDate().isBefore(ChronoLocalDate.from(LocalDateTime.now()))) {
+        if (request.workHours() != null && (request.workHours().getStartTime().after(request.workHours().getEndTime())
+                || request.contractEndDate().isBefore(ChronoLocalDate.from(LocalDateTime.now())))) {
             throw new EmployeeException("Start time cannot be after end time in work hours");
         }
 
