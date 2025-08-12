@@ -45,7 +45,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
         }
 
         MultipartFile file = request.item();
-        String savedGalleryItemUrl = uploadImage(file, file.getName(), ImageSubfolder.GALLERY);
+        String savedGalleryItemUrl = uploadImage(file, ImageSubfolder.GALLERY);
 
         GalleryItem image = GalleryItem.builder()
                 .uploadedAt(LocalDateTime.now())
@@ -83,7 +83,7 @@ public class GalleryItemService implements GalleryItemServiceApi {
         item.setItemDescription(getOrDefault(request.itemDescription(), item.getItemDescription()));
 
         if (request.item() != null) {
-            String newImage = uploadImage(request.item(), request.itemName(), ImageSubfolder.GALLERY);
+            String newImage = uploadImage(request.item(), ImageSubfolder.GALLERY);
             item.setItemName(newImage);
         }
         GalleryItem savedItem = galleryItemRepository.save(item);
@@ -119,11 +119,11 @@ public class GalleryItemService implements GalleryItemServiceApi {
                 () -> new GalleryItemException("GalleryItem with id " + id + " not found"));
     }
 
-    private String uploadImage(MultipartFile imageFile, String imageName, ImageSubfolder subfolder) {
+    private String uploadImage(MultipartFile imageFile, ImageSubfolder subfolder) {
         if (ObjectUtils.isEmpty(imageFile)) {
             return null;
         }
-        return imageServiceApi.uploadFile(imageFile, imageName, subfolder);
+        return imageServiceApi.uploadFile(imageFile, subfolder);
     }
 
     private <T> T getOrDefault(T newValue, T currentValue) {
