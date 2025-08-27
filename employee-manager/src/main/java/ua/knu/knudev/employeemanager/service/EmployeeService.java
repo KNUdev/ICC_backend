@@ -111,13 +111,13 @@ public class EmployeeService implements EmployeeApi {
             throw new EmployeeException("Employee with email: " + request.email() + " already exists");
         }
 
-        Specialty specialty = specialtyRepository.findById(request.specialty().id()).orElseThrow(
-                () -> new SpecialtyException("Specialty with id: " + request.specialty().id() + " not found"));
-        Sector sector = sectorRepository.findById(request.sector().id()).orElseThrow(
-                () -> new SectorException("Sector with id: " + request.sector().id() + " not found"));
+        Specialty specialty = specialtyRepository.findById(request.specialtyId()).orElseThrow(
+                () -> new SpecialtyException("Specialty with id: " + request.specialtyId() + " not found"));
+        Sector sector = sectorRepository.findById(request.sectorId()).orElseThrow(
+                () -> new SectorException("Sector with id: " + request.sectorId() + " not found"));
 
-        validateSectorNonExistence(request.sector());
-        validateSpecialtyNonExistence(request.specialty());
+        validateSectorNonExistence(request.sectorId());
+        validateSpecialtyNonExistence(request.specialtyId());
 
         String uploadEmployeeImage = uploadEmployeeImage(
                 request.avatarFile(),
@@ -241,11 +241,17 @@ public class EmployeeService implements EmployeeApi {
         if (request.phoneNumber() != null && request.phoneNumber().matches("^\\d{10,15}$")) {
             employee.setPhoneNumber(getOrDefault(request.phoneNumber(), employee.getPhoneNumber()));
         }
-        if (request.specialty() != null && specialtyRepository.existsById(request.specialty().id())) {
-            employee.setSpecialty(getOrDefault(request.specialty(), employee.getSpecialty(), specialtyMapper::toDomain));
+        if (request.specialtyId() != null) {
+            Specialty specialty = specialtyRepository.findById(request.specialtyId()).orElseThrow(
+                    () -> new SpecialtyException("Specialty with id: " + request.specialtyId() + " not found")
+            );
+            employee.setSpecialty(specialty);
         }
-        if (request.sector() != null && sectorRepository.existsById(request.sector().id())) {
-            employee.setSector(getOrDefault(request.sector(), employee.getSector(), sectorMapper::toDomain));
+        if (request.sectorId() != null) {
+            Sector sector = sectorRepository.findById(request.sectorId()).orElseThrow(
+                    () -> new SectorException("Sector with id: " + request.sectorId() + " not found")
+            );
+            employee.setSector(sector);
         }
         if (request.avatarFile() != null) {
             updateAvatar(request.id(), request.avatarFile());
@@ -444,15 +450,15 @@ public class EmployeeService implements EmployeeApi {
         return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
     }
 
-    private void validateSectorNonExistence(SectorDto sector) {
-        sectorRepository.findById(sector.id()).orElseThrow(
-                () -> new EmployeeException("Sector (passed to employee) with id " + sector.id() + " does not exist")
+    private void validateSectorNonExistence(UUID sectorId) {
+        sectorRepository.findById(sectorId).orElseThrow(
+                () -> new EmployeeException("Sector (passed to employee) with id " + sectorId + " does not exist")
         );
     }
 
-    private void validateSpecialtyNonExistence(SpecialtyDto specialty) {
-        specialtyRepository.findById(specialty.id()).orElseThrow(
-                () -> new EmployeeException("Specialty (passed to employee) with id " + specialty.id() + " does not exist")
+    private void validateSpecialtyNonExistence(UUID specialtyId) {
+        specialtyRepository.findById(specialtyId).orElseThrow(
+                () -> new EmployeeException("Specialty (passed to employee) with id " + specialtyId + " does not exist")
         );
     }
 
