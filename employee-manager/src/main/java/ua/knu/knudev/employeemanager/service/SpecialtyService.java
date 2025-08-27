@@ -17,7 +17,6 @@ import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanagerapi.api.SpecialtyApi;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.SpecialtyException;
 import ua.knu.knudev.employeemanagerapi.request.SpecialtyCreationRequest;
@@ -33,7 +32,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +48,10 @@ public class SpecialtyService implements SpecialtyApi {
     @Override
     @Transactional
     public SpecialtyDto create(@Valid SpecialtyCreationRequest specialtyCreationRequest) {
-        Set<UUID> ids = specialtyCreationRequest.sectors().stream()
-                .map(SectorDto::id)
-                .collect(Collectors.toSet());
+        Set<UUID> ids = specialtyCreationRequest.sectorsIds();
 
         Set<Sector> existingSectors = new HashSet<>(sectorRepository.findAllById(ids));
+        validateSectorsNonExistence(existingSectors, ids);
 
         Specialty specialty = Specialty.builder()
                 .createdAt(LocalDateTime.now())
@@ -99,8 +96,10 @@ public class SpecialtyService implements SpecialtyApi {
         specialty.setCategory(getOrDefault(specialtyUpdateRequest.category(),
                 specialty.getCategory()));
 
-        if (specialtyUpdateRequest.sectors() != null) {
-            Set<Sector> sectors = sectorMapper.toDomains(specialtyUpdateRequest.sectors());
+        if (specialtyUpdateRequest.sectorsIds() != null) {
+            Set<Sector> sectors = new HashSet<>(sectorRepository.findAllById(specialtyUpdateRequest.sectorsIds()));
+            validateSectorsNonExistence(sectors, specialtyUpdateRequest.sectorsIds());
+
             specialty.removeAllSectors(sectors);
             specialty.addSectors(sectors);
         }
@@ -133,6 +132,12 @@ public class SpecialtyService implements SpecialtyApi {
         if (name.getUk() != null && !Pattern.matches("^[А-Яа-яЇїІіЄєҐґ\\s'’-]+$", name.getUk())) {
             throw new SpecialtyException("Ukrainian name must contain only Ukrainian letters, hyphens, apostrophes and spaces." +
                     " Instead got: '" + name.getUk() + "'");
+        }
+    }
+
+    private void validateSectorsNonExistence(Set<Sector> existentSectors, Set<UUID> presumedSectorsIds) {
+        if (existentSectors.size() != presumedSectorsIds.size()) {
+            throw new SpecialtyException("Can not create specialty. Attached sector id not found");
         }
     }
 

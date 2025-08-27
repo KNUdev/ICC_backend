@@ -17,7 +17,6 @@ import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanagerapi.api.SectorApi;
 import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
-import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.employeemanagerapi.exception.SectorException;
 import ua.knu.knudev.employeemanagerapi.request.SectorCreationRequest;
 import ua.knu.knudev.employeemanagerapi.request.SectorReceivingRequest;
@@ -25,12 +24,10 @@ import ua.knu.knudev.employeemanagerapi.request.SectorUpdateRequest;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.icccommon.mapper.MultiLanguageFieldMapper;
 
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +35,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SectorService implements SectorApi {
     private final SectorRepository sectorRepository;
-    private final SpecialtyMapper specialtyMapper;
     private final SectorMapper sectorMapper;
     private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final SpecialtyRepository specialtyRepository;
@@ -48,11 +44,11 @@ public class SectorService implements SectorApi {
     public SectorDto create(@Valid SectorCreationRequest request) {
         Set<Specialty> existingSpecialties = new HashSet<>();
 
-        if(!request.specialties().isEmpty()) {
-            Set<UUID> ids = request.specialties().stream()
-                    .map(SpecialtyDto::id)
-                    .collect(Collectors.toSet());
+        if (!request.specialtiesIds().isEmpty()) {
+            Set<UUID> ids = request.specialtiesIds();
             existingSpecialties = new HashSet<>(specialtyRepository.findAllById(ids));
+
+
         }
 
         Sector sector = Sector.builder()
@@ -97,8 +93,10 @@ public class SectorService implements SectorApi {
                 sector.getName(),
                 multiLanguageFieldMapper::toDomain
         ));
-        if (request.specialties() != null) {
-            Set<Specialty> specialties = specialtyMapper.toDomains(request.specialties());
+        if (request.specialtiesIds() != null) {
+            Set<Specialty> specialties = new HashSet<>(specialtyRepository.findAllById(request.specialtiesIds()));
+            validateSpecialtiesNonExistence(specialties, request.specialtiesIds());
+
             sector.removeAllSpecialties();
             sector.addSpecialties(specialties);
         }
@@ -128,6 +126,12 @@ public class SectorService implements SectorApi {
         if (name.getUk() != null && !Pattern.matches("^[А-Яа-яЇїІіЄєҐґ\\s'’-]+$", name.getUk())) {
             throw new SectorException("Ukrainian name must contain only Ukrainian letters, hyphens, apostrophes and spaces." +
                     " Instead got: '" + name.getUk() + "'");
+        }
+    }
+
+    private void validateSpecialtiesNonExistence(Set<Specialty> existentSpecialties, Set<UUID> presumedSpecialtiesIds) {
+        if (existentSpecialties.size() != presumedSpecialtiesIds.size()) {
+            throw new SectorException("Can not update sector. Attached specialty id not found");
         }
     }
 

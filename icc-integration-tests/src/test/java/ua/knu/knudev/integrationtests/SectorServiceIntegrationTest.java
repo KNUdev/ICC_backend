@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
+import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanager.service.SectorService;
@@ -47,6 +48,8 @@ public class SectorServiceIntegrationTest {
     @Autowired
     private SpecialtyRepository specialtyRepository;
     @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
     private SpecialtyMapper specialtyMapper;
 
     private Sector testSector;
@@ -60,6 +63,7 @@ public class SectorServiceIntegrationTest {
 
     @AfterEach
     public void tearDown() {
+        employeeRepository.deleteAll();
         sectorRepository.deleteAll();
         specialtyRepository.deleteAll();
     }
@@ -94,7 +98,7 @@ public class SectorServiceIntegrationTest {
         MultiLanguageFieldDto sectorName = new MultiLanguageFieldDto(englishName, ukrainianName);
         SectorCreationRequest request = SectorCreationRequest.builder()
                 .name(sectorName)
-                .specialties(Set.of(specialtyDto))
+                .specialtiesIds(Set.of(specialtyDto.id()))
                 .build();
 
         return request;

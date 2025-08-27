@@ -12,6 +12,7 @@ import ua.knu.knudev.employeemanager.domain.Sector;
 import ua.knu.knudev.employeemanager.domain.Specialty;
 import ua.knu.knudev.employeemanager.mapper.SectorMapper;
 import ua.knu.knudev.employeemanager.mapper.SpecialtyMapper;
+import ua.knu.knudev.employeemanager.repository.EmployeeRepository;
 import ua.knu.knudev.employeemanager.repository.SectorRepository;
 import ua.knu.knudev.employeemanager.repository.SpecialtyRepository;
 import ua.knu.knudev.employeemanager.service.SpecialtyService;
@@ -48,9 +49,7 @@ public class SpecialtyServiceIntegrationTest {
     @Autowired
     private SectorRepository sectorRepository;
     @Autowired
-    private SectorMapper sectorMapper;
-    @Autowired
-    private SpecialtyMapper specialtyMapper;
+    private EmployeeRepository employeeRepository;
     @Autowired
     private MultiLanguageFieldMapper multiLanguageFieldMapper;
 
@@ -65,6 +64,7 @@ public class SpecialtyServiceIntegrationTest {
 
     @AfterEach
     public void tearDown() {
+        employeeRepository.deleteAll();
         sectorRepository.deleteAll();
         specialtyRepository.deleteAll();
     }
@@ -155,7 +155,7 @@ public class SpecialtyServiceIntegrationTest {
             SpecialtyCreationRequest request = new SpecialtyCreationRequest(
                     new MultiLanguageFieldDto("Test-Specialty", "Тестова-Спеціальність"),
                     SpecialtyCategory.SENIOR,
-                    Set.of(sectorMapper.toDto(testSector))
+                    Set.of(testSector.getId())
             );
 
             SpecialtyDto response = specialtyService.create(request);
@@ -178,12 +178,12 @@ public class SpecialtyServiceIntegrationTest {
             SpecialtyCreationRequest requestWithInvalidEnName = new SpecialtyCreationRequest(
                     new MultiLanguageFieldDto("Неправильне імя", "Тестова-Спеціальність"),
                     SpecialtyCategory.SENIOR,
-                    Set.of(sectorMapper.toDto(testSector))
+                    Set.of(testSector.getId())
             );
             SpecialtyCreationRequest requestWithInvalidUkName = new SpecialtyCreationRequest(
                     new MultiLanguageFieldDto("Test-Specialty", "Wrong name"),
                     SpecialtyCategory.SENIOR,
-                    Set.of(sectorMapper.toDto(testSector))
+                    Set.of(testSector.getId())
             );
 
             assertThrows(ConstraintViolationException.class, () -> specialtyService.create(requestWithInvalidEnName));
@@ -201,7 +201,7 @@ public class SpecialtyServiceIntegrationTest {
 
             SpecialtyUpdateRequest request = new SpecialtyUpdateRequest(
                     specialty.getId(), multiLanguageFieldMapper.toDto(specialty.getName()),
-                    SpecialtyCategory.LEAD, Set.of(sectorMapper.toDto(testSector))
+                    SpecialtyCategory.LEAD, Set.of(testSector.getId())
             );
 
             SpecialtyDto response = specialtyService.update(request);
@@ -224,7 +224,7 @@ public class SpecialtyServiceIntegrationTest {
 
             SpecialtyUpdateRequest request = new SpecialtyUpdateRequest(
                     testSector.getId(), new MultiLanguageFieldDto(invalidEnName, newUkName),
-                    SpecialtyCategory.LEAD, Set.of(sectorMapper.toDto(testSector)));
+                    SpecialtyCategory.LEAD, Set.of(testSector.getId()));
             assertThrows(SpecialtyException.class, () -> specialtyService.update(request));
         }
     }

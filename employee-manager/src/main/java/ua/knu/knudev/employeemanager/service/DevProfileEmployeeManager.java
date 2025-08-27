@@ -12,6 +12,7 @@ import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Profile("dev")
 @Service
@@ -50,7 +51,9 @@ public class DevProfileEmployeeManager implements DevProfileEmployeeManagerApi {
                     );
             SpecialtyCreationRequest request = SpecialtyCreationRequest.builder()
                     .name(name)
-                    .sectors(sectors)
+                    .sectorsIds(sectors.stream()
+                            .map(SectorDto::id)
+                            .collect(Collectors.toSet()))
                     .category(SpecialtyCategory.FIRST)
                     .build();
 
@@ -66,7 +69,7 @@ public class DevProfileEmployeeManager implements DevProfileEmployeeManagerApi {
                 new MultiLanguageFieldDto("sector " + getRandomString(ENGLISH_LETTERS), "сектор " + getRandomString(UKRAINIAN_LETTERS));
         SectorCreationRequest request = SectorCreationRequest.builder()
                 .name(name)
-                .specialties(new HashSet<>())
+                .specialtiesIds(new HashSet<>())
                 .build();
 
         return sectorService.create(request);
