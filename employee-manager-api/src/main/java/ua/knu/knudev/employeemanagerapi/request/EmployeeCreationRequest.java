@@ -6,13 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
-import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Builder
 @Schema(description = "Request object for creating an employee")
@@ -91,20 +90,18 @@ public record EmployeeCreationRequest(
         )
         EmployeeAdministrativeRole role,
 
-        @NotNull(message = "Field 'specialty' cannot be null")
+        @NotNull(message = "Field 'specialtyId' cannot be null")
         @Schema(
                 description = "Employee specialty",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SpecialtyDto.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
-        SpecialtyDto specialty,
+        UUID specialtyId,
 
-        @NotNull(message = "Field 'sector' cannot be null")
+        @NotNull(message = "Field 'sectorId' cannot be null")
         @Schema(
                 description = "Employee sector",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SectorDto.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
-        SectorDto sector
+        UUID sectorId
 ) {
 }

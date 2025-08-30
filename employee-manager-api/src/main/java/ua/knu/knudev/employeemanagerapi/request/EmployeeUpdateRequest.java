@@ -5,8 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
-import ua.knu.knudev.employeemanagerapi.dto.SpecialtyDto;
 import ua.knu.knudev.icccommon.constant.EmployeeAdministrativeRole;
 import ua.knu.knudev.icccommon.dto.FullNameDto;
 import ua.knu.knudev.icccommon.dto.WorkHoursDto;
@@ -79,15 +77,13 @@ public record EmployeeUpdateRequest(
         EmployeeAdministrativeRole role,
 
         @Schema(
-                description = "Employee specialty",
-                implementation = SpecialtyDto.class
+                description = "Employee specialty"
         )
-        SpecialtyDto specialty,
+        UUID specialtyId,
 
         @Schema(
-                description = "Employee sector",
-                implementation = SectorDto.class
+                description = "Employee sector"
         )
-        SectorDto sector
+        UUID sectorId
 ) {
 }

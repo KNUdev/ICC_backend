@@ -1,10 +1,8 @@
 package ua.knu.knudev.employeemanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
@@ -37,9 +35,8 @@ public record SpecialtyUpdateRequest(
 
         @Schema(
                 description = "A set of specialty sectors",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SectorDto.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
-        Set<@Valid SectorDto> sectors
+        Set<UUID> sectorsIds
 ) {
 }

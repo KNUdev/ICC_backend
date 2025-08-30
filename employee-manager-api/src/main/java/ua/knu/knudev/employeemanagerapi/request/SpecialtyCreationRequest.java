@@ -4,11 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import ua.knu.knudev.employeemanagerapi.dto.SectorDto;
 import ua.knu.knudev.icccommon.constant.SpecialtyCategory;
 import ua.knu.knudev.icccommon.dto.MultiLanguageFieldDto;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Builder
 @Schema(description = "Request object for creating a specialty")
@@ -32,9 +32,8 @@ public record SpecialtyCreationRequest(
         @NotNull(message = "Sectors set cannot be empty")
         @Schema(
                 description = "A set of specialty sectors",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                implementation = SectorDto.class
+                requiredMode = Schema.RequiredMode.REQUIRED
         )
-        Set<@Valid SectorDto> sectors
+        Set<UUID> sectorsIds
 ) {
 }
