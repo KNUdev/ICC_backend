@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class MinioProperties {
     private String internalUrl;
     private String externalUrl;
+    private String filePathUrl;
     private String accessKey;
     private String secretKey;
     private boolean useProxy;

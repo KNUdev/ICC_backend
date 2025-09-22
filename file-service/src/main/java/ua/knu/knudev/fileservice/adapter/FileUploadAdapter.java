@@ -13,4 +13,5 @@ public interface FileUploadAdapter {
 
     void deleteByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties);
 
+    byte[] getFile(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties);
 }
