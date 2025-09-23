@@ -1,5 +1,6 @@
 package ua.knu.knudev.iccrest.controller;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,7 @@ public class ImageProxyController {
 
     @GetMapping("/{subfolder}/{filename}")
     public ResponseEntity<byte[]> getFile(
-            @PathVariable String subfolder,
+            @PathVariable @NotBlank String subfolder,
             @PathVariable String filename
     ) {
         ImageSubfolder folderEnum = ImageSubfolder.valueOf(subfolder.toUpperCase());

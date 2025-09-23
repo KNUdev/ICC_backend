@@ -36,12 +36,7 @@ public class ImageService extends FileService implements ImageServiceApi {
         }
 
         String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        MediaType mediaType = switch (extension) {
-            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG;
-            case "png" -> MediaType.IMAGE_PNG;
-            case "webp" -> MediaType.valueOf("image/webp");
-            default -> MediaType.APPLICATION_OCTET_STREAM;
-        };
+        MediaType mediaType = getMediaType(extension);
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
@@ -117,6 +112,15 @@ public class ImageService extends FileService implements ImageServiceApi {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private MediaType getMediaType(String extension) {
+        return switch (extension) {
+            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG;
+            case "png" -> MediaType.IMAGE_PNG;
+            case "webp" -> MediaType.valueOf("image/webp");
+            default -> MediaType.APPLICATION_OCTET_STREAM;
+        };
     }
 
 }

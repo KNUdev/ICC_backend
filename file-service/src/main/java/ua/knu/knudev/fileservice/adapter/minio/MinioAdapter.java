@@ -65,7 +65,11 @@ public class MinioAdapter implements FileUploadAdapter {
     @Override
     @SneakyThrows
     public String getPathByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
-        String filePath = (fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename).substring(1);
+        String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
+
+        if (filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         if (minioProperties.isUseProxy()) {
