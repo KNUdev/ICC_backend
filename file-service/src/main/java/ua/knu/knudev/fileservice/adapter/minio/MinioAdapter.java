@@ -48,10 +48,28 @@ public class MinioAdapter implements FileUploadAdapter {
         }
     }
 
+    @SneakyThrows
+    public byte[] getFile(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+        String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
+
+        try (GetObjectResponse response = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(fileFolderProperties.getFolder().getName())
+                        .object(filePath)
+                        .build())) {
+
+            return response.readAllBytes();
+        }
+    }
+
     @Override
     @SneakyThrows
     public String getPathByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
+
+        if (filePath.startsWith("/")) {
+            filePath = filePath.substring(1);
+        }
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         if (minioProperties.isUseProxy()) {
@@ -65,7 +83,7 @@ public class MinioAdapter implements FileUploadAdapter {
                 .httpClient(okHttpClient)
                 .build();
 
-        return externalClient.getPresignedObjectUrl(
+        String path = externalClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
                         .bucket(fileFolderProperties.getFolder().getName())
@@ -73,6 +91,8 @@ public class MinioAdapter implements FileUploadAdapter {
                         .expiry(2, TimeUnit.HOURS)
                         .build()
         );
+
+        return path.replace(minioProperties.getExternalUrl(), minioProperties.getFilePathUrl());
     }
 
     @Override
