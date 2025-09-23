@@ -26,7 +26,7 @@ public class ImageProxyController {
     @GetMapping("/{subfolder}/{filename}")
     public ResponseEntity<byte[]> getFile(
             @PathVariable @NotBlank String subfolder,
-            @PathVariable String filename
+            @PathVariable @NotBlank String filename
     ) {
         ImageSubfolder folderEnum = ImageSubfolder.valueOf(subfolder.toUpperCase());
 
