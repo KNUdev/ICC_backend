@@ -92,7 +92,7 @@ public class MinioAdapter implements FileUploadAdapter {
                         .build()
         );
 
-        return path.replace(minioProperties.getExternalUrl(), minioProperties.getFilePathUrl());
+        return path.replace(minioProperties.getExternalUrl(), "");
     }
 
     @Override
