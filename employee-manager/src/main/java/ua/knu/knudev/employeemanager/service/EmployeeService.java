@@ -253,9 +253,12 @@ public class EmployeeService implements EmployeeApi {
             );
             employee.setSector(sector);
         }
-        if (request.avatarFile() != null) {
+        if (StringUtils.isNotBlank(request.avatarFile().getOriginalFilename())) {
             updateAvatar(request.id(), request.avatarFile());
+        } else {
+            removeAvatar(request.id());
         }
+
         if (request.email() != null && (!employee.getEmail().equals(request.email())
                 && request.email().matches("^[\\w.-]+@knu\\.ua$"))) {
             employee.setEmail(request.email());
