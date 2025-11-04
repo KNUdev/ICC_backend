@@ -1,6 +1,6 @@
 # render.yaml: Configuration for deploying the ICC application stack on Render.
 #
-# This file defines three services:
+# This file defines:
 # 1. A managed PostgreSQL database (replaces the postgres container).
 # 2. A MinIO instance as a web service with a persistent disk.
 # 3. The main Spring Boot application as a web service.
@@ -23,19 +23,16 @@ envVarGroups:
       - key: JWT_SECRET_KEY
         sync: false             # Set this secret value in the Render dashboard
 
-services:
+databases:
   # 1. PostgreSQL Database (Managed Service)
-  # This replaces your postgres:16.3-alpine container with a fully managed,
-  # persistent PostgreSQL instance on Render. This is the idiomatic way
-  # to handle databases on the platform and simplifies networking.
-  - type: pserv
-    name: postgres
+  # This block tells Render to create a new managed PostgreSQL instance.
+  # The 'name: postgres' allows other services to reference it as '${postgres.host}'.
+  - name: postgres
     plan: starter                # Choose a plan that fits your needs
     databaseName: icc_db
     user: ${POSTGRES_USERNAME}   # Pulls from the 'icc-secrets' group
-    envVarGroup: icc-secrets     # Links the secret group to get the password
-    # Render's managed Postgres handles persistence and health checks automatically.
 
+services:
   # 2. MinIO Object Storage (Web Service)
   # Deployed as a Web Service to get both an internal and external URL.
   # A persistent disk is attached to store data.
