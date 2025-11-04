@@ -5,7 +5,8 @@ services:
     plan: free
     env: docker
     image:
-      name: "postgres:16.3-alpine"
+      url: docker.io/library/postgres:16.3-alpine
+    region: frankfurt
     envVars:
       - key: POSTGRES_USER
         value: postgres
@@ -25,7 +26,8 @@ services:
     plan: free
     env: docker
     image:
-      name: "minio/minio:RELEASE.2024-10-13T13-34-11Z"
+      url: "docker.io/minio/minio:RELEASE.2024-10-13T13-34-11Z"
+    region: frankfurt
     startCommand: server /data --console-address :9090
     envVars:
       - key: MINIO_ROOT_USER
@@ -44,7 +46,8 @@ services:
     plan: free
     env: docker
     image:
-      name: "olympicgay/icc-app-backend:latest"
+      url: "olympicgay/icc-app-backend:latest"
+    region: frankfurt
     # startCommand можно оставить пустым если контейнер уже прописывает CMD/ENTRYPOINT
     startCommand: ""
     envVars:
