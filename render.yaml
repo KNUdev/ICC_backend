@@ -4,7 +4,7 @@ services:
     name: icc-database
     plan: free
     env: docker
-    image: postgres:16.3-alpine
+    image: "postgres:16.3-alpine"
     envVars:
       - key: POSTGRES_USER
         value: postgres
@@ -23,7 +23,7 @@ services:
     name: minio
     plan: free
     env: docker
-    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    image: "minio/minio:RELEASE.2024-10-13T13-34-11Z"
     startCommand: server /data --console-address :9090
     envVars:
       - key: MINIO_ROOT_USER
@@ -41,7 +41,7 @@ services:
     name: icc-app-backend
     plan: free
     env: docker
-    image: olympicgay/icc-app-backend:latest
+    image: "olympicgay/icc-app-backend:latest"
     startCommand: ""
     envVars:
       - key: SPRING_DATASOURCE_URL
