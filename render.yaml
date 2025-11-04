@@ -31,6 +31,7 @@ databases:
     plan: starter                # Choose a plan that fits your needs
     databaseName: icc_db
     user: ${POSTGRES_USERNAME}   # Pulls from the 'icc-secrets' group
+    envVarGroups: [icc-secrets]  # <-- ИСПРАВЛЕНИЕ: Добавлено для разрешения 'user'
 
 services:
   # 2. MinIO Object Storage (Web Service)
@@ -43,7 +44,7 @@ services:
       url: minio/minio:RELEASE.2024-10-13T13-34-11Z
     startCommand: server /data --console-address :9090
     httpPort: 9000               # The primary MinIO API port
-    envVarGroup: icc-secrets     # Links secrets
+    envVarGroups: [icc-secrets]  # <-- ИСПРАВЛЕНИЕ: 'envVarGroup' -> 'envVarGroups' и в виде списка
     envVars:
       # These vars are read by MinIO itself
       - key: MINIO_ROOT_USER
@@ -69,7 +70,7 @@ services:
     image:
       url: olympicgay/icc-app-backend:latest
     httpPort: 5003
-    envVarGroup: icc-secrets     # Links secrets
+    envVarGroups: [icc-secrets]  # <-- ИСПРАВЛЕНИЕ: 'envVarGroup' -> 'envVarGroups' и в виде списка
     envVars:
       # Database Configuration - values are injected by Render from the 'postgres' service
       - key: SPRING_DATASOURCE_URL
