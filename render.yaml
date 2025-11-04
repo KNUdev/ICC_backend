@@ -1,6 +1,6 @@
 services:
   # === PostgreSQL Database ===
-  - type: pserv
+  - type: web
     name: icc-database
     plan: free
     env: docker
@@ -15,7 +15,7 @@ services:
         value: icc_db
 
   # === MinIO Object Storage ===
-  - type: pserv
+  - type: web
     name: minio
     plan: free
     env: docker
