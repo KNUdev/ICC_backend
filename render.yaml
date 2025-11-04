@@ -2,79 +2,71 @@ services:
   # === PostgreSQL Database ===
   - type: pserv
     name: icc-database
-    env: docker
     plan: free
-    dockerCommand: |
-      docker run --name IccDatabase \
-        -e POSTGRES_USER=${POSTGRES_USERNAME:-postgres} \
-        -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-knudevpass} \
-        -e POSTGRES_DB=icc_db \
-        -p 5432:5432 \
-        -v /var/lib/postgresql/data \
-        postgres:16.3-alpine
+    env: docker
+    image: postgres:16.3-alpine
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: knudevpass
+      - key: POSTGRES_DB
+        value: icc_db
     disk:
       name: db-data
       mountPath: /var/lib/postgresql/data
       sizeGB: 1
     healthCheckPath: /
-    autoDeploy: false
 
   # === MinIO Object Storage ===
   - type: pserv
     name: minio
-    env: docker
     plan: free
-    dockerCommand: |
-      docker run --name minio \
-        -e MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin} \
-        -e MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin} \
-        -p 9000:9000 \
-        -p 9090:9090 \
-        -v /data \
-        minio/minio:RELEASE.2024-10-13T13-34-11Z server /data --console-address :9090
+    env: docker
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    startCommand: server /data --console-address :9090
+    envVars:
+      - key: MINIO_ROOT_USER
+        value: minioadmin
+      - key: MINIO_ROOT_PASSWORD
+        value: minioadmin
     disk:
       name: minio-data
       mountPath: /data
       sizeGB: 1
     healthCheckPath: /minio/health/live
-    autoDeploy: false
 
-  # === Spring Boot App Backend ===
+  # === Spring Boot Backend ===
   - type: web
     name: icc-app-backend
-    env: docker
-    dockerImage: olympicgay/icc-app-backend:latest
     plan: free
+    env: docker
+    image: olympicgay/icc-app-backend:latest
+    startCommand: ""
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://icc-database:5432/icc_db
       - key: SPRING_DATASOURCE_USERNAME
-        value: ${POSTGRES_USERNAME:-postgres}
+        value: postgres
       - key: SPRING_DATASOURCE_PASSWORD
-        value: ${POSTGRES_PASSWORD:-knudevpass}
+        value: knudevpass
 
       - key: MINIO_INTERNAL_URL
         value: http://minio:9000
       - key: MINIO_EXTERNAL_URL
         value: https://minio.onrender.com
       - key: MINIO_ACCESS_KEY
-        value: ${MINIO_ACCESS_KEY:-minioadmin}
+        value: minioadmin
       - key: MINIO_SECRET_KEY
-        value: ${MINIO_SECRET_KEY:-minioadmin}
+        value: minioadmin
       - key: MINIO_USE_PROXY
         value: "true"
 
       - key: JWT_SECRET_KEY
-        value: ${JWT_SECRET_KEY:-OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=}
-
+        value: OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=
       - key: BASE_URL
         value: https://icc-app-backend.onrender.com
       - key: SPRING_PROFILES_ACTIVE
         value: dev
       - key: APPLICATION_PORT
         value: 5003
-    ports:
-      - 5003
-    dependsOn:
-      - icc-database
-      - minio
