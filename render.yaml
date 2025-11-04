@@ -6,7 +6,6 @@ services:
     env: docker
     image:
       url: docker.io/library/postgres:16.3-alpine
-    region: frankfurt
     envVars:
       - key: POSTGRES_USER
         value: postgres
@@ -14,11 +13,6 @@ services:
         value: knudevpass
       - key: POSTGRES_DB
         value: icc_db
-    disk:
-      name: db-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 1
-    healthCheckPath: /
 
   # === MinIO Object Storage ===
   - type: pserv
@@ -27,18 +21,11 @@ services:
     env: docker
     image:
       url: "docker.io/minio/minio:RELEASE.2024-10-13T13-34-11Z"
-    region: frankfurt
-    startCommand: server /data --console-address :9090
     envVars:
       - key: MINIO_ROOT_USER
         value: minioadmin
       - key: MINIO_ROOT_PASSWORD
         value: minioadmin
-    disk:
-      name: minio-data
-      mountPath: /data
-      sizeGB: 1
-    healthCheckPath: /minio/health/live
 
   # === Spring Boot Backend ===
   - type: web
@@ -47,9 +34,6 @@ services:
     env: docker
     image:
       url: "olympicgay/icc-app-backend:latest"
-    region: frankfurt
-    # startCommand можно оставить пустым если контейнер уже прописывает CMD/ENTRYPOINT
-    startCommand: ""
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://icc-database:5432/icc_db
