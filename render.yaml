@@ -1,0 +1,107 @@
+# render.yaml: Configuration for deploying the ICC application stack on Render.
+#
+# This file defines three services:
+# 1. A managed PostgreSQL database (replaces the postgres container).
+# 2. A MinIO instance as a web service with a persistent disk.
+# 3. The main Spring Boot application as a web service.
+#
+# Secrets are managed via an Environment Group. You will need to create
+# an Environment Group in your Render dashboard named 'icc-secrets' and
+# add the secret key/value pairs there.
+
+envVarGroups:
+  - name: icc-secrets
+    envVars:
+      - key: POSTGRES_USERNAME
+        value: postgres         # Or set your desired username
+      - key: POSTGRES_PASSWORD
+        sync: false             # Set this secret value in the Render dashboard
+      - key: MINIO_ACCESS_KEY
+        value: minioadmin       # Or set your desired access key
+      - key: MINIO_SECRET_KEY
+        sync: false             # Set this secret value in the Render dashboard
+      - key: JWT_SECRET_KEY
+        sync: false             # Set this secret value in the Render dashboard
+
+services:
+  # 1. PostgreSQL Database (Managed Service)
+  # This replaces your postgres:16.3-alpine container with a fully managed,
+  # persistent PostgreSQL instance on Render. This is the idiomatic way
+  # to handle databases on the platform and simplifies networking.
+  - type: pserv
+    name: postgres
+    plan: starter                # Choose a plan that fits your needs
+    databaseName: icc_db
+    user: ${POSTGRES_USERNAME}   # Pulls from the 'icc-secrets' group
+    envVarGroup: icc-secrets     # Links the secret group to get the password
+    # Render's managed Postgres handles persistence and health checks automatically.
+
+  # 2. MinIO Object Storage (Web Service)
+  # Deployed as a Web Service to get both an internal and external URL.
+  # A persistent disk is attached to store data.
+  - type: web
+    name: minio
+    plan: starter                # Choose a plan that fits your needs
+    image:
+      url: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    startCommand: server /data --console-address :9090
+    httpPort: 9000               # The primary MinIO API port
+    envVarGroup: icc-secrets     # Links secrets
+    envVars:
+      # These vars are read by MinIO itself
+      - key: MINIO_ROOT_USER
+        value: ${MINIO_ACCESS_KEY}
+      - key: MINIO_ROOT_PASSWORD
+        value: ${MINIO_SECRET_KEY}
+    disk:
+      name: minio-data
+      mountPath: /data
+      sizeGB: 10                 # Adjust size as needed
+    healthCheck:
+      type: HTTP
+      path: /minio/health/live
+      port: 9000
+    # Note: Render only exposes one port per web service (9000 in this case).
+    # The MinIO console on port 9090 will not be accessible from the public internet.
+
+  # 3. ICC Application Backend (Web Service)
+  # The main application, configured to connect to the other services.
+  - type: web
+    name: icc-app
+    plan: starter                # Choose a plan that fits your needs
+    image:
+      url: olympicgay/icc-app-backend:latest
+    httpPort: 5003
+    envVarGroup: icc-secrets     # Links secrets
+    envVars:
+      # Database Configuration - values are injected by Render from the 'postgres' service
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://${postgres.host}:${postgres.port}/${postgres.database}
+      - key: SPRING_DATASOURCE_USERNAME
+        value: ${postgres.user}
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ${postgres.password}
+
+      # MinIO Configuration - values are injected by Render from the 'minio' service
+      - key: MINIO_INTERNAL_URL
+        value: http://${minio.host}:${minio.port} # Internal cluster URL
+      - key: MINIO_EXTERNAL_URL
+        value: https://${minio.url}              # Public URL with SSL
+      - key: MINIO_ACCESS_KEY
+        value: ${MINIO_ACCESS_KEY}
+      - key: MINIO_SECRET_KEY
+        value: ${MINIO_SECRET_KEY}
+      - key: MINIO_USE_PROXY
+        value: "true"
+
+      # JWT Configuration
+      - key: JWT_SECRET_KEY
+        value: ${JWT_SECRET_KEY}
+
+      # Application Configuration
+      - key: BASE_URL
+        value: https://${self.url} # This service's own public URL
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev                 # Or 'prod' when ready
+      - key: APPLICATION_PORT
+        value: 5003
